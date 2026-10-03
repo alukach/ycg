@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YCG Flight Watch</title>
+<meta name="description" content="Today's flights at Castlegar / West Kootenay Regional Airport (YCG), weather, and a cancellation outlook.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232a78d6' d='M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <span class="code">YCG</span>
+      <div>
+        <h1>Castlegar Flight Watch</h1>
+        <p class="sub">West Kootenay Regional Airport · <span id="today-label">—</span></p>
+      </div>
+    </div>
+    <div class="meta">
+      <span id="updated">Loading…</span>
+      <button id="theme" class="ghost" type="button" aria-label="Toggle colour theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="alerts"></div>
+
+  <section aria-labelledby="h-today">
+    <h2 id="h-today">Today's flights</h2>
+    <div id="flights" class="flights"></div>
+  </section>
+
+  <section aria-labelledby="h-wx">
+    <div class="sec-head">
+      <h2 id="h-wx">Weather at YCG</h2>
+      <div class="seg" role="tablist" aria-label="Forecast day">
+        <button role="tab" data-day="0" aria-selected="true">Today</button>
+        <button role="tab" data-day="1" aria-selected="false">Tomorrow</button>
+      </div>
+    </div>
+    <div class="wx-grid">
+      <div class="card" id="obs"></div>
+      <div class="card chart-card">
+        <div class="chart-title">Hourly forecast <span class="muted" id="fc-src"></span></div>
+        <div id="fc-chart" class="fc-chart"></div>
+      </div>
+    </div>
+    <details class="card raw">
+      <summary>Raw METAR &amp; TAF</summary>
+      <pre id="raw-wx"></pre>
+    </details>
+  </section>
+
+  <section aria-labelledby="h-tomorrow" id="tomorrow-sec">
+    <h2 id="h-tomorrow">Tomorrow's outlook</h2>
+    <div id="tomorrow" class="flights small"></div>
+  </section>
+
+  <section aria-labelledby="h-hist">
+    <div class="sec-head">
+      <h2 id="h-hist">History</h2>
+      <div class="seg" role="tablist" aria-label="History range" id="hist-range">
+        <button role="tab" data-range="30" aria-selected="true">30 days</button>
+        <button role="tab" data-range="90" aria-selected="false">90 days</button>
+        <button role="tab" data-range="0" aria-selected="false">All</button>
+      </div>
+    </div>
+    <div id="hist-stats" class="stats"></div>
+    <div class="card">
+      <div class="chart-title">Daily outcomes <span class="muted">arrival AC8376 (top) · departure AC8377 (bottom)</span></div>
+      <div id="hist-strip" class="strip"></div>
+      <div class="legend" id="hist-legend"></div>
+    </div>
+    <div class="card" id="by-ceiling"></div>
+    <details class="card raw">
+      <summary>All recorded flights</summary>
+      <div class="table-wrap"><table id="hist-table"></table></div>
+    </details>
+  </section>
+
+  <section class="card about">
+    <h2>How the outlook works</h2>
+    <p>The cancellation outlook is a hand-tuned heuristic, not an airline forecast. It starts from a seasonal base rate and adds risk for low ceilings, poor visibility, fog, snow, freezing precipitation and strong gusts at the scheduled YCG time, using the latest METAR when it is within ~75 minutes, the TAF when it covers the flight, and the Open-Meteo model otherwise. The departure (AC8377) uses the same aircraft as the inbound AC8376, so its risk follows the arrival until that aircraft is on the ground. Live airline status (cancelled, diverted, arrived) always overrides the model.</p>
+    <p>Context: Castlegar's day-only approach uses an unusually steep glideslope through mountainous terrain. Air Canada reported an 84% landing/take-off success rate on the Vancouver route between December 2023 and September 2024, with a bus shuttle via Kelowna on cancellation days.</p>
+    <p class="muted">Sources: flight status from FlightStats (scraped every 15 min by a GitHub Action), METAR/TAF from aviationweather.gov, hourly forecast from Open-Meteo. Not affiliated with Air Canada or the airport; always confirm with the airline.</p>
+  </section>
+</main>
+
+<div id="tip" class="tip" role="tooltip" hidden></div>
+<script type="module" src="assets/app.js"></script>
+</body>
+</html>

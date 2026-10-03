@@ -1,0 +1,76 @@
+name: Update data & deploy
+
+on:
+  schedule:
+    # Every 15 min, 12:00–21:59 UTC (05:00–14:59 PDT / 04:00–13:59 PST): covers both flights.
+    - cron: "*/15 12-21 * * *"
+    # Every 3 h otherwise, for tomorrow's status and evening METAR/TAF.
+    - cron: "7 0-11/3 * * *"
+    - cron: "7 22,23 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: update-and-deploy
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Parser tests
+        run: python -m unittest scripts/test_fetch.py
+
+      - name: Fetch flight status + weather
+        id: fetch
+        env:
+          AERODATABOX_KEY: ${{ secrets.AERODATABOX_KEY }}
+        run: |
+          python scripts/fetch.py --debug || echo "::warning::Flight status could not be read for today; see the debug-html artifact."
+
+      - name: Upload raw HTML for debugging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-html
+          path: debug/
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Commit history if changed
+        run: |
+          git config user.name "ycg-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json
+          if ! git diff --cached --quiet; then
+            git commit -m "data: update flight history"
+            git push
+          fi
+
+      - name: Prepare site
+        run: |
+          mkdir -p _site
+          cp -r index.html assets data _site/
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4
