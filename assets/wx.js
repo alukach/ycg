@@ -343,7 +343,14 @@ export function predict(ctx) {
   const leadH = Math.max(0, (ctx.when - now) / 3600e3);
   const mw = modelWeight(leadH);
   const modelOnly = om && !sources.length;
-  if (om) {
+  const ens = modelOnly && leadH >= 12 && ctx.ensHour?.length ? ctx.ensHour.map((m) => conditionScore(omConditions(m)).total) : null;
+  if (ens) {
+    // Ensemble: average the evidence over all runs; their spread gives the range shown on the card.
+    const mean = ens.reduce((a, b) => a + b, 0) / ens.length;
+    const k = ens.filter((t) => t > 0).length;
+    main = { total: mean * mw, parts: mean > 0 ? [{ label: `risk weather in ${k} of ${ens.length} forecast runs (model)`, v: mean * mw }] : [] };
+    sources.push("ensemble");
+  } else if (om) {
     const s = conditionScore(om);
     if (modelOnly) {
       main = { total: s.total * mw, parts: s.parts.map((p) => ({ ...p, v: p.v * mw, label: p.label + " (model)" })) };
@@ -362,6 +369,11 @@ export function predict(ctx) {
 
   let x = factors.reduce((a, f) => a + f.v, 0);
   let p = sigmoid(x);
+  let range = null;
+  if (ens) {
+    const xs = ens.map((t) => x + (t * mw - main.total)).sort((a, b) => a - b);
+    range = [sigmoid(xs[Math.floor(xs.length * 0.1)]), sigmoid(xs[Math.ceil(xs.length * 0.9) - 1])];
+  }
   let basis = `Weather (${sources.join(" + ") || "season only"})`;
   if (modelOnly && mw < 0.9) basis = `Mostly seasonal: weather model ${Math.round(leadH)} h ahead, weighted ×${mw.toFixed(2)}`;
 
@@ -372,10 +384,11 @@ export function predict(ctx) {
       basis = "Inbound arrived; departure risk only";
     } else if (ctx.inboundP != null) {
       p = ctx.inboundP + (1 - ctx.inboundP) * 0.02;
+      range = ctx.inboundRange?.map((q) => q + (1 - q) * 0.02) ?? null;
       basis = `Tied to inbound ${ctx.inbound?.flight ?? "flight"} (same aircraft)`;
     }
   }
-  return { p, basis, factors, sources, when: ctx.when, now, leadH, modelWeight: modelOnly ? mw : 1 };
+  return { p, range, basis, factors, sources, when: ctx.when, now, leadH, modelWeight: modelOnly ? mw : 1 };
 }
 
 function pick(g) {
@@ -398,15 +411,31 @@ export function riskLabel(p) {
  * Predictions for one day's [arrival, departure]. The departure is the same aircraft, so its
  * risk follows the arrival. forecast: Open-Meteo hourly rows; history: data/history.json flights.
  */
-export function predictDay({ dateIso, flights, metar, taf, forecast, history, now = new Date() }) {
+export function predictDay({ dateIso, flights, metar, taf, forecast, ensemble, history, now = new Date() }) {
   const [arr, dep] = flights;
   const base = rollingBase(history || [], dateIso, zoned(dateIso, arr.sched_arr));
   const ctxFor = (f) => {
     const when = zoned(dateIso, f.kind === "arrival" ? f.sched_arr : f.sched_dep);
     const key = hourKey(when);
-    return { when, now, metar, taf, kind: f.kind, status: f.status, base, omHour: forecast?.find((h) => h.time === key) || null };
+    return { when, now, metar, taf, kind: f.kind, status: f.status, base, omHour: forecast?.find((h) => h.time === key) || null, ensHour: ensemble?.[key] };
   };
   const pa = predict(ctxFor(arr));
-  const pd = predict({ ...ctxFor(dep), inbound: arr, inboundP: pa.p });
+  const pd = predict({ ...ctxFor(dep), inbound: arr, inboundP: pa.p, inboundRange: pa.range });
   return [pa, pd];
+}
+
+export const ENSEMBLE_MODEL = "ecmwf_ifs025"; // the only Open-Meteo ensemble with low cloud at YCG (checked 2026-10-03)
+export const ENSEMBLE_VARS = ["cloud_cover_low", "weather_code", "snowfall", "wind_speed_10m", "wind_gusts_10m"];
+
+/** Open-Meteo ensemble response -> { "2026-10-04T10:00": [member rows...] } */
+export function ensembleByHour(j) {
+  const h = j?.hourly;
+  if (!h) return null;
+  const members = Object.keys(h).filter((k) => k.startsWith("cloud_cover_low")).map((k) => k.slice("cloud_cover_low".length));
+  const out = {};
+  h.time.forEach((t, i) => {
+    const rows = members.map((suf) => Object.fromEntries(ENSEMBLE_VARS.map((v) => [v, h[v + suf]?.[i] ?? null]))).filter((r) => r.cloud_cover_low != null);
+    if (rows.length) out[t] = rows;
+  });
+  return out;
 }

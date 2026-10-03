@@ -1,4 +1,4 @@
-import { TZ, parseMetar, parseTaf, predictDay, riskLabel, fmtVis } from "./wx.js";
+import { TZ, parseMetar, parseTaf, predictDay, riskLabel, fmtVis, ensembleByHour, ENSEMBLE_MODEL, ENSEMBLE_VARS } from "./wx.js";
 
 const LAT = 49.2961, LON = -117.6325;
 const SCHEDULE = [
@@ -75,6 +75,11 @@ async function loadForecast() {
   return h.time.map((t, i) => Object.fromEntries([["time", t], ...Object.keys(h).filter((k) => k !== "time").map((k) => [k, h[k][i]])]));
 }
 
+async function loadEnsemble() {
+  const p = new URLSearchParams({ latitude: LAT, longitude: LON, timezone: TZ, forecast_days: "3", wind_speed_unit: "kn", models: ENSEMBLE_MODEL, hourly: ENSEMBLE_VARS.join(",") });
+  return ensembleByHour(await getJSON(`https://ensemble-api.open-meteo.com/v1/ensemble?${p}`));
+}
+
 const state = { latest: null, history: { flights: [] }, forecast: null, fcDay: 0, range: 30 };
 
 // --------------------------------------------------------------- render
@@ -87,7 +92,7 @@ function flightsFor(dateIso, recs) {
 }
 
 function predictionsFor(dateIso, flights, metar, taf) {
-  return predictDay({ dateIso, flights, metar, taf, forecast: state.forecast, history: state.history.flights });
+  return predictDay({ dateIso, flights, metar, taf, forecast: state.forecast, ensemble: state.ensemble, history: state.history.flights });
 }
 
 function gauge(p, statusKey) {
@@ -131,6 +136,7 @@ function flightCard(f, pred, compact = false) {
       <div>
         <div class="risk-title">${pred.final ? esc(pred.basis) : `${rl.text} risk of cancellation or diversion`}</div>
         ${pred.final ? "" : `<div class="risk-basis">${esc(pred.basis)}</div>`}
+        ${pred.range && pct(pred.range[0]) !== pct(pred.range[1]) ? `<div class="risk-basis">Range across forecast runs: ${pct(pred.range[0])}–${pct(pred.range[1])}</div>` : ""}
         ${compact ? "" : baseNote}
         ${compact || !factors ? "" : `<ul class="factors">${factors}</ul>`}
       </div>
@@ -419,10 +425,11 @@ $("#theme").addEventListener("click", () => {
 
 async function load() {
   const bust = `?t=${Math.floor(Date.now() / 60000)}`;
-  const [latest, history, forecast] = await Promise.allSettled([getJSON(`data/latest.json${bust}`), getJSON(`data/history.json${bust}`), loadForecast()]);
+  const [latest, history, forecast, ensemble] = await Promise.allSettled([getJSON(`data/latest.json${bust}`), getJSON(`data/history.json${bust}`), loadForecast(), loadEnsemble()]);
   if (latest.status === "fulfilled") state.latest = latest.value;
   if (history.status === "fulfilled") state.history = history.value;
   if (forecast.status === "fulfilled") state.forecast = forecast.value;
+  if (ensemble.status === "fulfilled") state.ensemble = ensemble.value;
   render();
 }
 load();

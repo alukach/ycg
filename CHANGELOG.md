@@ -8,6 +8,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - First version: today's and tomorrow's AC8376/AC8377 status, METAR/TAF, hourly forecast, cancellation outlook and outcome history, deployed to GitHub Pages every 15 minutes.
 - "Coming days" shows tomorrow and the day after, within Open-Meteo's 3-day forecast.
 - Every external data source is linked from the page and the README.
+- For flights 12 h+ ahead, the outlook averages the 51-member ECMWF ensemble (Open-Meteo) instead of a single model run, and cards show the range across runs.
 
 ### Changed
 - Weather-model evidence is weighted down with lead time (≈0.5 at 24 h, 0.25 at 48 h), so tomorrow and the day after lean on the seasonal base and say so.

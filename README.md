@@ -13,7 +13,7 @@ GitHub Actions (cron, every 15 min in the flight window)
 
 Browser: index.html + assets/app.js
   ├─ data/latest.json, data/history.json
-  └─ Open-Meteo hourly forecast (fetched live, CORS-enabled)
+  └─ Open-Meteo hourly + ensemble forecasts (fetched live, CORS-enabled)
 ```
 
 - **Flight status** is scraped from FlightStats' public tracker pages. The parser tries the embedded Next.js state first and falls back to the rendered text. Each run uploads the raw HTML as a `debug-html` artifact (kept 3 days) so a markup change can be fixed quickly.
@@ -52,6 +52,7 @@ python -m http.server                       # http://localhost:8000
 | Flight status (±3 days) | [FlightStats flight tracker](https://www.flightstats.com/v2/flight-tracker/arrivals/YCG) | Today/tomorrow status, history outcomes |
 | METAR / TAF | [aviationweather.gov Data API](https://aviationweather.gov/data/api/) ([CYCG METAR](https://aviationweather.gov/api/data/metar?ids=CYCG&format=raw&hours=24), [TAF](https://aviationweather.gov/api/data/taf?ids=CYCG&format=raw)) | Observations, TAF, weather attached to history |
 | Hourly forecast | [Open-Meteo](https://open-meteo.com/en/docs) | Chart, model-based risk terms |
+| Ensemble forecast | [Open-Meteo Ensemble API](https://open-meteo.com/en/docs/ensemble-api) (ECMWF IFS, 51 runs) | Risk and range 12 h+ ahead |
 | Historical METAR archive | [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/request/download.phtml?network=CA_BC_ASOS) | Linked from history rows; candidate for weather backfill |
 | 84% success rate, shuttle | [Boundary Creek Times, 2024](https://www.boundarycreektimes.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017) | Reference line, context |
 | Airport / approach | [Wikipedia](https://en.wikipedia.org/wiki/West_Kootenay_Regional_Airport) | Context |

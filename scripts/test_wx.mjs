@@ -74,3 +74,13 @@ test("BECMG in transition counts the worse state; BCFG does not cancel FG", () =
   const fg = parseTaf("TAF CYCG 151140Z 1512/1600 00000KT 1/2SM FG BCFG OVC003", now);
   assert.ok(day("2026-12-15", { now, taf: fg })[0].factors.some((f) => /fog/.test(f.label)));
 });
+
+test("ensemble spread gives a range around the estimate", () => {
+  const now = new Date("2026-12-13T15:00Z");
+  const run = (low) => ({ cloud_cover_low: low, weather_code: low > 90 ? 45 : 3, snowfall: 0, wind_speed_10m: 3, wind_gusts_10m: 5 });
+  const ensemble = { "2026-12-15T10:00": [...Array(30).fill(run(10)), ...Array(21).fill(run(100))] };
+  const [a, d] = day("2026-12-15", { now, ensemble, forecast: [{ time: "2026-12-15T10:00", ...run(10), visibility: 20000 }] });
+  assert.ok(a.range && a.range[0] < a.p && a.p < a.range[1], JSON.stringify([a.range, a.p]));
+  assert.ok(d.range && d.range[1] >= a.range[1]);
+  assert.ok(a.sources.includes("ensemble"));
+});
