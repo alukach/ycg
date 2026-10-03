@@ -20,6 +20,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 ### Changed
 - Weather-model evidence is weighted down with lead time (≈0.5 at 24 h, 0.25 at 48 h), so tomorrow and the day after lean on the seasonal base and say so.
 - The latest METAR now counts up to 6 h before the flight, with weight fading after 75 min. Previously an 08:00 low-cloud report was ignored for a 10:14 arrival.
+- The page refreshes only while visible (and immediately when you return to it), and auto-refresh no longer scrolls the history strip back to the end.
 
 ### Fixed
 - FlightStats status code `A` means *Active* (airborne), not arrived. In-flight runs no longer finalise a flight early. Code `NO` (not operational) now counts as cancelled.

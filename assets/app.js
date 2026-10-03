@@ -295,8 +295,9 @@ function renderHistory() {
     if (dd.getUTCDate() === 1 || i === 0 || (span.length <= 35 && dd.getUTCDay() === 1)) svg += `<text x="${padL + i * (cell + g)}" y="${H - 2}">${fmtDay(d, { month: "short", day: "numeric" })}</text>`;
   });
   svg += `</svg>`;
-  $("#hist-strip").innerHTML = svg;
-  $("#hist-strip").scrollLeft = 1e6;
+  const strip = $("#hist-strip"), atEnd = !strip.scrollLeft || strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4;
+  strip.innerHTML = svg;
+  if (atEnd) strip.scrollLeft = 1e6; // keep the reader's position if they scrolled back
   $("#hist-strip").querySelectorAll("rect[data-d]").forEach((rc) => {
     rc.addEventListener("pointerenter", (ev) => {
       const r = state.history.flights.find((x) => x.date === rc.dataset.d && x.flight === rc.dataset.f);
@@ -459,5 +460,6 @@ async function load() {
   render();
 }
 load();
-setInterval(load, 5 * 60e3);
+setInterval(() => document.hidden || load(), 5 * 60e3);
+document.addEventListener("visibilitychange", () => document.hidden || load());
 let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(renderForecast, 150); });
