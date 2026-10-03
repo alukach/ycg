@@ -22,6 +22,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - "Arrivals that land, by month" table for planning trips weeks ahead: the seasonal estimate next to recorded outcomes.
 - The hourly forecast chart has a third tab for the day after tomorrow, labelled with its weekday.
 - Trail Regional Airport (YZZ): Pacific Coastal 8P451/452, tracked the same way as Castlegar. Trail has no published METAR/TAF, so its outlook uses Castlegar's at reduced weight (labelled *Castlegar, 25 km*) alongside the weather model for Trail itself.
+- Airport switcher in the header (Castlegar YCG · Trail YZZ). The choice is in the URL (`?a=yzz`, shareable) and remembered per browser. Titles, links, feed and airport-specific sections (the Air Canada shuttle panel and the 84% reference line are Castlegar-only) follow the selected airport.
 
 ### Changed
 - Weather-model evidence is weighted down with lead time (≈0.5 at 24 h, 0.25 at 48 h), so tomorrow and the day after lean on the seasonal base and say so.

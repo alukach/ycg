@@ -22,7 +22,6 @@ const SRC = {
   metar: (st) => `https://aviationweather.gov/api/data/metar?ids=${st}&format=raw&hours=24`,
   taf: (st) => `https://aviationweather.gov/api/data/taf?ids=${st}&format=raw`,
   awcPage: (st) => `https://aviationweather.gov/data/metar/?id=${st}&hours=24&decoded=yes&taf=yes`,
-  shuttle: "https://www.nelsonstar.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017",
 };
 const CITY = { YVR: "Vancouver" };
 const fsUrl = (flight, iso) => `https://www.flightstats.com/v2/flight-tracker/${state.ap.carrier}/${flight.slice(state.ap.carrier.length)}?year=${+iso.slice(0, 4)}&month=${+iso.slice(5, 7)}&date=${+iso.slice(8, 10)}`;
@@ -69,7 +68,11 @@ const loadEnsemble = async () => ensembleByHour(await getJSON(ensembleUrl(state.
 const dataUrl = (file) => `data/${state.apId}/${file}`;
 const inboundFlight = () => state.ap.flights.find((f) => f.kind === "arrival").flight;
 
-const state = { apId: "ycg", ap: null, latest: null, history: { flights: [] }, predictions: [], forecast: null, fcDay: 0, range: 30 };
+// ?a=<id> picks the airport (shareable); otherwise the last one viewed, else Castlegar
+let lastAirport = null;
+try { lastAirport = localStorage.getItem("airport"); } catch {}
+
+const state = { apId: new URLSearchParams(location.search).get("a") || lastAirport || "ycg", ap: null, latest: null, history: { flights: [] }, predictions: [], forecast: null, fcDay: 0, range: 30 };
 
 // --------------------------------------------------------------- render
 
@@ -134,7 +137,7 @@ function flightCard(f, pred, compact = false) {
     </div>
     ${f.status === "diverted" && f.diverted_to ? `<div class="f-dir"><b>${f.diverted_to === f.from ? `Returned to ${esc(f.from)}` : `Diverted to ${esc(f.diverted_to)}`}</b></div>` : ""}
     ${f.aircraft ? `<div class="f-dir">${aircraftLine(f.aircraft)}</div>` : ""}
-    ${f.status_text && !compact ? `<div class="f-dir">Airline status: ${esc(f.status_text)} · ${ext(f.source_url || fsUrl(f.flight, f.date), "FlightStats ↗")}</div>` : ""}
+    ${f.status_text && !compact ? `<div class="f-dir">Airline status: ${esc(f.status_text)} · ${ext(f.source_url || fsUrl(f.flight, f.date), "FlightStats ↗")} · ${ext(state.ap.airline_status_url, `${esc(state.ap.airline.split(" (")[0])} ↗`)}</div>` : ""}
     <div class="risk">
       ${gauge(pred.p, rl.key, pred.final, f.status)}
       <div>
@@ -185,7 +188,7 @@ function renderObs() {
   const clouds = m.layers.length ? m.layers.map((l) => (l.base != null ? `${l.cover} ${l.base.toLocaleString()} ft` : l.cover)).join(", ") : "Clear";
   const wxMap = { BR: "mist", FG: "fog", RA: "rain", SN: "snow", DZ: "drizzle", FU: "smoke", HZ: "haze", SH: "showers", TS: "thunder", FZ: "freezing " };
   const wxText = m.wx.map((w) => w.replace(/^[+-]/, (s) => (s === "+" ? "heavy " : "light ")).replace(/FZ|SH|TS|BR|FG|RA|SN|DZ|FU|HZ/g, (k) => wxMap[k] + " ").trim()).join(", ");
-  $("#obs").innerHTML = `<div class="chart-title">Latest observation <span class="muted">${ext(SRC.awcPage(state.ap.wx_station), "METAR")} ${m.time ? fmtTime(m.time) + " · " + ago(m.time) : ""}</span></div>
+  $("#obs").innerHTML = `<div class="chart-title">Latest observation${state.ap.wx_proxy ? ` <span class="muted">(${esc(state.ap.wx_proxy.label)}; ${state.ap.code} has no published reports)</span>` : ""} <span class="muted">${ext(SRC.awcPage(state.ap.wx_station), "METAR")} ${m.time ? fmtTime(m.time) + " · " + ago(m.time) : ""}</span></div>
     <div class="obs-top"><span class="obs-temp">${m.temp ?? "—"}°C</span><span class="muted">dew point ${m.dew ?? "—"}°</span></div>
     <dl class="kv">
       <dt>Ceiling</dt><dd>${m.ceiling != null ? m.ceiling.toLocaleString() + " ft" : "None (no broken/overcast layer)"}</dd>
@@ -418,8 +421,9 @@ function renderRolling() {
   const x = (i) => padL + (i / (pts.length - 1)) * (W - padL - padR);
   const y = (v) => padT + (1 - v) * (H - padT - padB);
   let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Trailing 30-day completion rate">`;
-  [0, 0.5, 0.84, 1].forEach((t) => { svg += `<line x1="${padL}" x2="${W - padR}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)" ${t === 0.84 ? 'stroke-dasharray="4 3" stroke="var(--neutral)"' : ""}/><text x="${padL - 6}" y="${y(t) + 4}" text-anchor="end">${Math.round(t * 100)}%</text>`; });
-  svg += `<a href="${SRC.shuttle}" target="_blank" rel="noopener"><text x="${W - padR}" y="${y(0.84) - 4}" text-anchor="end" style="text-decoration:underline">84% (Dec 2023–Sep 2024 avg)</text></a>`;
+  const ref = state.ap.reference; // a published success rate to compare against, if the airport has one
+  [0, 0.5, ...(ref ? [ref.p] : []), 1].forEach((t) => { svg += `<line x1="${padL}" x2="${W - padR}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)" ${t === ref?.p ? 'stroke-dasharray="4 3" stroke="var(--neutral)"' : ""}/><text x="${padL - 6}" y="${y(t) + 4}" text-anchor="end">${Math.round(t * 100)}%</text>`; });
+  if (ref) svg += `<a href="${esc(ref.url)}" target="_blank" rel="noopener"><text x="${W - padR}" y="${y(ref.p) - 4}" text-anchor="end" style="text-decoration:underline">${esc(ref.label)}</text></a>`;
   svg += `<path d="${pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.ok / p.n).toFixed(1)}`).join("")}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
   [0, pts.length - 1].forEach((i) => { svg += `<text x="${x(i)}" y="${H - 4}" text-anchor="${i ? "end" : "start"}">${fmtDay(pts[i].d, { month: "short", day: "numeric" })}</text>`; });
   svg += `<circle id="rdot" r="4" fill="var(--series-1)" stroke="var(--surface)" stroke-width="2" opacity="0"/><rect id="rhit" x="${padL}" y="0" width="${W - padL - padR}" height="${H}" fill="transparent"/></svg>`;
@@ -450,6 +454,26 @@ function showTip(ev, html) {
 }
 function hideTip() { tip.hidden = true; }
 
+// Airport identity, switcher and airport-specific sections; static per page load
+function renderAirport() {
+  const ap = state.ap;
+  document.title = `${ap.code} Flight Watch`;
+  $("#ap-code").textContent = ap.code;
+  $("#ap-title").textContent = `${ap.city} Flight Watch`;
+  $("#ap-name").textContent = ap.name;
+  $("#ap-icao").textContent = ap.icao;
+  document.querySelectorAll(".ap-code").forEach((x) => (x.textContent = ap.code));
+  $("#feed-link").href = dataUrl("feed.xml");
+  $("#fs-airport").href = `https://www.flightstats.com/v2/flight-tracker/arrivals/${ap.code}`;
+  $('link[rel="alternate"]').href = dataUrl("feed.xml");
+  document.querySelectorAll("a[data-file]").forEach((a) => (a.href = a.dataset.file === "commits" ? `${REPO}/commits/main/${dataUrl("history.json")}` : dataUrl(a.dataset.file)));
+  document.querySelectorAll("[data-only]").forEach((x) => (x.hidden = x.dataset.only === "shuttle" ? !ap.shuttle : x.dataset.only !== ap.code));
+  const [a, d] = ap.flights;
+  $("#strip-legend").textContent = `arrival ${a.flight} (top) · departure ${d.flight} (bottom)`;
+  $("#airports").innerHTML = Object.entries(state.airports).map(([id, x]) =>
+    `<a href="?a=${id}" ${id === state.apId ? 'aria-current="page"' : ""}>${esc(x.city)} <span class="muted">${x.code}</span></a>`).join("");
+}
+
 function renderHeader() {
   const today = localDate();
   $("#today-label").textContent = fmtDay(today);
@@ -475,6 +499,7 @@ function renderHeader() {
 }
 
 function render() {
+  renderAirport();
   renderHeader();
   renderFlights();
   renderObs();
@@ -531,7 +556,12 @@ addEventListener("hashchange", showLinkedDay);
 
 async function load() {
   const bust = `?t=${Math.floor(Date.now() / 60000)}`;
-  if (!state.ap) state.ap = (await getJSON("assets/airports.json" + bust))[state.apId];
+  if (!state.ap) {
+    state.airports = await getJSON("assets/airports.json" + bust);
+    if (!state.airports[state.apId]) state.apId = "ycg";
+    state.ap = state.airports[state.apId];
+    try { localStorage.setItem("airport", state.apId); } catch {}
+  }
   const [latest, history, forecast, ensemble, preds] = await Promise.allSettled([getJSON(dataUrl("latest.json") + bust), getJSON(dataUrl("history.json") + bust), loadForecast(), loadEnsemble(), getJSON(dataUrl("predictions.json") + bust)]);
   if (preds.status === "fulfilled") state.predictions = preds.value.predictions;
   if (latest.status === "fulfilled") state.latest = latest.value;

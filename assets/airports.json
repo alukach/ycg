@@ -16,7 +16,8 @@
   "wx_station": "CYCG",
   "wx_proxy": null,
   "month_base": [0.22, 0.18, 0.12, 0.08, 0.05, 0.04, 0.05, 0.06, 0.06, 0.1, 0.2, 0.25],
-  "shuttle": true
+  "shuttle": true,
+  "reference": { "p": 0.84, "label": "84% (Dec 2023–Sep 2024 avg)", "url": "https://www.nelsonstar.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017" }
  },
  "yzz": {
   "code": "YZZ",
@@ -38,6 +39,7 @@
    "weight": 0.6
   },
   "month_base": [0.22, 0.18, 0.12, 0.08, 0.05, 0.04, 0.05, 0.06, 0.06, 0.1, 0.2, 0.25],
-  "shuttle": false
+  "shuttle": false,
+  "reference": null
  }
 }
