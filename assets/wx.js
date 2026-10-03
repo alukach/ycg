@@ -202,6 +202,12 @@ export function rollingBase(history, beforeIso, when, days = 30) {
 
 export const MONTH_BASE = [0.22, 0.18, 0.12, 0.08, 0.05, 0.04, 0.05, 0.06, 0.06, 0.1, 0.2, 0.25];
 export const CLEAR_DAY = -1.0;
+/**
+ * Weight on the weather model's evidence by lead time: ≈0.7 at 12 h, 0.5 at 24 h, 0.25 at 48 h.
+ * Deterministic low-cloud/fog skill in a narrow valley decays to roughly climatology by ~2 days.
+ * ponytail: τ=36 h is a guess; fit it per lead bucket from data/predictions.json once outcomes accrue.
+ */
+export const modelWeight = (leadH) => Math.exp(-leadH / 36);
 const logit = (p) => Math.log(p / (1 - p));
 const sigmoid = (x) => 1 / (1 + Math.exp(-x));
 
@@ -320,13 +326,16 @@ export function predict(ctx) {
     }
   }
   const om = omConditions(ctx.omHour);
+  const leadH = Math.max(0, (ctx.when - now) / 3600e3);
+  const mw = modelWeight(leadH);
+  const modelOnly = om && !sources.length;
   if (om) {
     const s = conditionScore(om);
-    if (!sources.length) {
-      main = { total: s.total, parts: s.parts.map((p) => ({ ...p, label: p.label + " (model)" })) };
+    if (modelOnly) {
+      main = { total: s.total * mw, parts: s.parts.map((p) => ({ ...p, v: p.v * mw, label: p.label + " (model)" })) };
     } else {
       // precip type and gusts from the model can still add risk the TAF omits
-      for (const p of s.parts) if (/snow|freezing|wind/.test(p.label) && !main.parts.some((q) => q.label.startsWith(p.label.split(" ")[0]))) main.parts.push({ ...p, v: p.v * 0.5, label: p.label + " (model)" });
+      for (const p of s.parts) if (/snow|freezing|wind/.test(p.label) && !main.parts.some((q) => q.label.startsWith(p.label.split(" ")[0]))) main.parts.push({ ...p, v: p.v * 0.5 * mw, label: p.label + " (model)" });
     }
     sources.push("model");
   }
@@ -334,11 +343,12 @@ export function predict(ctx) {
   // The base rate is an average over all days, bad weather included, so weather terms measured
   // from zero would count bad days twice. Once a weather source covers the flight, start from a
   // clear day instead. ponytail: hand-set (clear December ≈ 11% vs 25% average); fit from history.
-  if (sources.length) factors.push({ label: "Clear-day adjustment", v: CLEAR_DAY, isBase: true });
+  if (sources.length) factors.push({ label: "Clear-day adjustment", v: CLEAR_DAY * (modelOnly ? mw : 1), isBase: true });
 
   let x = factors.reduce((a, f) => a + f.v, 0);
   let p = sigmoid(x);
   let basis = `Weather (${sources.join(" + ") || "season only"})`;
+  if (modelOnly && mw < 0.9) basis = `Mostly seasonal: weather model ${Math.round(leadH)} h ahead, weighted ×${mw.toFixed(2)}`;
 
   if (st === "en_route" && ctx.kind === "arrival") {
     p *= 0.5;
@@ -354,7 +364,7 @@ export function predict(ctx) {
       basis = `Tied to inbound ${ctx.inbound?.flight ?? "flight"} (same aircraft)`;
     }
   }
-  return { p, basis, factors, sources, when: ctx.when, now };
+  return { p, basis, factors, sources, when: ctx.when, now, leadH, modelWeight: modelOnly ? mw : 1 };
 }
 
 function pick(g) {

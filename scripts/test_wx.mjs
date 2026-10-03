@@ -48,3 +48,11 @@ test("ceiling, visibility and fog are not stacked", () => {
   assert.equal(a.factors.filter((f) => !f.isBase).length, 1);
   assert.ok(a.p > 0.6 && a.p < 0.95, `p=${a.p}`);
 });
+
+test("model evidence shrinks toward the base as lead time grows", () => {
+  const fc = [{ time: "2026-12-15T10:00", cloud_cover_low: 100, visibility: 20000, snowfall: 0, weather_code: 3, wind_speed_10m: 3, wind_gusts_10m: 5 }];
+  const at = (iso) => day("2026-12-15", { now: new Date(iso), forecast: fc })[0];
+  const near = at("2026-12-15T15:00Z"), far = at("2026-12-13T15:00Z");
+  assert.ok(near.p > far.p && far.p > far.factors[0].p, `${near.p} ${far.p}`);
+  assert.ok(far.modelWeight < 0.3);
+});

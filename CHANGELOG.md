@@ -9,6 +9,9 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - "Coming days" shows tomorrow and the day after, within Open-Meteo's 3-day forecast.
 - Every external data source is linked from the page and the README.
 
+### Changed
+- Weather-model evidence is weighted down with lead time (≈0.5 at 24 h, 0.25 at 48 h), so tomorrow and the day after lean on the seasonal base and say so.
+
 ### Fixed
 - FlightStats status code `A` means *Active* (airborne), not arrived. In-flight runs no longer finalise a flight early. Code `NO` (not operational) now counts as cancelled.
 - Outlook no longer counts bad weather twice. The seasonal base already includes bad-weather days, so a clear METAR, TAF or model forecast now pulls the risk *below* the base (e.g. clear December ≈ 11%, not 25%).
