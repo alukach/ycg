@@ -31,3 +31,12 @@ test("zoned converts Vancouver local time", () => {
   assert.equal(zoned("2026-10-03", "10:14").toISOString(), "2026-10-03T17:14:00.000Z");
   assert.equal(zoned("2026-12-15", "10:14").toISOString(), "2026-12-15T18:14:00.000Z");
 });
+
+const CLEAR_TAF = "TAF CYCG 151140Z 1512/1600 VRB03KT P6SM SKC";
+test("a clear forecast pulls risk below the seasonal base; no forecast leaves it at base", () => {
+  const now = new Date("2026-12-15T12:00Z");
+  const [none] = day("2026-12-15", { now });
+  const [clear] = day("2026-12-15", { now, taf: parseTaf(CLEAR_TAF, now) });
+  assert.ok(Math.abs(none.p - none.factors[0].p) < 1e-9);
+  assert.ok(clear.p < none.p / 1.5);
+});

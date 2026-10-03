@@ -201,6 +201,7 @@ export function rollingBase(history, beforeIso, when, days = 30) {
 }
 
 export const MONTH_BASE = [0.22, 0.18, 0.12, 0.08, 0.05, 0.04, 0.05, 0.06, 0.06, 0.1, 0.2, 0.25];
+export const CLEAR_DAY = -1.0;
 const logit = (p) => Math.log(p / (1 - p));
 const sigmoid = (x) => 1 / (1 + Math.exp(-x));
 
@@ -326,6 +327,10 @@ export function predict(ctx) {
     sources.push("model");
   }
   factors.push(...main.parts);
+  // The base rate is an average over all days, bad weather included, so weather terms measured
+  // from zero would count bad days twice. Once a weather source covers the flight, start from a
+  // clear day instead. ponytail: hand-set (clear December ≈ 11% vs 25% average); fit from history.
+  if (sources.length) factors.push({ label: "Clear-day adjustment", v: CLEAR_DAY, isBase: true });
 
   let x = factors.reduce((a, f) => a + f.v, 0);
   let p = sigmoid(x);
