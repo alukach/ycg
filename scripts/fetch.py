@@ -326,6 +326,36 @@ def fetch_taf() -> str | None:
         return None
 
 
+# Q-code subjects that bear on whether the flight can land: runway, approach procedures,
+# lighting, navaids, ILS, aerodrome closure.
+NOTAM_KEY = re.compile(r"^Q(MR|P[IAD]|L|N|IC|FALC)")
+
+
+def fetch_notams() -> list[dict] | None:
+    """CYCG NOTAMs from NAV CANADA's CFPS weather API (undocumented; public flight-planning site)."""
+    try:
+        rows = json.loads(get(f"https://plan.navcanada.ca/weather/api/alpha/?site={STATION}&alpha=notam"))["data"]
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! notam: {e}", file=sys.stderr)
+        return None
+    out = []
+    for r in rows:
+        if r.get("location") != STATION:
+            continue
+        try:
+            raw = json.loads(r["text"])["raw"]
+        except (KeyError, TypeError, json.JSONDecodeError):
+            raw = str(r.get("text"))
+        q = re.search(r"Q\)\s*\w+/(Q\w+)/", raw)
+        e = re.search(r"E\)\s*(.*?)(?:\n[F-G]\)|\)$|$)", raw, re.S)
+        text = re.sub(r"\s+", " ", (e.group(1) if e else raw)).strip()
+        # runway condition codes 0-6 per third of the runway; 4 or lower means a contaminated surface
+        rsc = [int(c) for t in re.findall(r"RSC \d+ (\d/\d/\d)", text) for c in t.split("/")]
+        out.append({"id": raw[1:raw.find(" ")] if raw.startswith("(") else r.get("pk"), "from": r.get("startValidity"), "to": r.get("endValidity"),
+                    "key": bool(q and NOTAM_KEY.match(q.group(1))) or bool(rsc and min(rsc) <= 4), "text": text})
+    return sorted(out, key=lambda n: (not n["key"], n["from"] or ""))
+
+
 def fetch_iem_metars(day: dt.date) -> list[str]:
     """Archived METARs for a local day from Iowa Environmental Mesonet (for days we missed)."""
     a, b = day - dt.timedelta(days=1), day + dt.timedelta(days=1)
@@ -443,6 +473,7 @@ def main() -> int:
 
     metars = fetch_metars(72)
     taf = fetch_taf()
+    notams = fetch_notams()
 
     flights_today, flights_tomorrow, failures = [], [], []
     for offset in range(-args.days_back, 2):
@@ -509,6 +540,7 @@ def main() -> int:
         "taf": taf,
         "failures": failures,
         "aircraft": aircraft,
+        "notams": notams,
     }
     (DATA / "latest.json").write_text(json.dumps(latest, indent=1) + "\n")
 

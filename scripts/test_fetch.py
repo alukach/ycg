@@ -95,6 +95,19 @@ class Parsers(unittest.TestCase):
         self.assertEqual((r["tail"], r["equipment"]), ("C-GGMZ", "DH4"))
         self.assertAlmostEqual(fetch.nm_between(fetch.AIRPORTS["YVR"], fetch.AIRPORTS["YCG"]), 218, delta=3)  # ~404 km
 
+    def test_notams(self):
+        raw = lambda q, e: json.dumps({"raw": f"(A1/26 NOTAMN\nQ) CZVR/{q}/IV/NBO/A/000/999/4918N11738W005\nA) CYCG B) 2610031411 C) 2610032211\nE) {e})"})
+        rows = [{"location": "CYCG", "text": raw("QFAXX", "RSC 15 6/6/3 DRY, DRY, SLUSH."), "startValidity": "2026-10-03T14:11:00", "endValidity": None},
+                {"location": "CYCG", "text": raw("QOBCE", "CRANE ERECTED"), "startValidity": "2026-10-01T00:00:00", "endValidity": None},
+                {"location": None, "text": raw("QAFCH", "FIR CAPACITY"), "startValidity": None, "endValidity": None}]
+        orig = fetch.get
+        fetch.get = lambda url, *a, **k: json.dumps({"data": rows})
+        try:
+            n = fetch.fetch_notams()
+        finally:
+            fetch.get = orig
+        self.assertEqual([(x["key"], x["text"]) for x in n], [(True, "RSC 15 6/6/3 DRY, DRY, SLUSH."), (False, "CRANE ERECTED")])
+
     def test_nearest_metar(self):
         metars = ["METAR CYCG 021800Z VRB02KT 15SM SCT085 15/08 A3006", "METAR CYCG 021700Z 00000KT 15SM FEW140 13/08 A3008"]
         when = dt.datetime(2026, 10, 2, 17, 14, tzinfo=dt.timezone.utc)

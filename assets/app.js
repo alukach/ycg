@@ -197,6 +197,16 @@ function renderObs() {
   $("#raw-src").innerHTML = `Source: ${ext(SRC.metar, "METAR API")} · ${ext(SRC.taf, "TAF API")} · ${ext(SRC.awcPage, "aviationweather.gov decoded view")} · fetched ${L.generated_at ? ago(new Date(L.generated_at)) : "—"}`;
 }
 
+const notamLive = (n, day) => (!n.from || n.from.slice(0, 10) <= day) && (!n.to || n.to.slice(0, 10) >= day);
+
+function renderNotams() {
+  const ns = state.latest?.notams;
+  $("#notams-box").hidden = !ns;
+  if (!ns) return;
+  $("#notam-count").textContent = `(${ns.length}${ns.some((n) => n.key) ? `, ${ns.filter((n) => n.key).length} flagged` : ""})`;
+  $("#notams").innerHTML = ns.map((n) => `<li class="${n.key ? "key" : ""}"><b>${esc(n.id)}</b> ${esc(n.text)} <span class="muted">${n.to ? `until ${esc(n.to.slice(0, 16).replace("T", " "))} UTC` : "no end date"}</span></li>`).join("") || "<li>None in effect.</li>";
+}
+
 // --------------------------------------------------------- forecast chart
 
 function renderForecast() {
@@ -405,6 +415,8 @@ function renderHeader() {
   const alerts = [];
   if (L && L.date !== today) alerts.push(`Flight status data is from ${L.date}; today's status hasn't been fetched yet. Showing the published schedule.`);
   if (L?.failures?.length) alerts.push(`The last update couldn't read status for ${L.failures.join(", ")}.`);
+  // flagged, temporary NOTAMs in force today (permanent chart notes would alert every day)
+  for (const n of L?.notams || []) if (n.key && n.to && notamLive(n, today)) alerts.push(`NOTAM ${n.id}: ${n.text}`);
   $("#alerts").innerHTML = alerts.map((a) => `<div class="alert warn">${esc(a)}</div>`).join("");
 }
 
@@ -412,6 +424,7 @@ function render() {
   renderHeader();
   renderFlights();
   renderObs();
+  renderNotams();
   renderForecast();
   renderHistory();
 }
