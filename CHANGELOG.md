@@ -34,6 +34,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - Times are correct after BC moves to permanent UTC−7 on 1 Nov 2026. The page no longer relies on the browser's (often stale) time-zone data, and CI fails if the runner's tz database predates the change.
 - Dead link to the 2024 shuttle article (Boundary Creek Times returns 404) now points to the same story on the Nelson Star.
 - Cancelled, diverted and completed flights show a status icon instead of a misleading "100%"/"0%" risk gauge.
+- Contrast: muted text darkened to pass WCAG AA (5:1), the amber risk ring drawn darker in light mode, dashed "no record" cells visible in dark mode, and the theme button enlarged to a 44 px tap target.
 
 ### Removed
 - The unexplained ×0.5 risk discount once the inbound aircraft is airborne. Turning back is how YCG arrivals usually fail.
