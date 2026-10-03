@@ -2,7 +2,7 @@ name: Update data & deploy
 
 on:
   schedule:
-    # Every 15 min, 12:00–21:59 UTC (05:00–14:59 PDT / 04:00–13:59 PST): covers both flights.
+    # Every 15 min, 12:00–21:59 UTC (05:00–14:59 Vancouver, UTC−7 year-round from 2026-11-01).
     - cron: "*/15 12-21 * * *"
     # Every 3 h otherwise, for tomorrow's status and evening METAR/TAF.
     - cron: "7 0-11/3 * * *"

@@ -23,6 +23,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - TAF handling: a BECMG change still in progress counts its worse state; TEMPO/PROB risk is measured against the METAR when the METAR is the worse source; a `BCFG` group no longer hides reported `FG`.
 - A broken scraper now fails the GitHub Actions run (after deploying), so GitHub emails the owner instead of logging a warning nobody sees.
 - Diversions, including an AC8376 that turns back to Vancouver, are recorded from FlightStats' diverted-airport fields even when the status code says *landed*. The card and history show where the flight went.
+- Times are correct after BC moves to permanent UTC−7 on 1 Nov 2026. The page no longer relies on the browser's (often stale) time-zone data, and CI fails if the runner's tz database predates the change.
 
 ### Removed
 - The unexplained ×0.5 risk discount once the inbound aircraft is airborne. Turning back is how YCG arrivals usually fail.

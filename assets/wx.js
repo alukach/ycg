@@ -2,17 +2,33 @@
 
 export const TZ = "America/Vancouver";
 
+// BC moved to permanent UTC−7 on 2026-11-01 (tz database 2026b). The rule is written out here
+// because JS runtimes ship stale tz data (Node ≤24 and older browsers still switch to PST).
+// ponytail: Vancouver only; update if BC changes its clocks again.
+const PERMANENT_UTC7 = Date.UTC(2026, 10, 1, 9);
+const nthSunday = (y, m, n) => 1 + ((7 - new Date(Date.UTC(y, m, 1)).getUTCDay()) % 7) + 7 * (n - 1);
+/** Vancouver's UTC offset in hours (-7 or -8) at instant t. */
+export function utcOffsetH(t) {
+  t = +t;
+  if (t >= PERMANENT_UTC7) return -7;
+  const y = new Date(t).getUTCFullYear();
+  return t >= Date.UTC(y, 2, nthSunday(y, 2, 2), 10) && t < Date.UTC(y, 10, nthSunday(y, 10, 1), 9) ? -7 : -8;
+}
+/** A Date whose UTC fields read as Vancouver wall-clock time (format it with timeZone "UTC"). */
+export const wall = (d) => new Date(+d + utcOffsetH(d) * 3600e3);
+/** Vancouver calendar date ("2026-10-03") at instant d. */
+export const localDate = (d = new Date()) => wall(d).toISOString().slice(0, 10);
+
 /** "2026-10-03" + "10:14" in Vancouver time -> Date */
 export function zoned(iso, hm) {
-  const guess = new Date(`${iso}T${hm}:00Z`);
-  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: TZ, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(guess).map((p) => [p.type, p.value]));
-  const asLocal = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute);
-  return new Date(guess.getTime() - (asLocal - guess.getTime()));
+  const asUtc = Date.parse(`${iso}T${hm}:00Z`);
+  const t = asUtc - utcOffsetH(asUtc + 8 * 3600e3) * 3600e3;
+  return new Date(asUtc - utcOffsetH(t) * 3600e3);
 }
 
 /** Open-Meteo hourly key ("2026-10-03T10:00", local time) for the hour nearest `when`. */
 export function hourKey(when) {
-  return new Intl.DateTimeFormat("sv-SE", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" }).format(new Date(when.getTime() + 30 * 60e3)).replace(" ", "T") + ":00";
+  return wall(+when + 30 * 60e3).toISOString().slice(0, 13) + ":00";
 }
 
 // ---------------------------------------------------------------- helpers
@@ -185,7 +201,7 @@ export function tafAt(taf, t) {
  */
 export const PRIOR_WEIGHT = 15;
 export function rollingBase(history, beforeIso, when, days = 30) {
-  const month = Number(new Intl.DateTimeFormat("en-CA", { timeZone: TZ, month: "numeric" }).format(when)) - 1;
+  const month = wall(when).getUTCMonth();
   const prior = MONTH_BASE[month];
   const start = new Date(beforeIso + "T12:00:00Z");
   start.setUTCDate(start.getUTCDate() - days);
@@ -302,10 +318,10 @@ export function omConditions(h) {
  * Returns { p, label, basis, factors: [{label, v}] }
  */
 export function predict(ctx) {
-  const month = Number(new Intl.DateTimeFormat("en-CA", { timeZone: TZ, month: "numeric" }).format(ctx.when)) - 1;
+  const month = wall(ctx.when).getUTCMonth();
   const seasonal = MONTH_BASE[month];
   const base = ctx.base?.p ?? seasonal;
-  const factors = [{ label: ctx.base?.label ?? `Seasonal base (${new Intl.DateTimeFormat("en-CA", { month: "long", timeZone: TZ }).format(ctx.when)})`, v: logit(base), isBase: true, p: base, detail: ctx.base?.detail }];
+  const factors = [{ label: ctx.base?.label ?? `Seasonal base (${new Intl.DateTimeFormat("en-CA", { month: "long", timeZone: "UTC" }).format(wall(ctx.when))})`, v: logit(base), isBase: true, p: base, detail: ctx.base?.detail }];
 
   // --- live status overrides
   const st = ctx.status;

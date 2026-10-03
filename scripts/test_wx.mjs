@@ -1,7 +1,7 @@
 // Outlook tests: node --test scripts/test_wx.mjs
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseMetar, parseTaf, tafAt, predictDay, zoned } from "../assets/wx.js";
+import { parseMetar, parseTaf, tafAt, predictDay, zoned, hourKey, localDate } from "../assets/wx.js";
 
 const SCHED = [
   { flight: "AC8376", kind: "arrival", sched_dep: "09:05", sched_arr: "10:14", status: "schedule" },
@@ -29,7 +29,11 @@ test("departure follows the inbound aircraft", () => {
 
 test("zoned converts Vancouver local time", () => {
   assert.equal(zoned("2026-10-03", "10:14").toISOString(), "2026-10-03T17:14:00.000Z");
-  assert.equal(zoned("2026-12-15", "10:14").toISOString(), "2026-12-15T18:14:00.000Z");
+  assert.equal(zoned("2026-03-01", "10:14").toISOString(), "2026-03-01T18:14:00.000Z"); // PST
+  assert.equal(zoned("2026-12-15", "10:14").toISOString(), "2026-12-15T17:14:00.000Z"); // permanent UTC-7
+  assert.equal(zoned("2025-12-15", "10:14").toISOString(), "2025-12-15T18:14:00.000Z");
+  assert.equal(hourKey(new Date("2026-12-15T17:14:00Z")), "2026-12-15T10:00");
+  assert.equal(localDate(new Date("2026-03-08T07:30:00Z")), "2026-03-07");
 });
 
 const CLEAR_TAF = "TAF CYCG 151140Z 1512/1600 VRB03KT P6SM SKC";

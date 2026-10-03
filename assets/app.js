@@ -1,4 +1,4 @@
-import { TZ, parseMetar, parseTaf, predictDay, riskLabel, fmtVis, ensembleByHour, ENSEMBLE_MODEL, ENSEMBLE_VARS } from "./wx.js";
+import { TZ, localDate, wall, parseMetar, parseTaf, predictDay, riskLabel, fmtVis, ensembleByHour, ENSEMBLE_MODEL, ENSEMBLE_VARS } from "./wx.js";
 
 const LAT = 49.2961, LON = -117.6325;
 const SCHEDULE = [
@@ -38,15 +38,12 @@ const pct = (p) => `${Math.round(p * 100)}%`;
 
 // ------------------------------------------------------------ time helpers
 
-function localDate(d = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
-}
 function addDays(iso, n) {
   const d = new Date(iso + "T12:00:00Z");
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
 }
-const fmtTime = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(d);
+const fmtTime = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: "UTC", hour: "numeric", minute: "2-digit" }).format(wall(d));
 const fmtDay = (iso, opts = { weekday: "long", month: "long", day: "numeric" }) => new Intl.DateTimeFormat("en-CA", { ...opts, timeZone: "UTC" }).format(new Date(iso + "T12:00:00Z"));
 function ago(d) {
   const m = Math.round((Date.now() - d) / 60000);

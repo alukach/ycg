@@ -84,6 +84,10 @@ class Parsers(unittest.TestCase):
         self.assertEqual((r["outcome"], r["sched_arr"]), ("unknown", "10:14"))
         self.assertEqual(fetch.ycg_time(r, dt.date(2026, 12, 15)).isoformat(), "2026-12-15T17:14:00+00:00")  # BC is UTC-7 year-round from 2026-11-01 (tz 2026b)
 
+    def test_tz_data_has_bc_permanent_utc7(self):
+        # Fails if the runner's tz database predates 2026b (BC on UTC-7 year-round from 2026-11-01).
+        self.assertEqual(dt.datetime(2026, 12, 15, 10, tzinfo=fetch.TZ).utcoffset(), dt.timedelta(hours=-7))
+
     def test_nearest_metar(self):
         metars = ["METAR CYCG 021800Z VRB02KT 15SM SCT085 15/08 A3006", "METAR CYCG 021700Z 00000KT 15SM FEW140 13/08 A3008"]
         when = dt.datetime(2026, 10, 2, 17, 14, tzinfo=dt.timezone.utc)
