@@ -207,3 +207,6 @@ a:hover { text-decoration: underline; }
 .gauge.done.good { background: var(--good); } .gauge.done.serious { background: var(--serious); } .gauge.done.critical { background: var(--critical); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .strip rect:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.day-link { color: inherit; }
+.linked { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+tr.linked { outline-offset: -2px; }

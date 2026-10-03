@@ -169,7 +169,7 @@ function renderFlights() {
     const d = addDays(today, n);
     const fs = flightsFor(d, (L?.tomorrow || []).filter((r) => r.date === d));
     const ps = predictionsFor(d, fs, null, taf);
-    return `<h3>${n === 1 ? "Tomorrow" : fmtDay(d, { weekday: "long" })} · ${fmtDay(d, { month: "short", day: "numeric" })}</h3>
+    return `<h3 id="day-${d}"><a href="#date=${d}" class="day-link">${n === 1 ? "Tomorrow" : fmtDay(d, { weekday: "long" })} · ${fmtDay(d, { month: "short", day: "numeric" })}</a></h3>
       <div class="flights small">${fs.map((f, i) => flightCard(f, ps[i], true)).join("")}</div>`;
   }).join("");
 }
@@ -360,7 +360,7 @@ function renderHistory() {
 
   // full table
   $("#hist-table").innerHTML = `<thead><tr><th>Date</th><th>Flight</th><th>Outcome</th><th>Dep sched / act</th><th>Arr sched / act</th><th>Arr delay</th><th>METAR at YCG</th></tr></thead><tbody>` +
-    [...state.history.flights].reverse().map((r) => `<tr><td>${r.date}</td><td>${ext(fsUrl(r.flight, r.date), r.flight)}</td><td>${r.outcome ? `<span class="sw ${outcomeOf(r).cls}"></span> ${outcomeOf(r).label}${r.diverted_to ? ` (${esc(r.diverted_to)})` : ""}` : esc(r.status)}</td>
+    [...state.history.flights].reverse().map((r) => `<tr data-date="${r.date}"><td>${r.date}</td><td>${ext(fsUrl(r.flight, r.date), r.flight)}</td><td>${r.outcome ? `<span class="sw ${outcomeOf(r).cls}"></span> ${outcomeOf(r).label}${r.diverted_to ? ` (${esc(r.diverted_to)})` : ""}` : esc(r.status)}</td>
       <td>${r.sched_dep} / ${r.dep_time || "—"}</td><td>${r.sched_arr} / ${r.arr_time || "—"}</td><td>${r.arr_delay_min ?? "—"}${r.arr_delay_min != null ? " min" : ""}</td><td class="metar">${esc(r.metar || "")} ${ext(iemUrl(r.date), "archive ↗")}</td></tr>`).join("") + `</tbody>`;
 }
 
@@ -494,6 +494,23 @@ $("#theme").addEventListener("click", () => {
   try { localStorage.setItem("theme", root.dataset.theme); } catch {}
 });
 
+// #date=YYYY-MM-DD (used by feed links): jump to that day's cards, or its history rows
+function showLinkedDay() {
+  const d = (location.hash.match(/date=(\d{4}-\d{2}-\d{2})/) || [])[1];
+  if (!d) return;
+  document.querySelectorAll(".linked").forEach((x) => x.classList.remove("linked"));
+  let el = d === localDate() ? $("#h-today") : $(`#day-${d}`);
+  if (!el) {
+    const rows = document.querySelectorAll(`#hist-table tr[data-date="${d}"]`);
+    if (!rows.length) return;
+    rows[0].closest("details").open = true;
+    rows.forEach((r) => r.classList.add("linked"));
+    el = rows[0];
+  } else el.classList.add("linked");
+  el.scrollIntoView({ block: "start" });
+}
+addEventListener("hashchange", showLinkedDay);
+
 async function load() {
   const bust = `?t=${Math.floor(Date.now() / 60000)}`;
   const [latest, history, forecast, ensemble, preds] = await Promise.allSettled([getJSON(`data/latest.json${bust}`), getJSON(`data/history.json${bust}`), loadForecast(), loadEnsemble(), getJSON(`data/predictions.json${bust}`)]);
@@ -504,6 +521,7 @@ async function load() {
   if (forecast.status === "fulfilled") state.forecast = forecast.value;
   if (ensemble.status === "fulfilled") state.ensemble = ensemble.value;
   render();
+  if (!state.linked) { state.linked = true; showLinkedDay(); }
 }
 load();
 setInterval(() => document.hidden || load(), 5 * 60e3);
