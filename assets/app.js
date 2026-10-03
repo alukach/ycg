@@ -1,4 +1,4 @@
-import { TZ, parseMetar, parseTaf, tafAt, predict, riskLabel, fmtVis, rollingBase } from "./wx.js";
+import { TZ, parseMetar, parseTaf, predictDay, riskLabel, fmtVis } from "./wx.js";
 
 const LAT = 49.2961, LON = -117.6325;
 const SCHEDULE = [
@@ -41,13 +41,6 @@ function addDays(iso, n) {
   const d = new Date(iso + "T12:00:00Z");
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
-}
-/** "2026-10-03" + "10:14" in Vancouver time -> Date */
-function zoned(iso, hm) {
-  const guess = new Date(`${iso}T${hm}:00Z`);
-  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: TZ, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(guess).map((p) => [p.type, p.value]));
-  const asLocal = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute);
-  return new Date(guess.getTime() - (asLocal - guess.getTime()));
 }
 const fmtTime = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(d);
 const fmtDay = (iso, opts = { weekday: "long", month: "long", day: "numeric" }) => new Intl.DateTimeFormat("en-CA", { ...opts, timeZone: "UTC" }).format(new Date(iso + "T12:00:00Z"));
@@ -93,25 +86,8 @@ function flightsFor(dateIso, recs) {
   });
 }
 
-function omHourAt(when) {
-  if (!state.forecast) return null;
-  const key = new Intl.DateTimeFormat("sv-SE", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" }).format(new Date(when.getTime() + 30 * 60e3)).replace(" ", "T") + ":00";
-  return state.forecast.find((h) => h.time === key) || null;
-}
-
 function predictionsFor(dateIso, flights, metar, taf) {
-  const [arr, dep] = flights;
-  const base = rollingBase(state.history.flights, dateIso, zoned(dateIso, arr.sched_arr));
-  const ctxFor = (f) => ({ when: zoned(dateIso, f.kind === "arrival" ? f.sched_arr : f.sched_dep), metar, taf, kind: f.kind, status: f.status, omHour: null, base });
-  const a = ctxFor(arr);
-  a.omHour = omHourAt(a.when);
-  const pa = predict(a);
-  const d = ctxFor(dep);
-  d.omHour = omHourAt(d.when);
-  d.inbound = arr;
-  d.inboundP = pa.p;
-  const pd = predict(d);
-  return [pa, pd];
+  return predictDay({ dateIso, flights, metar, taf, forecast: state.forecast, history: state.history.flights });
 }
 
 function gauge(p, statusKey) {

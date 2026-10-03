@@ -2,6 +2,19 @@
 
 export const TZ = "America/Vancouver";
 
+/** "2026-10-03" + "10:14" in Vancouver time -> Date */
+export function zoned(iso, hm) {
+  const guess = new Date(`${iso}T${hm}:00Z`);
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: TZ, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(guess).map((p) => [p.type, p.value]));
+  const asLocal = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute);
+  return new Date(guess.getTime() - (asLocal - guess.getTime()));
+}
+
+/** Open-Meteo hourly key ("2026-10-03T10:00", local time) for the hour nearest `when`. */
+export function hourKey(when) {
+  return new Intl.DateTimeFormat("sv-SE", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" }).format(new Date(when.getTime() + 30 * 60e3)).replace(" ", "T") + ":00";
+}
+
 // ---------------------------------------------------------------- helpers
 
 const COVER = { FEW: 1, SCT: 2, BKN: 3, OVC: 4, VV: 4 };
@@ -282,7 +295,7 @@ export function predict(ctx) {
     return { p: 0.97, basis: `Inbound ${ctx.inbound.flight} ${ctx.inbound.status}: no aircraft at YCG`, factors };
 
   // --- weather at the scheduled YCG time
-  const now = new Date();
+  const now = ctx.now ?? new Date();
   const metarFresh = ctx.metar && ctx.metar.time && Math.abs(ctx.when - ctx.metar.time) < 75 * 60e3;
   const taf = tafAt(ctx.taf, ctx.when);
   const sources = [];
@@ -349,4 +362,21 @@ export function riskLabel(p) {
   if (p >= 0.3) return { key: "serious", text: "Elevated" };
   if (p >= 0.12) return { key: "warning", text: "Moderate" };
   return { key: "good", text: "Low" };
+}
+
+/**
+ * Predictions for one day's [arrival, departure]. The departure is the same aircraft, so its
+ * risk follows the arrival. forecast: Open-Meteo hourly rows; history: data/history.json flights.
+ */
+export function predictDay({ dateIso, flights, metar, taf, forecast, history, now = new Date() }) {
+  const [arr, dep] = flights;
+  const base = rollingBase(history || [], dateIso, zoned(dateIso, arr.sched_arr));
+  const ctxFor = (f) => {
+    const when = zoned(dateIso, f.kind === "arrival" ? f.sched_arr : f.sched_dep);
+    const key = hourKey(when);
+    return { when, now, metar, taf, kind: f.kind, status: f.status, base, omHour: forecast?.find((h) => h.time === key) || null };
+  };
+  const pa = predict(ctxFor(arr));
+  const pd = predict({ ...ctxFor(dep), inbound: arr, inboundP: pa.p });
+  return [pa, pd];
 }
