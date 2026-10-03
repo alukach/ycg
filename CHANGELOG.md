@@ -17,6 +17,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - The outlook is logged at fixed lead times (48, 24, 12, 6, 3 and 1 h before each flight) to `data/predictions.json`. History shows its Brier score against the base rate alone, per lead time, so you can see whether the weather terms help.
 - Warnings when flight data can't be loaded or is stale (over 45 min old during the flight window, 4 h otherwise), and a loading placeholder in place of an empty page.
 - "If the flight is cancelled" panel: how Air Canada's free shuttle via Kelowna works in each direction, typical timings, eligibility, and links to flight status, bookings and the airport FAQ. It opens automatically on disrupted or Elevated-risk days.
+- Keyboard and screen-reader access: history cells can be reached with Tab and arrow keys (tooltips on focus), the forecast and 30-day charts have text equivalents, and the day/range tabs support arrow keys.
 
 ### Changed
 - Weather-model evidence is weighted down with lead time (≈0.5 at 24 h, 0.25 at 48 h), so tomorrow and the day after lean on the seasonal base and say so.

@@ -258,7 +258,9 @@ function renderForecast() {
   rows.forEach((r, i) => { if (i % (W < 480 ? 5 : 3) === 0) svg += `<text x="${x(i)}" y="${padT + panels.length * (ph + gap) - gap + 14}" text-anchor="middle">${+r.time.slice(11, 13)}:00</text>`; });
   svg += `<line id="xh" x1="0" x2="0" y1="${padT - 4}" y2="${H - 20}" stroke="var(--text)" stroke-width="1" opacity="0"/>`;
   svg += `<rect id="hit" x="${padL}" y="0" width="${W - padL - padR}" height="${H}" fill="transparent"/></svg>`;
-  el.innerHTML = svg;
+  const table = `<table class="sr-only"><caption>Hourly forecast for ${day}</caption><thead><tr><th>Hour</th><th>Low cloud</th><th>Visibility</th><th>Rain</th><th>Snow</th><th>Gusts</th></tr></thead><tbody>${rows.map((r) =>
+    `<tr><td>${r.time.slice(11, 16)}</td><td>${r.cloud_cover_low ?? "—"}%</td><td>${r.vis_km != null ? r.vis_km.toFixed(1) + " km" : "—"}</td><td>${r.rain ?? 0} mm</td><td>${r.snowfall ?? 0} cm</td><td>${Math.round(r.wind_gusts_10m)} kt</td></tr>`).join("")}</tbody></table>`;
+  el.innerHTML = svg.replace(" role=\"img\"", " aria-hidden=\"true\"") + table;
 
   const s = el.querySelector("svg"), hit = el.querySelector("#hit"), xh = el.querySelector("#xh");
   const move = (ev) => {
@@ -302,7 +304,7 @@ function renderHistory() {
   for (let d = start; d <= today; d = addDays(d, 1)) span.push(d);
   const cell = 16, g = 3, padL = 58, padT = 4;
   const W = padL + span.length * (cell + g), H = padT + 2 * (cell + g) + 18;
-  let svg = `<svg width="${W}" height="${H}" role="img" aria-label="Daily outcomes; see table for details">`;
+  let svg = `<svg width="${W}" height="${H}" role="group" aria-label="Daily outcomes; arrow keys move between days and flights">`;
   ["AC8376", "AC8377"].forEach((f, row) => { svg += `<text x="0" y="${padT + row * (cell + g) + 12}">${f}</text>`; });
   span.forEach((d, i) => {
     ["AC8376", "AC8377"].forEach((f, row) => {
@@ -310,7 +312,8 @@ function renderHistory() {
       const o = r?.outcome;
       const fill = o ? `var(--${outcomeOf(r).status})` : "transparent";
       const stroke = o ? "none" : "var(--neutral)";
-      svg += `<rect data-d="${d}" data-f="${f}" x="${padL + i * (cell + g)}" y="${padT + row * (cell + g)}" width="${cell}" height="${cell}" rx="3" fill="${fill}" stroke="${stroke}" stroke-dasharray="${o ? "" : "2 2"}"/>`;
+      const desc = `${f} ${fmtDay(d, { weekday: "short", month: "short", day: "numeric" })}: ${o ? outcomeOf(r).label : "no record"}`;
+      svg += `<rect tabindex="-1" role="img" aria-label="${esc(desc)}" data-d="${d}" data-f="${f}" x="${padL + i * (cell + g)}" y="${padT + row * (cell + g)}" width="${cell}" height="${cell}" rx="3" fill="${fill}" stroke="${stroke}" stroke-dasharray="${o ? "" : "2 2"}"/>`;
     });
     const dd = new Date(d + "T12:00:00Z");
     if (dd.getUTCDate() === 1 || i === 0 || (span.length <= 35 && dd.getUTCDay() === 1)) svg += `<text x="${padL + i * (cell + g)}" y="${H - 2}">${fmtDay(d, { month: "short", day: "numeric" })}</text>`;
@@ -319,7 +322,17 @@ function renderHistory() {
   const strip = $("#hist-strip"), atEnd = !strip.scrollLeft || strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4;
   strip.innerHTML = svg;
   if (atEnd) strip.scrollLeft = 1e6; // keep the reader's position if they scrolled back
-  $("#hist-strip").querySelectorAll("rect[data-d]").forEach((rc) => {
+  const cells = [...$("#hist-strip").querySelectorAll("rect[data-d]")]; // order: day-major, AC8376 then AC8377
+  if (cells.length) cells.at(-2).tabIndex = 0;
+  cells.forEach((rc, i) => rc.addEventListener("keydown", (e) => {
+    const d = { ArrowRight: 2, ArrowLeft: -2, ArrowDown: 1, ArrowUp: -1 }[e.key], next = d && cells[i + d];
+    if (!next) return;
+    e.preventDefault(); rc.tabIndex = -1; next.tabIndex = 0; next.focus();
+  }));
+  cells.forEach((rc) => {
+    const at = () => { const b = rc.getBoundingClientRect(); return { clientX: b.right, clientY: b.bottom }; };
+    rc.addEventListener("focus", () => rc.dispatchEvent(new PointerEvent("pointerenter", at())));
+    rc.addEventListener("blur", hideTip);
     rc.addEventListener("pointerenter", (ev) => {
       const r = state.history.flights.find((x) => x.date === rc.dataset.d && x.flight === rc.dataset.f);
       showTip(ev, `<b>${rc.dataset.f} · ${fmtDay(rc.dataset.d, { weekday: "short", month: "short", day: "numeric" })}</b>` + (r?.outcome
@@ -393,7 +406,8 @@ function renderRolling() {
   svg += `<path d="${pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.ok / p.n).toFixed(1)}`).join("")}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
   [0, pts.length - 1].forEach((i) => { svg += `<text x="${x(i)}" y="${H - 4}" text-anchor="${i ? "end" : "start"}">${fmtDay(pts[i].d, { month: "short", day: "numeric" })}</text>`; });
   svg += `<circle id="rdot" r="4" fill="var(--series-1)" stroke="var(--surface)" stroke-width="2" opacity="0"/><rect id="rhit" x="${padL}" y="0" width="${W - padL - padR}" height="${H}" fill="transparent"/></svg>`;
-  el.innerHTML = head + svg;
+  const last = pts.at(-1);
+  el.innerHTML = head + svg.replace(" role=\"img\"", " aria-hidden=\"true\"") + `<p class="sr-only">Latest 30-day completion rate ${pct(last.ok / last.n)} (${last.ok} of ${last.n} arrivals), from ${pct(pts[0].ok / pts[0].n)} on ${pts[0].d}.</p>`;
   const s = el.querySelector("svg"), dot = el.querySelector("#rdot");
   el.querySelector("#rhit").addEventListener("pointermove", (ev) => {
     const pt = s.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
@@ -452,10 +466,21 @@ function render() {
 }
 
 function wireTabs(sel, attr, fn) {
-  document.querySelectorAll(`${sel} button`).forEach((b) => b.addEventListener("click", () => {
-    document.querySelectorAll(`${sel} button`).forEach((x) => x.setAttribute("aria-selected", x === b));
+  const tabs = [...document.querySelectorAll(`${sel} button`)];
+  const select = (b) => {
+    tabs.forEach((x) => { x.setAttribute("aria-selected", x === b); x.tabIndex = x === b ? 0 : -1; });
     fn(b.dataset[attr]);
-  }));
+  };
+  tabs.forEach((b, i) => {
+    b.tabIndex = b.getAttribute("aria-selected") === "true" ? 0 : -1;
+    b.addEventListener("click", () => select(b));
+    b.addEventListener("keydown", (e) => {
+      const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (!d) return;
+      const next = tabs[(i + d + tabs.length) % tabs.length];
+      next.focus(); select(next);
+    });
+  });
 }
 wireTabs(".sec-head .seg:not(#hist-range)", "day", (d) => { state.fcDay = +d; renderForecast(); });
 wireTabs("#hist-range", "range", (r) => { state.range = +r; renderHistory(); });
