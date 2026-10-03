@@ -1,0 +1,20 @@
+{
+ "events": [
+  {
+   "date": "2026-10-03",
+   "flight": "AC8376",
+   "status": "en_route",
+   "text": "En route",
+   "prev": null,
+   "at": "2026-10-03T10:17:41-07:00"
+  },
+  {
+   "date": "2026-10-03",
+   "flight": "AC8377",
+   "status": "delayed",
+   "text": "Delayed 40 min (dep 11:30)",
+   "prev": null,
+   "at": "2026-10-03T10:17:41-07:00"
+  }
+ ]
+}
