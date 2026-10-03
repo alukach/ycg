@@ -22,7 +22,7 @@ const SRC = {
   metar: "https://aviationweather.gov/api/data/metar?ids=CYCG&format=raw&hours=24",
   taf: "https://aviationweather.gov/api/data/taf?ids=CYCG&format=raw",
   awcPage: "https://aviationweather.gov/data/metar/?id=CYCG&hours=24&decoded=yes&taf=yes",
-  shuttle: "https://www.boundarycreektimes.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017",
+  shuttle: "https://www.nelsonstar.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017",
   historyCommits: `${REPO}/commits/main/data/history.json`,
 };
 const fsUrl = (flight, iso) => `https://www.flightstats.com/v2/flight-tracker/AC/${flight.replace(/^AC/, "")}?year=${+iso.slice(0, 4)}&month=${+iso.slice(5, 7)}&date=${+iso.slice(8, 10)}`;

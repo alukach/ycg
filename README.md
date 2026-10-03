@@ -60,7 +60,7 @@ python -m http.server                       # http://localhost:8000
 | Hourly forecast | [Open-Meteo](https://open-meteo.com/en/docs) | Chart, model-based risk terms |
 | Ensemble forecast | [Open-Meteo Ensemble API](https://open-meteo.com/en/docs/ensemble-api) (ECMWF IFS, 51 runs) | Risk and range 12 h+ ahead |
 | Historical METAR archive | [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/request/download.phtml?network=CA_BC_ASOS) | Linked from history rows; candidate for weather backfill |
-| 84% success rate, shuttle | [Boundary Creek Times, 2024](https://www.boundarycreektimes.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017) | Reference line, context |
+| 84% success rate, shuttle | [Nelson Star, 2024](https://www.nelsonstar.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017) | Reference line, context |
 | Airport / approach | [Wikipedia](https://en.wikipedia.org/wiki/West_Kootenay_Regional_Airport) | Context |
 | NOTAMs | [NAV CANADA CFPS](https://plan.navcanada.ca/wxrecall/) (undocumented JSON endpoint) | Runway/approach notices, alerts |
 | Inbound aircraft position | [adsb.lol API](https://api.adsb.lol/docs) (ODbL) | Where today's aircraft is now |
