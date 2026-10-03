@@ -17,5 +17,27 @@
   "wx_proxy": null,
   "month_base": [0.22, 0.18, 0.12, 0.08, 0.05, 0.04, 0.05, 0.06, 0.06, 0.1, 0.2, 0.25],
   "shuttle": true
+ },
+ "yzz": {
+  "code": "YZZ",
+  "icao": "CAD4",
+  "city": "Trail",
+  "name": "Trail Regional Airport",
+  "lat": 49.0667,
+  "lon": -117.6,
+  "airline": "Pacific Coastal Airlines",
+  "airline_status_url": "https://www.pacificcoastal.com/",
+  "carrier": "8P",
+  "flights": [
+   { "flight": "8P451", "from": "YVR", "to": "YZZ", "kind": "arrival", "sched_dep": "09:15", "sched_arr": "10:31" },
+   { "flight": "8P452", "from": "YZZ", "to": "YVR", "kind": "departure", "sched_dep": "10:55", "sched_arr": "12:11" }
+  ],
+  "wx_station": "CYCG",
+  "wx_proxy": {
+   "label": "Castlegar, 25 km",
+   "weight": 0.6
+  },
+  "month_base": [0.22, 0.18, 0.12, 0.08, 0.05, 0.04, 0.05, 0.06, 0.06, 0.1, 0.2, 0.25],
+  "shuttle": false
  }
 }

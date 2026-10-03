@@ -346,15 +346,18 @@ export function predict(ctx) {
   const taf = tafAt(ctx.taf, ctx.when);
   const sources = [];
   let main = { total: 0, parts: [] };
-  const mtw = metarWeight(ctx.metar?.time ? (ctx.when - ctx.metar.time) / 3600e3 : null);
+  // An airport without its own reports borrows a nearby station's METAR/TAF at reduced weight.
+  const px = ctx.ap?.wx_proxy, pw = px?.weight ?? 1, ptag = px ? ` (${px.label})` : "";
+  const mtw = metarWeight(ctx.metar?.time ? (ctx.when - ctx.metar.time) / 3600e3 : null) * pw;
   if (mtw > 0) {
     const m = conditionScore(ctx.metar);
-    const tag = mtw < 1 ? ` (now, ×${mtw.toFixed(2)})` : "";
+    const tag = px ? ptag : mtw < 1 ? ` (now, ×${mtw.toFixed(2)})` : "";
     main = { total: m.total * mtw, parts: m.parts.map((p) => ({ ...p, v: p.v * mtw, label: p.label + tag })) };
     sources.push("METAR");
   }
   if (taf?.prevailing) {
-    const s = conditionScore(taf.prevailing);
+    const s0 = conditionScore(taf.prevailing);
+    const s = { total: s0.total * pw, parts: s0.parts.map((p) => ({ ...p, v: p.v * pw, label: p.label + ptag })) };
     if (s.total >= main.total) main = s;
     sources.push("TAF");
     // extra risk from temporary groups, measured against whichever source won above
@@ -362,8 +365,8 @@ export function predict(ctx) {
     for (const g of taf.temporary) {
       const ts = conditionScore({ ...taf.prevailing, ...pick(g) });
       const weight = g.prob ? g.prob / 100 : g.kind === "BECMG" ? 1 : 0.5;
-      const extra = (ts.total - baseTotal) * weight;
-      if (extra > 0.05) main.parts.push({ label: `${g.kind === "PROB" ? "PROB" + g.prob : g.kind}: ${ts.parts.map((p) => p.label).join(", ")}`, v: extra });
+      const extra = (ts.total * pw - baseTotal) * weight;
+      if (extra > 0.05) main.parts.push({ label: `${g.kind === "PROB" ? "PROB" + g.prob : g.kind}: ${ts.parts.map((p) => p.label).join(", ")}${ptag}`, v: extra });
     }
   }
   const om = omConditions(ctx.omHour);
@@ -379,7 +382,8 @@ export function predict(ctx) {
     sources.push("ensemble");
   } else if (om) {
     const s = conditionScore(om);
-    if (modelOnly) {
+    if (modelOnly || (px && s.total * mw > main.total)) {
+      // with only borrowed observations, the model for this airport's own location can win outright
       main = { total: s.total * mw, parts: s.parts.map((p) => ({ ...p, v: p.v * mw, label: p.label + " (model)" })) };
     } else {
       // precip type and gusts from the model can still add risk the TAF omits
@@ -391,7 +395,7 @@ export function predict(ctx) {
   // The base rate is an average over all days, bad weather included, so weather terms measured
   // from zero would count bad days twice. Once a weather source covers the flight, start from a
   // clear day instead. ponytail: hand-set (clear December ≈ 11% vs 25% average); fit from history.
-  const evidenceW = Math.max(mtw, taf?.prevailing ? 1 : 0, om ? mw : 0);
+  const evidenceW = Math.max(mtw, taf?.prevailing ? pw : 0, om ? mw : 0);
   if (sources.length) factors.push({ label: "Clear-day adjustment", v: CLEAR_DAY * evidenceW, isBase: true });
 
   let x = factors.reduce((a, f) => a + f.v, 0);
@@ -401,7 +405,7 @@ export function predict(ctx) {
     const xs = ens.map((t) => x + (t * mw - main.total)).sort((a, b) => a - b);
     range = [sigmoid(xs[Math.floor(xs.length * 0.1)]), sigmoid(xs[Math.ceil(xs.length * 0.9) - 1])];
   }
-  let basis = `Weather (${sources.join(" + ") || "season only"})`;
+  let basis = `Weather (${sources.join(" + ") || "season only"})${px && (mtw > 0 || taf?.prevailing) ? `; observations from ${px.label}` : ""}`;
   if (modelOnly && mw < 0.9) basis = `Mostly seasonal: weather model ${Math.round(leadH)} h ahead, weighted ×${mw.toFixed(2)}`;
 
   if (ctx.kind === "departure") {

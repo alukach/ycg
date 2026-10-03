@@ -93,3 +93,13 @@ test("predictions are logged once per lead window", async () => {
   const { leadBucket } = await import("./predict.mjs");
   assert.deepEqual([47, 24.5, 13, 0.5, 49, 0].map(leadBucket), [48, 48, 24, 1, null, null]);
 });
+
+test("a proxy station's observations count at reduced weight", () => {
+  const now = new Date("2026-12-15T12:00Z");
+  const taf = parseTaf("TAF CYCG 151140Z 1512/1600 00000KT 1/2SM FG OVC003", now);
+  const yzz = AIRPORTS.yzz;
+  const [own] = day("2026-12-15", { now, taf });
+  const [proxied] = predictDay({ ap: yzz, dateIso: "2026-12-15", flights: flightsFor(yzz, "2026-12-15", []), history: [], now, taf });
+  assert.ok(proxied.p < own.p && proxied.p > own.factors[0].p, `${proxied.p} vs ${own.p}`);
+  assert.match(proxied.basis, /Castlegar/);
+});
