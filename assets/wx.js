@@ -166,7 +166,8 @@ export function tafAt(taf, t) {
       };
     }
   }
-  const temporary = taf.groups.filter((g) => (g.kind === "TEMPO" || g.kind === "PROB") && g.from <= t && g.to >= t);
+  // TEMPO/PROB groups, plus any BECMG still in its transition window (either state may apply)
+  const temporary = taf.groups.filter((g) => ["TEMPO", "PROB", "BECMG"].includes(g.kind) && g.from <= t && g.to >= t);
   return { prevailing: prev, temporary };
 }
 
@@ -329,10 +330,13 @@ export function predict(ctx) {
     const s = conditionScore(taf.prevailing);
     if (s.total >= main.total) main = s;
     sources.push("TAF");
+    // extra risk from temporary groups, measured against whichever source won above
+    const baseTotal = main.total;
     for (const g of taf.temporary) {
       const ts = conditionScore({ ...taf.prevailing, ...pick(g) });
-      const extra = (ts.total - s.total) * (g.prob ? g.prob / 100 : 0.5);
-      if (extra > 0.05) main.parts.push({ label: `${g.kind === "PROB" ? "PROB" + g.prob : "TEMPO"}: ${ts.parts.map((p) => p.label).join(", ")}`, v: extra });
+      const weight = g.prob ? g.prob / 100 : g.kind === "BECMG" ? 1 : 0.5;
+      const extra = (ts.total - baseTotal) * weight;
+      if (extra > 0.05) main.parts.push({ label: `${g.kind === "PROB" ? "PROB" + g.prob : g.kind}: ${ts.parts.map((p) => p.label).join(", ")}`, v: extra });
     }
   }
   const om = omConditions(ctx.omHour);
@@ -361,10 +365,6 @@ export function predict(ctx) {
   let basis = `Weather (${sources.join(" + ") || "season only"})`;
   if (modelOnly && mw < 0.9) basis = `Mostly seasonal: weather model ${Math.round(leadH)} h ahead, weighted ×${mw.toFixed(2)}`;
 
-  if (st === "en_route" && ctx.kind === "arrival") {
-    p *= 0.5;
-    basis += "; aircraft airborne";
-  }
   if (ctx.kind === "departure") {
     if (ctx.inbound?.status === "arrived") {
       // aircraft is on the ground; departures are rarely weather-cancelled

@@ -65,3 +65,12 @@ test("a low-cloud METAR two hours out still counts, at reduced weight", () => {
   assert.ok(f && f.v > 0 && f.v < 1.2, JSON.stringify(f));
   assert.ok(a.sources.includes("METAR"));
 });
+
+test("BECMG in transition counts the worse state; BCFG does not cancel FG", () => {
+  const now = new Date("2026-12-15T12:00Z");
+  const becmg = parseTaf("TAF CYCG 151140Z 1512/1600 VRB03KT P6SM SKC BECMG 1517/1519 OVC008", now);
+  const [a] = day("2026-12-15", { now, taf: becmg }); // arrival 18:14Z, mid-transition
+  assert.ok(a.factors.some((f) => f.label.startsWith("BECMG")), JSON.stringify(a.factors));
+  const fg = parseTaf("TAF CYCG 151140Z 1512/1600 00000KT 1/2SM FG BCFG OVC003", now);
+  assert.ok(day("2026-12-15", { now, taf: fg })[0].factors.some((f) => /fog/.test(f.label)));
+});
