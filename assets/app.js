@@ -142,6 +142,8 @@ function renderFlights() {
   const taf = parseTaf(L?.taf);
   const preds = predictionsFor(today, flights, metar, taf);
   $("#flights").innerHTML = flights.map((f, i) => flightCard(f, preds[i])).join("");
+  // open the cancellation plan when it's likely to be needed today
+  if (flights.some((f) => ["cancelled", "diverted"].includes(f.status)) || preds.some((p) => !p.final && p.p >= 0.3)) $("#if-cancelled").open = true;
 
   // ponytail: horizon is bounded by Open-Meteo forecast_days (3); beyond that it's base rate only
   $("#tomorrow").innerHTML = [1, 2].map((n) => {

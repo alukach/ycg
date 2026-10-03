@@ -192,3 +192,8 @@ a:hover { text-decoration: underline; }
 .skeleton { min-height: 180px; color: var(--muted); animation: pulse 1.4s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .55; } }
 @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+.plan { margin-top: 14px; }
+.plan summary { cursor: pointer; }
+.plan p, .plan li { color: var(--text-2); font-size: .88rem; max-width: 75ch; }
+.plan ul { padding-left: 18px; }
+.plan .links { font-size: .85rem; }
