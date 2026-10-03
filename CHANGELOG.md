@@ -27,6 +27,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - The latest METAR now counts up to 6 h before the flight, with weight fading after 75 min. Previously an 08:00 low-cloud report was ignored for a 10:14 arrival.
 - The page refreshes only while visible (and immediately when you return to it), and auto-refresh no longer scrolls the history strip back to the end.
 - Cards lead with a plain answer: a one-line summary per flight at the top, risk in words with advice (e.g. *No action needed*), and the estimate rounded to the nearest 5% ("~10%"). Forecast shorthand is spelled out ("30% chance of…", "at times…"), and "Coming days" sits above the weather charts.
+- Data files moved to `data/ycg/` (`history.json`, `latest.json`, `events.json`, `predictions.json`, `feed.xml`), ready for more airports. Airport details (flights, coordinates, weather station, seasonal base) now come from one `assets/airports.json`.
 
 ### Fixed
 - FlightStats status code `A` means *Active* (airborne), not arrived. In-flight runs no longer finalise a flight early. Code `NO` (not operational) now counts as cancelled.

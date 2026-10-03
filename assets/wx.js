@@ -1,16 +1,13 @@
 // METAR / TAF parsing and the cancellation heuristic. No dependencies.
 
 export const TZ = "America/Vancouver";
-const LAT = 49.2961, LON = -117.6325;
-// Published schedule; fetched records override it. Keep in sync with SCHEDULE in scripts/fetch.py.
-export const SCHEDULE = [
-  { flight: "AC8376", from: "YVR", to: "YCG", kind: "arrival", sched_dep: "09:05", sched_arr: "10:14" },
-  { flight: "AC8377", from: "YCG", to: "YVR", kind: "departure", sched_dep: "10:50", sched_arr: "12:05" },
-];
 
-/** Today's/tomorrow's fetched records merged over the published schedule -> [arrival, departure]. */
-export function flightsFor(dateIso, recs) {
-  return SCHEDULE.map((s) => {
+// Airport details (flights, coordinates, weather station, seasonal base) come from assets/airports.json
+// and are passed in as `ap`, so this module stays pure.
+
+/** Fetched records merged over the airport's published schedule -> [arrival, departure]. */
+export function flightsFor(ap, dateIso, recs) {
+  return ap.flights.map((s) => {
     const r = (recs || []).find((x) => x.flight === s.flight && (!x.date || x.date === dateIso));
     return r ? { ...s, ...r, sched_dep: r.sched_dep || s.sched_dep, sched_arr: r.sched_arr || s.sched_arr } : { ...s, date: dateIso, status: "schedule" };
   });
@@ -204,7 +201,7 @@ export function tafAt(taf, t) {
 // ---------------------------------------------------------- the heuristic
 //
 // P(cancel or divert) = sigmoid( logit(seasonal base) + Σ weather terms ).
-// Base rates and weights are hand-set from published YCG figures (84% landing success,
+// Base rates (month_base in airports.json) and weights are hand-set from published YCG figures (84% landing success,
 // Dec 2023–Sep 2024; winter fog/low cloud dominate) and are meant to be re-tuned
 // against data/history.json as it accumulates.
 
@@ -214,13 +211,14 @@ export function tafAt(taf, t) {
  * prior; after ~30 days the recent regime (e.g. a valley-cloud inversion spell) dominates.
  */
 export const PRIOR_WEIGHT = 15;
-export function rollingBase(history, beforeIso, when, days = 30) {
+export function rollingBase(history, beforeIso, when, ap, days = 30) {
   const month = wall(when).getUTCMonth();
-  const prior = MONTH_BASE[month];
+  const prior = ap.month_base[month];
+  const inbound = ap.flights.find((f) => f.kind === "arrival").flight;
   const start = new Date(beforeIso + "T12:00:00Z");
   start.setUTCDate(start.getUTCDate() - days);
   const from = start.toISOString().slice(0, 10);
-  const recs = history.filter((r) => r.flight === "AC8376" && r.outcome && r.outcome !== "unknown" && r.date >= from && r.date < beforeIso);
+  const recs = history.filter((r) => r.flight === inbound && r.outcome && r.outcome !== "unknown" && r.date >= from && r.date < beforeIso);
   const n = recs.length;
   const fails = recs.filter((r) => r.outcome === "cancelled" || r.outcome === "diverted").length;
   const p = (fails + PRIOR_WEIGHT * prior) / (n + PRIOR_WEIGHT);
@@ -231,7 +229,6 @@ export function rollingBase(history, beforeIso, when, days = 30) {
   };
 }
 
-export const MONTH_BASE = [0.22, 0.18, 0.12, 0.08, 0.05, 0.04, 0.05, 0.06, 0.06, 0.1, 0.2, 0.25];
 export const CLEAR_DAY = -1.0;
 /**
  * Weight on the weather model's evidence by lead time: ≈0.7 at 12 h, 0.5 at 24 h, 0.25 at 48 h.
@@ -328,12 +325,12 @@ export function omConditions(h) {
 }
 
 /**
- * ctx: { when: Date (scheduled YCG time), metar, taf, omHour, status, inbound }
+ * ctx: { ap, when: Date (scheduled local time), metar, taf, omHour, ensHour, status, inbound }
  * Returns { p, label, basis, factors: [{label, v}] }
  */
 export function predict(ctx) {
   const month = wall(ctx.when).getUTCMonth();
-  const seasonal = MONTH_BASE[month];
+  const seasonal = ctx.ap.month_base[month];
   const base = ctx.base?.p ?? seasonal;
   const factors = [{ label: ctx.base?.label ?? `Seasonal base (${new Intl.DateTimeFormat("en-CA", { month: "long", timeZone: "UTC" }).format(wall(ctx.when))})`, v: logit(base), isBase: true, p: base, detail: ctx.base?.detail }];
 
@@ -342,9 +339,9 @@ export function predict(ctx) {
   if (st === "cancelled" || st === "diverted") return { p: 1, basis: `Flight ${st}`, factors, final: true };
   if (st === "arrived") return { p: 0, basis: "Flight completed", factors, final: true };
   if (ctx.inbound && ["cancelled", "diverted"].includes(ctx.inbound.status))
-    return { p: 0.97, basis: `Inbound ${ctx.inbound.flight} ${ctx.inbound.status}: no aircraft at YCG`, factors };
+    return { p: 0.97, basis: `Inbound ${ctx.inbound.flight} ${ctx.inbound.status}: no aircraft at ${ctx.ap.code}`, factors };
 
-  // --- weather at the scheduled YCG time
+  // --- weather at the scheduled local time
   const now = ctx.now ?? new Date();
   const taf = tafAt(ctx.taf, ctx.when);
   const sources = [];
@@ -441,22 +438,22 @@ export function riskLabel(p) {
  * Predictions for one day's [arrival, departure]. The departure is the same aircraft, so its
  * risk follows the arrival. forecast: Open-Meteo hourly rows; history: data/history.json flights.
  */
-export function predictDay({ dateIso, flights, metar, taf, forecast, ensemble, history, now = new Date() }) {
+export function predictDay({ ap, dateIso, flights, metar, taf, forecast, ensemble, history, now = new Date() }) {
   const [arr, dep] = flights;
-  const base = rollingBase(history || [], dateIso, zoned(dateIso, arr.sched_arr));
+  const base = rollingBase(history || [], dateIso, zoned(dateIso, arr.sched_arr), ap);
   const ctxFor = (f) => {
     const when = zoned(dateIso, f.kind === "arrival" ? f.sched_arr : f.sched_dep);
     const key = hourKey(when);
-    return { when, now, metar, taf, kind: f.kind, status: f.status, base, omHour: forecast?.find((h) => h.time === key) || null, ensHour: ensemble?.[key] };
+    return { ap, when, now, metar, taf, kind: f.kind, status: f.status, base, omHour: forecast?.find((h) => h.time === key) || null, ensHour: ensemble?.[key] };
   };
   const pa = predict(ctxFor(arr));
   const pd = predict({ ...ctxFor(dep), inbound: arr, inboundP: pa.p, inboundRange: pa.range });
   return [pa, pd];
 }
 
-const OM = { latitude: LAT, longitude: LON, timezone: TZ, forecast_days: "3", wind_speed_unit: "kn" };
-export const forecastUrl = () => `https://api.open-meteo.com/v1/forecast?${new URLSearchParams({ ...OM, hourly: "temperature_2m,precipitation,rain,snowfall,cloud_cover_low,visibility,wind_speed_10m,wind_gusts_10m,weather_code" })}`;
-export const ensembleUrl = () => `https://ensemble-api.open-meteo.com/v1/ensemble?${new URLSearchParams({ ...OM, models: ENSEMBLE_MODEL, hourly: ENSEMBLE_VARS.join(",") })}`;
+const om = (ap) => ({ latitude: ap.lat, longitude: ap.lon, timezone: TZ, forecast_days: "3", wind_speed_unit: "kn" });
+export const forecastUrl = (ap) => `https://api.open-meteo.com/v1/forecast?${new URLSearchParams({ ...om(ap), hourly: "temperature_2m,precipitation,rain,snowfall,cloud_cover_low,visibility,wind_speed_10m,wind_gusts_10m,weather_code" })}`;
+export const ensembleUrl = (ap) => `https://ensemble-api.open-meteo.com/v1/ensemble?${new URLSearchParams({ ...om(ap), models: ENSEMBLE_MODEL, hourly: ENSEMBLE_VARS.join(",") })}`;
 /** Open-Meteo hourly columns -> [{time, var: value, ...}] */
 export function hourlyRows(j) {
   const h = j.hourly;

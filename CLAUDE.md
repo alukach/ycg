@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Static dashboard for Air Canada flights at Castlegar (YCG). A GitHub Action runs `scripts/fetch.py`, which writes `data/*.json`. The page (`index.html`, `assets/app.js`) renders that data. The cancellation outlook lives in `assets/wx.js`, which has no DOM dependencies, so it also runs under Node.
+Static dashboard for regional flights at West Kootenay airports. Airport details (flights, coordinates, weather station, seasonal base) live in `assets/airports.json`; nothing else should hard-code an airport. A GitHub Action runs `scripts/fetch.py`, which writes `data/<airport>/*.json`. The page (`index.html`, `assets/app.js`) renders that data. The cancellation outlook lives in `assets/wx.js`, which has no DOM dependencies, so it also runs under Node.
 
 ## Every change
 
@@ -19,5 +19,5 @@ python -m http.server                      # view at http://localhost:8000
 ## Conventions
 
 - No build step and no dependencies: Python stdlib, plain ES modules, no frameworks.
-- `data/history.json`, `data/events.json` and `data/predictions.json` (written by `scripts/predict.mjs`) are committed by the Action. Don't hand-edit them except to correct bad records, and note any correction in the changelog.
-- The outlook weights are hand-set until enough history exists to fit them; the page's "How good is the outlook?" table (Brier score per lead time from `data/predictions.json`) is the yardstick. If you change a weight, explain why in a comment.
+- `data/<airport>/history.json`, `events.json` and `predictions.json` (the last written by `scripts/predict.mjs`) are committed by the Action. Don't hand-edit them except to correct bad records, and note any correction in the changelog.
+- The outlook weights are hand-set until enough history exists to fit them; the page's "How good is the outlook?" table (Brier score per lead time from `data/<airport>/predictions.json`) is the yardstick. If you change a weight, explain why in a comment.

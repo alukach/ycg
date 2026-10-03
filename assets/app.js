@@ -1,4 +1,4 @@
-import { MONTH_BASE, localDate, wall, parseMetar, parseTaf, predictDay, riskLabel, fmtVis, ensembleByHour, forecastUrl, ensembleUrl, hourlyRows, flightsFor } from "./wx.js";
+import { localDate, wall, parseMetar, parseTaf, predictDay, riskLabel, fmtVis, ensembleByHour, forecastUrl, ensembleUrl, hourlyRows, flightsFor } from "./wx.js";
 
 const OUTCOMES = {
   on_time: { label: "On time", cls: "on_time", status: "good" },
@@ -19,14 +19,14 @@ const STATUS_PILL = {
 const $ = (s) => document.querySelector(s);
 const REPO = "https://github.com/alukach/ycg";
 const SRC = {
-  metar: "https://aviationweather.gov/api/data/metar?ids=CYCG&format=raw&hours=24",
-  taf: "https://aviationweather.gov/api/data/taf?ids=CYCG&format=raw",
-  awcPage: "https://aviationweather.gov/data/metar/?id=CYCG&hours=24&decoded=yes&taf=yes",
+  metar: (st) => `https://aviationweather.gov/api/data/metar?ids=${st}&format=raw&hours=24`,
+  taf: (st) => `https://aviationweather.gov/api/data/taf?ids=${st}&format=raw`,
+  awcPage: (st) => `https://aviationweather.gov/data/metar/?id=${st}&hours=24&decoded=yes&taf=yes`,
   shuttle: "https://www.nelsonstar.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017",
-  historyCommits: `${REPO}/commits/main/data/history.json`,
 };
-const fsUrl = (flight, iso) => `https://www.flightstats.com/v2/flight-tracker/AC/${flight.replace(/^AC/, "")}?year=${+iso.slice(0, 4)}&month=${+iso.slice(5, 7)}&date=${+iso.slice(8, 10)}`;
-const iemUrl = (iso) => { const [y, m, d] = iso.split("-").map(Number); const n = new Date(Date.UTC(y, m - 1, d + 1)); return `https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=CYCG&data=metar&year1=${y}&month1=${m}&day1=${d}&year2=${n.getUTCFullYear()}&month2=${n.getUTCMonth() + 1}&day2=${n.getUTCDate()}&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=3&report_type=4`; };
+const CITY = { YVR: "Vancouver" };
+const fsUrl = (flight, iso) => `https://www.flightstats.com/v2/flight-tracker/${state.ap.carrier}/${flight.slice(state.ap.carrier.length)}?year=${+iso.slice(0, 4)}&month=${+iso.slice(5, 7)}&date=${+iso.slice(8, 10)}`;
+const iemUrl = (iso) => { const [y, m, d] = iso.split("-").map(Number); const n = new Date(Date.UTC(y, m - 1, d + 1)); return `https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=${state.ap.wx_station}&data=metar&year1=${y}&month1=${m}&day1=${d}&year2=${n.getUTCFullYear()}&month2=${n.getUTCMonth() + 1}&day2=${n.getUTCDate()}&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=3&report_type=4`; };
 const ext = (href, text) => `<a href="${esc(href)}" target="_blank" rel="noopener">${text}</a>`;
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const pct = (p) => `${Math.round(p * 100)}%`;
@@ -61,17 +61,20 @@ async function getJSON(url) {
   return r.json();
 }
 async function loadForecast() {
-  state.forecastUrl = forecastUrl();
+  state.forecastUrl = forecastUrl(state.ap);
   return hourlyRows(await getJSON(state.forecastUrl));
 }
-const loadEnsemble = async () => ensembleByHour(await getJSON(ensembleUrl()));
+const loadEnsemble = async () => ensembleByHour(await getJSON(ensembleUrl(state.ap)));
 
-const state = { latest: null, history: { flights: [] }, predictions: [], forecast: null, fcDay: 0, range: 30 };
+const dataUrl = (file) => `data/${state.apId}/${file}`;
+const inboundFlight = () => state.ap.flights.find((f) => f.kind === "arrival").flight;
+
+const state = { apId: "ycg", ap: null, latest: null, history: { flights: [] }, predictions: [], forecast: null, fcDay: 0, range: 30 };
 
 // --------------------------------------------------------------- render
 
 function predictionsFor(dateIso, flights, metar, taf) {
-  return predictDay({ dateIso, flights, metar, taf, forecast: state.forecast, ensemble: state.ensemble, history: state.history.flights });
+  return predictDay({ ap: state.ap, dateIso, flights, metar, taf, forecast: state.forecast, ensemble: state.ensemble, history: state.history.flights });
 }
 
 // The outlook is a hand-tuned estimate: show it to the nearest 5%, never as a precise figure.
@@ -121,7 +124,7 @@ function flightCard(f, pred, compact = false) {
   const baseNote = pred.final ? "" : `<div class="risk-basis" title="${esc(pred.factors[0].detail || "")}">Starting point ${approx(pred.factors[0].p)} (${esc(pred.factors[0].label)})${factors ? "; adding:" : "; no weather risk factors"}</div>`;
   return `<article class="card flight">
     <div class="f-head">
-      <div><div class="f-num">${ext(f.source_url || fsUrl(f.flight, f.date), f.flight)}</div><div class="f-dir">${f.kind === "arrival" ? "Arrival from Vancouver" : "Departure to Vancouver"} · Air Canada Express (Jazz)</div></div>
+      <div><div class="f-num">${ext(f.source_url || fsUrl(f.flight, f.date), f.flight)}</div><div class="f-dir">${f.kind === "arrival" ? `Arrival from ${CITY[f.from] ?? f.from}` : `Departure to ${CITY[f.to] ?? f.to}`} · ${esc(state.ap.airline)}</div></div>
       <span class="pill ${pillCls}"><span class="dot"></span>${esc(pillText)}</span>
     </div>
     <div class="route">
@@ -150,7 +153,7 @@ function renderFlights() {
   const today = localDate();
   const L = state.latest;
   const recs = L && L.date === today ? L.flights : (L?.tomorrow || []).filter((r) => r.date === today);
-  const flights = flightsFor(today, recs);
+  const flights = flightsFor(state.ap, today, recs);
   if (L?.aircraft && L.date === today && !flights[0].outcome) flights[0].aircraft = L.aircraft;
   const metar = L?.metars?.length ? parseMetar(L.metars[0]) : null;
   const taf = parseTaf(L?.taf);
@@ -159,7 +162,7 @@ function renderFlights() {
   $("#summary").innerHTML = flights.map((f, i) => {
     const p = preds[i], [pill] = STATUS_PILL[f.status] || STATUS_PILL.unknown;
     const delay = f.status === "delayed" && f.dep_delay_min ? ` ${f.dep_delay_min} min` : "";
-    return `<span><b>${f.flight}</b> ${f.kind === "arrival" ? "from" : "to"} Vancouver: ${esc(pill)}${delay}${p.final ? "" : ` · ${riskLabel(p.p).text.toLowerCase()} risk`}</span>`;
+    return `<span><b>${f.flight}</b> ${f.kind === "arrival" ? `from ${CITY[f.from] ?? f.from}` : `to ${CITY[f.to] ?? f.to}`}: ${esc(pill)}${delay}${p.final ? "" : ` · ${riskLabel(p.p).text.toLowerCase()} risk`}</span>`;
   }).join("");
   // open the cancellation plan when it's likely to be needed today
   if (flights.some((f) => ["cancelled", "diverted"].includes(f.status)) || preds.some((p) => !p.final && p.p >= 0.3)) $("#if-cancelled").open = true;
@@ -167,7 +170,7 @@ function renderFlights() {
   // ponytail: horizon is bounded by Open-Meteo forecast_days (3); beyond that it's base rate only
   $("#tomorrow").innerHTML = [1, 2].map((n) => {
     const d = addDays(today, n);
-    const fs = flightsFor(d, (L?.tomorrow || []).filter((r) => r.date === d));
+    const fs = flightsFor(state.ap, d, (L?.tomorrow || []).filter((r) => r.date === d));
     const ps = predictionsFor(d, fs, null, taf);
     return `<h3 id="day-${d}"><a href="#date=${d}" class="day-link">${n === 1 ? "Tomorrow" : fmtDay(d, { weekday: "long" })} · ${fmtDay(d, { month: "short", day: "numeric" })}</a></h3>
       <div class="flights small">${fs.map((f, i) => flightCard(f, ps[i], true)).join("")}</div>`;
@@ -182,7 +185,7 @@ function renderObs() {
   const clouds = m.layers.length ? m.layers.map((l) => (l.base != null ? `${l.cover} ${l.base.toLocaleString()} ft` : l.cover)).join(", ") : "Clear";
   const wxMap = { BR: "mist", FG: "fog", RA: "rain", SN: "snow", DZ: "drizzle", FU: "smoke", HZ: "haze", SH: "showers", TS: "thunder", FZ: "freezing " };
   const wxText = m.wx.map((w) => w.replace(/^[+-]/, (s) => (s === "+" ? "heavy " : "light ")).replace(/FZ|SH|TS|BR|FG|RA|SN|DZ|FU|HZ/g, (k) => wxMap[k] + " ").trim()).join(", ");
-  $("#obs").innerHTML = `<div class="chart-title">Latest observation <span class="muted">${ext(SRC.awcPage, "METAR")} ${m.time ? fmtTime(m.time) + " · " + ago(m.time) : ""}</span></div>
+  $("#obs").innerHTML = `<div class="chart-title">Latest observation <span class="muted">${ext(SRC.awcPage(state.ap.wx_station), "METAR")} ${m.time ? fmtTime(m.time) + " · " + ago(m.time) : ""}</span></div>
     <div class="obs-top"><span class="obs-temp">${m.temp ?? "—"}°C</span><span class="muted">dew point ${m.dew ?? "—"}°</span></div>
     <dl class="kv">
       <dt>Ceiling</dt><dd>${m.ceiling != null ? m.ceiling.toLocaleString() + " ft" : "None (no broken/overcast layer)"}</dd>
@@ -191,9 +194,9 @@ function renderObs() {
       <dt>Wind</dt><dd>${esc(wind)}</dd>
       ${wxText ? `<dt>Weather</dt><dd>${esc(wxText)}</dd>` : ""}
     </dl>
-    ${m.time && Date.now() - m.time > 3 * 3600e3 ? `<p class="muted" style="font-size:.8rem;margin:10px 0 0">YCG reports only during airport hours; the last observation may be from the previous evening.</p>` : ""}`;
-  $("#raw-wx").textContent = [...(L.metars || []).slice(0, 6), "", L.taf || "No TAF in effect (YCG TAFs are issued during operating hours)."].join("\n");
-  $("#raw-src").innerHTML = `Source: ${ext(SRC.metar, "METAR API")} · ${ext(SRC.taf, "TAF API")} · ${ext(SRC.awcPage, "aviationweather.gov decoded view")} · fetched ${L.generated_at ? ago(new Date(L.generated_at)) : "—"}`;
+    ${m.time && Date.now() - m.time > 3 * 3600e3 ? `<p class="muted" style="font-size:.8rem;margin:10px 0 0">${state.ap.wx_station} reports only during airport hours; the last observation may be from the previous evening.</p>` : ""}`;
+  $("#raw-wx").textContent = [...(L.metars || []).slice(0, 6), "", L.taf || `No TAF in effect (${state.ap.wx_station} TAFs are issued during operating hours).`].join("\n");
+  $("#raw-src").innerHTML = `Source: ${ext(SRC.metar(state.ap.wx_station), "METAR API")} · ${ext(SRC.taf(state.ap.wx_station), "TAF API")} · ${ext(SRC.awcPage(state.ap.wx_station), "aviationweather.gov decoded view")} · fetched ${L.generated_at ? ago(new Date(L.generated_at)) : "—"}`;
 }
 
 const notamLive = (n, day) => (!n.from || n.from.slice(0, 10) <= day) && (!n.to || n.to.slice(0, 10) >= day);
@@ -230,7 +233,7 @@ function renderForecast() {
   const hourX = (hm) => { const [h, m] = hm.split(":").map(Number); return padL + cw * (h + m / 60 - 5); };
   let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Hourly forecast for ${day}: low cloud, visibility, precipitation and gusts">`;
   // flight markers
-  const marks = [{ t: "10:14", l: "AC8376 arr" }, { t: "10:50", l: "AC8377 dep" }];
+  const [ia, od] = state.ap.flights, marks = [{ t: ia.sched_arr, l: `${ia.flight} arr` }, { t: od.sched_dep, l: `${od.flight} dep` }];
   svg += `<rect x="${hourX("09:30")}" y="${padT - 4}" width="${hourX("11:30") - hourX("09:30")}" height="${H - padT}" fill="var(--band)" rx="4"/>`;
   panels.forEach((p, pi) => {
     const y0 = padT + pi * (ph + gap), yb = y0 + ph;
@@ -305,9 +308,9 @@ function renderHistory() {
   const cell = 16, g = 3, padL = 58, padT = 4;
   const W = padL + span.length * (cell + g), H = padT + 2 * (cell + g) + 18;
   let svg = `<svg width="${W}" height="${H}" role="group" aria-label="Daily outcomes; arrow keys move between days and flights">`;
-  ["AC8376", "AC8377"].forEach((f, row) => { svg += `<text x="0" y="${padT + row * (cell + g) + 12}">${f}</text>`; });
+  state.ap.flights.map((x) => x.flight).forEach((f, row) => { svg += `<text x="0" y="${padT + row * (cell + g) + 12}">${f}</text>`; });
   span.forEach((d, i) => {
-    ["AC8376", "AC8377"].forEach((f, row) => {
+    state.ap.flights.map((x) => x.flight).forEach((f, row) => {
       const r = state.history.flights.find((x) => x.date === d && x.flight === f);
       const o = r?.outcome;
       const fill = o ? `var(--${outcomeOf(r).status})` : "transparent";
@@ -322,7 +325,7 @@ function renderHistory() {
   const strip = $("#hist-strip"), atEnd = !strip.scrollLeft || strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4;
   strip.innerHTML = svg;
   if (atEnd) strip.scrollLeft = 1e6; // keep the reader's position if they scrolled back
-  const cells = [...$("#hist-strip").querySelectorAll("rect[data-d]")]; // order: day-major, AC8376 then AC8377
+  const cells = [...$("#hist-strip").querySelectorAll("rect[data-d]")]; // order: day-major, arrival then departure
   if (cells.length) cells.at(-2).tabIndex = 0;
   cells.forEach((rc, i) => rc.addEventListener("keydown", (e) => {
     const d = { ArrowRight: 2, ArrowLeft: -2, ArrowDown: 1, ArrowUp: -1 }[e.key], next = d && cells[i + d];
@@ -349,7 +352,7 @@ function renderHistory() {
 
   // by ceiling at scheduled time (arrivals only — the weather-sensitive leg)
   const buckets = [["No ceiling", (c) => c == null], ["4,000 ft +", (c) => c >= 4000], ["2,000–3,900 ft", (c) => c >= 2000 && c < 4000], ["Below 2,000 ft", (c) => c != null && c < 2000]];
-  const arr = recs.filter((r) => r.flight === "AC8376" && r.metar);
+  const arr = recs.filter((r) => r.flight === inboundFlight() && r.metar);
   const rows = buckets.map(([label, test]) => {
     const b = arr.filter((r) => test(parseMetar(r.metar)?.ceiling ?? null));
     const fail = b.filter((r) => ["cancelled", "diverted"].includes(r.outcome)).length;
@@ -360,16 +363,16 @@ function renderHistory() {
     ${arr.length < 30 ? `<p class="muted" style="font-size:.8rem;margin:8px 0 0">Too few flights recorded to draw conclusions yet; this fills in as the tracker runs and is what the heuristic should be re-tuned against.</p>` : ""}`;
 
   // full table
-  $("#hist-table").innerHTML = `<thead><tr><th>Date</th><th>Flight</th><th>Outcome</th><th>Dep sched / act</th><th>Arr sched / act</th><th>Arr delay</th><th>METAR at YCG</th></tr></thead><tbody>` +
+  $("#hist-table").innerHTML = `<thead><tr><th>Date</th><th>Flight</th><th>Outcome</th><th>Dep sched / act</th><th>Arr sched / act</th><th>Arr delay</th><th>METAR (${state.ap.wx_station})</th></tr></thead><tbody>` +
     [...state.history.flights].reverse().map((r) => `<tr data-date="${r.date}"><td>${r.date}</td><td>${ext(fsUrl(r.flight, r.date), r.flight)}</td><td>${r.outcome ? `<span class="sw ${outcomeOf(r).cls}"></span> ${outcomeOf(r).label}${r.diverted_to ? ` (${esc(r.diverted_to)})` : ""}` : esc(r.status)}</td>
       <td>${r.sched_dep} / ${r.dep_time || "—"}</td><td>${r.sched_arr} / ${r.arr_time || "—"}</td><td>${r.arr_delay_min ?? "—"}${r.arr_delay_min != null ? " min" : ""}</td><td class="metar">${esc(r.metar || "")} ${ext(iemUrl(r.date), "archive ↗")}</td></tr>`).join("") + `</tbody>`;
 }
 
 // For trip planning: the seasonal estimate beside what's actually been recorded, per calendar month
 function renderMonths() {
-  const arr = state.history.flights.filter((r) => r.flight === "AC8376" && known(r));
+  const arr = state.history.flights.filter((r) => r.flight === inboundFlight() && known(r));
   const name = (m) => new Intl.DateTimeFormat("en-CA", { month: "short", timeZone: "UTC" }).format(new Date(Date.UTC(2026, m, 15)));
-  const rows = MONTH_BASE.map((est, m) => {
+  const rows = state.ap.month_base.map((est, m) => {
     const recs = arr.filter((r) => +r.date.slice(5, 7) === m + 1), fails = recs.filter((r) => ["cancelled", "diverted"].includes(r.outcome)).length;
     return `<tr><td>${name(m)}</td><td>${pct(1 - est)}</td><td>${recs.length ? `${pct(1 - fails / recs.length)} <span class="muted">(${recs.length - fails} of ${recs.length})</span>` : "—"}</td></tr>`;
   });
@@ -390,12 +393,12 @@ function renderSkill() {
   const n = state.predictions.length;
   $("#skill").innerHTML = `<div class="chart-title">How good is the outlook? <span class="muted">Brier score (lower is better) of predictions logged before each flight, vs. the base rate alone</span></div>
     <div class="table-wrap"><table><thead><tr><th>Lead time</th><th>Flights</th><th>Outlook</th><th>Base rate</th><th>Skill</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>
-    <p class="muted" style="font-size:.8rem;margin:8px 0 0">${n} predictions logged since tracking began; skill above 0% means the weather terms help at that lead time. It takes a winter with cancellations before these numbers mean much. ${ext("data/predictions.json", "predictions.json")}</p>`;
+    <p class="muted" style="font-size:.8rem;margin:8px 0 0">${n} predictions logged since tracking began; skill above 0% means the weather terms help at that lead time. It takes a winter with cancellations before these numbers mean much. ${ext(dataUrl("predictions.json"), "predictions.json")}</p>`;
 }
 
 function renderRolling() {
   const el = $("#rolling");
-  const arr = state.history.flights.filter((r) => r.flight === "AC8376" && known(r));
+  const arr = state.history.flights.filter((r) => r.flight === inboundFlight() && known(r));
   const today = localDate();
   const first = arr[0]?.date;
   const pts = [];
@@ -406,7 +409,7 @@ function renderRolling() {
       if (win.length >= 5) pts.push({ d, n: win.length, ok: win.filter((r) => !["cancelled", "diverted"].includes(r.outcome)).length });
     }
   }
-  const head = `<div class="chart-title">Trailing 30-day arrival completion rate <span class="muted">share of AC8376 arrivals that landed at YCG</span></div>`;
+  const head = `<div class="chart-title">Trailing 30-day arrival completion rate <span class="muted">share of ${inboundFlight()} arrivals that landed at ${state.ap.code}</span></div>`;
   if (pts.length < 2) {
     el.innerHTML = head + `<p class="muted" style="font-size:.85rem;margin:0">Plotted once at least 5 arrivals fall inside a 30-day window (${arr.length} recorded so far).</p>`;
     return;
@@ -528,7 +531,8 @@ addEventListener("hashchange", showLinkedDay);
 
 async function load() {
   const bust = `?t=${Math.floor(Date.now() / 60000)}`;
-  const [latest, history, forecast, ensemble, preds] = await Promise.allSettled([getJSON(`data/latest.json${bust}`), getJSON(`data/history.json${bust}`), loadForecast(), loadEnsemble(), getJSON(`data/predictions.json${bust}`)]);
+  if (!state.ap) state.ap = (await getJSON("assets/airports.json" + bust))[state.apId];
+  const [latest, history, forecast, ensemble, preds] = await Promise.allSettled([getJSON(dataUrl("latest.json") + bust), getJSON(dataUrl("history.json") + bust), loadForecast(), loadEnsemble(), getJSON(dataUrl("predictions.json") + bust)]);
   if (preds.status === "fulfilled") state.predictions = preds.value.predictions;
   if (latest.status === "fulfilled") state.latest = latest.value;
   state.loadError = latest.status === "rejected" && !state.latest;

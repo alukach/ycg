@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { localDate, parseMetar, parseTaf, predictDay, flightsFor, forecastUrl, ensembleUrl, hourlyRows, ensembleByHour } from "../assets/wx.js";
 
-// A prediction is logged once per lead window (hours before the scheduled YCG time): the first run
+// A prediction is logged once per lead window (hours before the scheduled local time): the first run
 // whose lead falls in (lower, upper] records it. Windows are missed, not back-filled, if no run lands in them.
 export const LEADS = [48, 24, 12, 6, 3, 1];
 
@@ -17,10 +17,16 @@ const getJSON = async (url) => { try { const r = await fetch(url); return r.ok ?
 
 async function main() {
   const now = new Date();
-  const L = read("data/latest.json", null);
-  const history = read("data/history.json", { flights: [] }).flights;
-  const log = read("data/predictions.json", { predictions: [] });
-  const [fc, ens] = await Promise.all([getJSON(forecastUrl()), getJSON(ensembleUrl())]);
+  const airports = JSON.parse(readFileSync("assets/airports.json", "utf8"));
+  for (const [id, ap] of Object.entries(airports)) console.log(`${ap.code}: ${await logAirport(id, ap, now)} prediction(s) logged`);
+}
+
+async function logAirport(id, ap, now) {
+  const dir = `data/${id}`;
+  const L = read(`${dir}/latest.json`, null);
+  const history = read(`${dir}/history.json`, { flights: [] }).flights;
+  const log = read(`${dir}/predictions.json`, { predictions: [] });
+  const [fc, ens] = await Promise.all([getJSON(forecastUrl(ap)), getJSON(ensembleUrl(ap))]);
   const forecast = fc ? hourlyRows(fc) : null, ensemble = ens ? ensembleByHour(ens) : null;
   const taf = parseTaf(L?.taf, now);
   const metar = L?.metars?.length ? parseMetar(L.metars[0], now) : null;
@@ -30,8 +36,8 @@ async function main() {
   for (const n of [0, 1, 2]) {
     const date = localDate(new Date(+now + n * 864e5));
     const recs = date === L?.date ? L.flights : (L?.tomorrow || []).filter((r) => r.date === date);
-    const flights = flightsFor(date, recs);
-    const preds = predictDay({ dateIso: date, flights, metar: date === today ? metar : null, taf, forecast, ensemble, history, now });
+    const flights = flightsFor(ap, date, recs);
+    const preds = predictDay({ ap, dateIso: date, flights, metar: date === today ? metar : null, taf, forecast, ensemble, history, now });
     flights.forEach((f, i) => {
       const p = preds[i], lead = leadBucket(p.leadH);
       if (!lead || p.final || have.has(`${date}|${f.flight}|${lead}`)) return;
@@ -40,8 +46,8 @@ async function main() {
       added++;
     });
   }
-  if (added) writeFileSync("data/predictions.json", JSON.stringify(log, null, 1) + "\n");
-  console.log(`  ${added} prediction(s) logged`);
+  if (added) writeFileSync(`${dir}/predictions.json`, JSON.stringify(log, null, 1) + "\n");
+  return added;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) await main();

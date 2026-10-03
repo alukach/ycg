@@ -62,7 +62,7 @@ jobs:
         run: |
           git config user.name "ycg-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/history.json $(ls data/events.json data/predictions.json 2>/dev/null)
+          git add -- $(ls data/*/history.json data/*/events.json data/*/predictions.json 2>/dev/null)
           if ! git diff --cached --quiet; then
             git commit -m "data: update flight history"
             git push

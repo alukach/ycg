@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch YCG flight status + aviation weather and update data/*.json.
+"""Fetch flight status + aviation weather for each airport in assets/airports.json; update data/<id>/*.json.
 
 Stdlib only. Run from the repo root:
 
@@ -30,17 +30,14 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 DEBUG = ROOT / "debug"
 
-FLIGHTS = [
-    # number, origin, destination, direction relative to YCG
-    {"flight": "AC8376", "carrier": "AC", "number": "8376", "from": "YVR", "to": "YCG", "kind": "arrival"},
-    {"flight": "AC8377", "carrier": "AC", "number": "8377", "from": "YCG", "to": "YVR", "kind": "departure"},
-]
-STATION = "CYCG"
-# Published times, used only for records FlightStats never returned (keep in sync with assets/wx.js)
-SCHEDULE = [
-    {"flight": "AC8376", "sched_dep": "09:05", "sched_arr": "10:14"},
-    {"flight": "AC8377", "sched_dep": "10:50", "sched_arr": "12:05"},
-]
+CONFIG = json.loads((ROOT / "assets" / "airports.json").read_text())
+
+
+def flights_of(ap: dict) -> list[dict]:
+    """Configured flights with the carrier/number split FlightStats URLs need."""
+    return [{**f, "carrier": ap["carrier"], "number": f["flight"][len(ap["carrier"]):]} for f in ap["flights"]]
+
+
 UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
@@ -278,7 +275,8 @@ def fetch_aerodatabox(f: dict, day: dt.date) -> dict | None:
 
 # ------------------------------------------------------------------ aircraft
 
-AIRPORTS = {"YVR": (49.1939, -123.1844), "YCG": (49.2964, -117.6325), "YLW": (49.9561, -119.3778), "YXC": (49.6108, -115.7820)}
+AIRPORTS = {"YVR": (49.1939, -123.1844), "YLW": (49.9561, -119.3778), "YXC": (49.6108, -115.7820),
+            **{ap["code"]: (ap["lat"], ap["lon"]) for ap in CONFIG.values()}}
 
 
 def nm_between(a: tuple, b: tuple) -> float:
@@ -308,18 +306,18 @@ def fetch_aircraft(tail: str) -> dict | None:
 
 # ------------------------------------------------------------------- weather
 
-def fetch_metars(hours: int = 72) -> list[str]:
+def fetch_metars(station: str, hours: int = 72) -> list[str]:
     try:
-        txt = get(f"https://aviationweather.gov/api/data/metar?ids={STATION}&format=raw&hours={hours}")
+        txt = get(f"https://aviationweather.gov/api/data/metar?ids={station}&format=raw&hours={hours}")
         return [ln.strip() for ln in txt.splitlines() if ln.strip()]
     except Exception as e:  # noqa: BLE001
         print(f"  ! metar: {e}", file=sys.stderr)
         return []
 
 
-def fetch_taf() -> str | None:
+def fetch_taf(station: str) -> str | None:
     try:
-        txt = get(f"https://aviationweather.gov/api/data/taf?ids={STATION}&format=raw")
+        txt = get(f"https://aviationweather.gov/api/data/taf?ids={station}&format=raw")
         return re.sub(r"\s+", " ", txt).strip() or None
     except Exception as e:  # noqa: BLE001
         print(f"  ! taf: {e}", file=sys.stderr)
@@ -331,16 +329,16 @@ def fetch_taf() -> str | None:
 NOTAM_KEY = re.compile(r"^Q(MR|P[IAD]|L|N|IC|FALC)")
 
 
-def fetch_notams() -> list[dict] | None:
-    """CYCG NOTAMs from NAV CANADA's CFPS weather API (undocumented; public flight-planning site)."""
+def fetch_notams(icao: str) -> list[dict] | None:
+    """Aerodrome NOTAMs from NAV CANADA's CFPS weather API (undocumented; public flight-planning site)."""
     try:
-        rows = json.loads(get(f"https://plan.navcanada.ca/weather/api/alpha/?site={STATION}&alpha=notam"))["data"]
+        rows = json.loads(get(f"https://plan.navcanada.ca/weather/api/alpha/?site={icao}&alpha=notam"))["data"]
     except Exception as e:  # noqa: BLE001
         print(f"  ! notam: {e}", file=sys.stderr)
         return None
     out = []
     for r in rows:
-        if r.get("location") != STATION:
+        if r.get("location") != icao:
             continue
         try:
             raw = json.loads(r["text"])["raw"]
@@ -356,10 +354,10 @@ def fetch_notams() -> list[dict] | None:
     return sorted(out, key=lambda n: (not n["key"], n["from"] or ""))
 
 
-def fetch_iem_metars(day: dt.date) -> list[str]:
+def fetch_iem_metars(station: str, day: dt.date) -> list[str]:
     """Archived METARs for a local day from Iowa Environmental Mesonet (for days we missed)."""
     a, b = day - dt.timedelta(days=1), day + dt.timedelta(days=1)
-    url = ("https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=" + STATION +
+    url = ("https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=" + station +
            f"&data=metar&year1={a.year}&month1={a.month}&day1={a.day}&year2={b.year}&month2={b.month}&day2={b.day}"
            "&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=3&report_type=4")
     try:
@@ -404,8 +402,8 @@ def nearest_metar(metars: list[str], when: dt.datetime, max_gap_h: float = 2.0) 
 
 # ------------------------------------------------------------------- outcomes
 
-def ycg_time(rec: dict, day: dt.date) -> dt.datetime | None:
-    """Scheduled time at YCG (arrival for the inbound, departure for the outbound), in UTC."""
+def local_time(rec: dict, day: dt.date) -> dt.datetime | None:
+    """Scheduled time at the local airport (arrival for the inbound, departure for the outbound), in UTC."""
     t = rec.get("sched_arr") if rec["kind"] == "arrival" else rec.get("sched_dep")
     if not t:
         return None
@@ -426,9 +424,9 @@ def outcome(rec: dict) -> str | None:
 
 
 def unknown_record(f: dict, day: dt.date, now: dt.datetime) -> dict:
-    sched = next(s for s in SCHEDULE if s["flight"] == f["flight"])
+    """A flight FlightStats never resolved, at its published times (f: a configured flight)."""
     return {"date": day.isoformat(), **{k: f[k] for k in ("flight", "from", "to", "kind")}, "status": "unknown",
-            "sched_dep": sched["sched_dep"], "sched_arr": sched["sched_arr"], "outcome": "unknown", "parser": "none", "recorded_at": now.isoformat(timespec="seconds")}
+            "sched_dep": f["sched_dep"], "sched_arr": f["sched_arr"], "outcome": "unknown", "parser": "none", "recorded_at": now.isoformat(timespec="seconds")}
 
 
 def minutes_between(a: str | None, b: str | None) -> int | None:
@@ -481,26 +479,27 @@ def new_events(events: list[dict], recs: list[dict], now: dt.datetime) -> list[d
     return out
 
 
-def atom(events: list[dict]) -> str:
+def atom(events: list[dict], ap_id: str = "ycg") -> str:
     esc = lambda t: htmllib.escape(str(t))
     entries = "".join(
-        f"<entry><id>tag:ycg-flight-watch,{e['date']}:{e['flight']}:{e['at']}</id>"
+        f"<entry><id>tag:ycg-flight-watch,{e['date']}:{ap_id}:{e['flight']}:{e['at']}</id>"
         f"<title>{esc(e['flight'])} {esc(e['date'])}: {esc(e['text'])}</title><updated>{e['at']}</updated>"
-        f"<link href=\"{SITE_URL}#date={e['date']}\"/><content>{esc(e['flight'])} on {esc(e['date'])} is now {esc(e['text'])}"
+        f"<link href=\"{SITE_URL}?a={ap_id}#date={e['date']}\"/><content>{esc(e['flight'])} on {esc(e['date'])} is now {esc(e['text'])}"
         f"{' (was ' + esc(EVENT_LABEL.get(e['prev'], e['prev'])) + ')' if e['prev'] else ''}.</content></entry>"
         for e in reversed(events[-50:]))
     updated = events[-1]["at"] if events else "2026-10-03T00:00:00-07:00"
-    return (f'<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom"><title>YCG Flight Watch</title>'
-            f'<id>{SITE_URL}</id><link href="{SITE_URL}"/><link rel="self" href="{SITE_URL}data/feed.xml"/><updated>{updated}</updated>'
-            f"<author><name>YCG Flight Watch</name></author>{entries}</feed>\n")
+    title = f"{CONFIG[ap_id]['code']} Flight Watch"
+    return (f'<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom"><title>{title}</title>'
+            f'<id>{SITE_URL}?a={ap_id}</id><link href="{SITE_URL}?a={ap_id}"/><link rel="self" href="{SITE_URL}data/{ap_id}/feed.xml"/><updated>{updated}</updated>'
+            f"<author><name>{title}</name></author>{entries}</feed>\n")
 
 
-def notify(events: list[dict]) -> None:
+def notify(events: list[dict], ap_id: str = "ycg") -> None:
     """Push to ntfy.sh when NTFY_TOPIC is set (subscribe in the ntfy app to that topic)."""
     topic = os.environ.get("NTFY_TOPIC")
     for e in events if topic else []:
         req = urllib.request.Request(f"https://ntfy.sh/{topic}", data=f"{e['flight']} {e['date']}: {e['text']}".encode(),
-                                     headers={"Title": "YCG Flight Watch", "Click": f"{SITE_URL}#date={e['date']}",
+                                     headers={"Title": f"{CONFIG[ap_id]['code']} Flight Watch", "Click": f"{SITE_URL}?a={ap_id}#date={e['date']}",
                                               "Priority": "high" if e["status"] in ("cancelled", "diverted") else "default"})
         try:
             urllib.request.urlopen(req, timeout=15).close()
@@ -522,21 +521,31 @@ def main() -> int:
     ap.add_argument("--debug", action="store_true")
     ap.add_argument("--days-back", type=int, default=3, help="FlightStats serves +/-3 days")
     args = ap.parse_args()
-
     now = dt.datetime.now(TZ)
-    today = now.date()
-    DATA.mkdir(exist_ok=True)
-    history = load(DATA / "history.json", {"flights": []})
-    hist_idx = {(r["date"], r["flight"]): r for r in history["flights"]}
+    wx: dict[str, tuple] = {}  # station -> (metars, taf); airports may share a weather station
+    broken = 0
+    for ap_id, cfg in CONFIG.items():
+        print(f"{cfg['code']}:")
+        if cfg["wx_station"] not in wx:
+            wx[cfg["wx_station"]] = (fetch_metars(cfg["wx_station"], 72), fetch_taf(cfg["wx_station"]))
+        broken += update_airport(ap_id, cfg, *wx[cfg["wx_station"]], args, now)
+    # Non-zero exit only if an airport got nothing at all for today/tomorrow (surfaces scraper breakage in Actions)
+    return 1 if broken else 0
 
-    metars = fetch_metars(72)
-    taf = fetch_taf()
-    notams = fetch_notams()
+
+def update_airport(ap_id: str, cfg: dict, metars: list[str], taf: str | None, args, now: dt.datetime) -> bool:
+    today = now.date()
+    flights = flights_of(cfg)
+    data = DATA / ap_id
+    data.mkdir(parents=True, exist_ok=True)
+    history = load(data / "history.json", {"flights": []})
+    hist_idx = {(r["date"], r["flight"]): r for r in history["flights"]}
+    notams = fetch_notams(cfg["icao"])
 
     flights_today, flights_tomorrow, failures = [], [], []
     for offset in range(-args.days_back, 2):
         day = today + dt.timedelta(days=offset)
-        for f in FLIGHTS:
+        for f in flights:
             key = (day.isoformat(), f["flight"])
             # skip past days already finalised in history
             if offset < 0 and key in hist_idx and hist_idx[key].get("outcome"):
@@ -560,7 +569,7 @@ def main() -> int:
             elif offset == 1:
                 flights_tomorrow.append(rec)
             if offset <= 0 and rec["outcome"]:
-                when = ycg_time(rec, day)
+                when = local_time(rec, day)
                 m = (nearest_metar(metars, when) if when else None) or (hist_idx.get(key) or {}).get("metar")
                 if m:
                     rec["metar"] = m
@@ -571,7 +580,7 @@ def main() -> int:
     if hist_idx:
         d = dt.date.fromisoformat(min(k[0] for k in hist_idx))
         while d < today - dt.timedelta(days=args.days_back):
-            for f in FLIGHTS:
+            for f in flights:
                 hist_idx.setdefault((d.isoformat(), f["flight"]), unknown_record(f, d, now))
             d += dt.timedelta(days=1)
     # Attach archived weather to finalised records that lack it (a few per run, oldest first).
@@ -580,18 +589,18 @@ def main() -> int:
     archive: dict[str, list[str]] = {}
     for r in missing[:6]:
         day = dt.date.fromisoformat(r["date"])
-        when = ycg_time(r, day)
+        when = local_time(r, day)
         if when:
-            archive.setdefault(r["date"], fetch_iem_metars(day))
+            archive.setdefault(r["date"], fetch_iem_metars(cfg["wx_station"], day))
             r["metar"] = nearest_metar(archive[r["date"]], when)
 
-    inbound = next((r for r in flights_today if r["flight"] == "AC8376"), None)
+    inbound = next((r for r in flights_today if r["kind"] == "arrival"), None)
     aircraft = fetch_aircraft(inbound["tail"]) if inbound and inbound.get("tail") and not inbound["outcome"] else None
 
     latest = {
         "generated_at": now.isoformat(timespec="seconds"),
         "date": today.isoformat(),
-        "station": STATION,
+        "station": cfg["wx_station"],
         "flights": flights_today,
         "tomorrow": flights_tomorrow,
         "metars": metars[:30],
@@ -600,28 +609,26 @@ def main() -> int:
         "aircraft": aircraft,
         "notams": notams,
     }
-    (DATA / "latest.json").write_text(json.dumps(latest, indent=1) + "\n")
+    (data / "latest.json").write_text(json.dumps(latest, indent=1) + "\n")
 
-    events = load(DATA / "events.json", {"events": []})
+    events = load(data / "events.json", {"events": []})
     fresh = new_events(events["events"], flights_today + flights_tomorrow, now)
     if fresh:
         events["events"] = (events["events"] + fresh)[-300:]
-        (DATA / "events.json").write_text(json.dumps(events, indent=1) + "\n")
-        notify(fresh)
+        (data / "events.json").write_text(json.dumps(events, indent=1) + "\n")
+        notify(fresh, ap_id)
         print(f"  {len(fresh)} new event(s)")
-    (DATA / "feed.xml").write_text(atom(events["events"]))
+    (data / "feed.xml").write_text(atom(events["events"], ap_id))
 
     history["flights"] = sorted(hist_idx.values(), key=lambda r: (r["date"], r["flight"]))
     new_hist = json.dumps(history, indent=1) + "\n"
-    old_hist = (DATA / "history.json").read_text() if (DATA / "history.json").exists() else ""
+    old_hist = (data / "history.json").read_text() if (data / "history.json").exists() else ""
     if new_hist != old_hist:
-        (DATA / "history.json").write_text(new_hist)
+        (data / "history.json").write_text(new_hist)
         print("  history.json updated")
     if failures:
         print(f"  ! no status for: {', '.join(failures)}", file=sys.stderr)
-    # Non-zero exit only if we got nothing at all for today (surfaces scraper breakage in Actions)
-    return 1 if len(failures) == len(FLIGHTS) * 2 else 0
-
+    return len(failures) == len(flights) * 2
 
 if __name__ == "__main__":
     sys.exit(main())

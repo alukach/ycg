@@ -9,11 +9,11 @@ GitHub Actions (every 15 min in the flight window, every 3 h otherwise)
   scripts/fetch.py      FlightStats status (±3 days) · aviationweather.gov METAR/TAF
                         NAV CANADA NOTAMs · adsb.lol aircraft position · IEM METAR archive
                         AeroDataBox (optional fallback)
-     └─► data/latest.json             deployed only
-         data/history.json            committed: outcomes + METAR at flight time
-         data/events.json → feed.xml  committed: status changes → Atom feed, ntfy.sh (optional)
+     └─► data/<id>/latest.json              deployed only
+         data/<id>/history.json             committed: outcomes + METAR at flight time
+         data/<id>/events.json → feed.xml   committed: status changes → Atom feed, ntfy.sh (optional)
   scripts/predict.mjs
-     └─► data/predictions.json        committed: outlook at 48/24/12/6/3/1 h before each flight
+     └─► data/<id>/predictions.json         committed: outlook at 48/24/12/6/3/1 h before each flight
   └─► GitHub Pages deploy
 
 Browser: index.html + assets/app.js + assets/wx.js
@@ -24,7 +24,7 @@ Browser: index.html + assets/app.js + assets/wx.js
 - **Flight status** is scraped from FlightStats' public tracker pages. The parser tries the embedded Next.js state first and falls back to the rendered text. Each run uploads the raw HTML as a `debug-html` artifact (kept 3 days) so a markup change can be fixed quickly.
 - **History**: past days are finalised once FlightStats reports Arrived, Cancelled or Diverted (including returns to YVR). A flight still unresolved when it drops out of FlightStats' 3-day window, or a day the job missed, is recorded as `unknown`, so gaps stay visible. Each record keeps the METAR nearest the scheduled YCG time, taken from the IEM archive if it was missed live. A year of records is well under 1 MB.
 - **Prediction log**: `scripts/predict.mjs` runs the same outlook code under Node and records one prediction per flight in each lead window (48/24/12/6/3/1 h). The page scores these against outcomes (Brier score per lead time), and that's the data for fitting the weights.
-- **Outlook**: `assets/wx.js` is a transparent heuristic with no dependencies. It starts from a base rate (trailing 30 days blended with `MONTH_BASE`) and adds logit terms for weather from the METAR, the TAF or Open-Meteo (the ECMWF ensemble 12 h+ ahead). Model evidence shrinks with lead time. AC8377 follows AC8376, because it is the same aircraft. Live status overrides everything. Fit the weights against `data/predictions.json` and `data/history.json` once a winter of data exists.
+- **Outlook**: `assets/wx.js` is a transparent heuristic with no dependencies. It starts from a base rate (trailing 30 days blended with `month_base` from `assets/airports.json`) and adds logit terms for weather from the METAR, the TAF or Open-Meteo (the ECMWF ensemble 12 h+ ahead). Model evidence shrinks with lead time. AC8377 follows AC8376, because it is the same aircraft. Live status overrides everything. Fit the weights against `data/<id>/predictions.json` and `history.json` once a winter of data exists.
 
 ## Setup
 
@@ -32,7 +32,7 @@ Browser: index.html + assets/app.js + assets/wx.js
 2. **Settings → Pages → Source: GitHub Actions.**
 3. **Settings → Actions → General → Workflow permissions: Read and write.**
 4. Run the workflow once from the Actions tab (`workflow_dispatch`).
-5. Optional: set an `NTFY_TOPIC` secret to push status changes (delays, cancellations, diversions) to [ntfy.sh](https://ntfy.sh). Anyone can subscribe to the same changes through the Atom feed at `data/feed.xml`.
+5. Optional: set an `NTFY_TOPIC` secret to push status changes (delays, cancellations, diversions) to [ntfy.sh](https://ntfy.sh). Anyone can subscribe to the same changes through the Atom feed at `data/<id>/feed.xml`.
 6. Optional: add a RapidAPI key for [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) as the `AERODATABOX_KEY` secret. It is used only when FlightStats returns nothing usable.
 
 GitHub disables scheduled workflows after 60 days without repository activity; the daily history commits keep it alive.
@@ -68,4 +68,4 @@ python -m http.server                       # http://localhost:8000
 | Inbound aircraft position | [adsb.lol API](https://api.adsb.lol/docs) (ODbL) | Where today's aircraft is now |
 | Optional fallback | [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) | Status if FlightStats fails |
 
-Seasonal base rates (`MONTH_BASE` in `assets/wx.js`) are hand-set estimates, not published figures.
+Seasonal base rates (`month_base` in `assets/airports.json`) are hand-set estimates, not published figures.

@@ -1,0 +1,21 @@
+{
+ "ycg": {
+  "code": "YCG",
+  "icao": "CYCG",
+  "city": "Castlegar",
+  "name": "West Kootenay Regional Airport",
+  "lat": 49.2964,
+  "lon": -117.6325,
+  "airline": "Air Canada Express (Jazz)",
+  "airline_status_url": "https://www.aircanada.com/flightstatus",
+  "carrier": "AC",
+  "flights": [
+   { "flight": "AC8376", "from": "YVR", "to": "YCG", "kind": "arrival", "sched_dep": "09:05", "sched_arr": "10:14" },
+   { "flight": "AC8377", "from": "YCG", "to": "YVR", "kind": "departure", "sched_dep": "10:50", "sched_arr": "12:05" }
+  ],
+  "wx_station": "CYCG",
+  "wx_proxy": null,
+  "month_base": [0.22, 0.18, 0.12, 0.08, 0.05, 0.04, 0.05, 0.06, 0.06, 0.1, 0.2, 0.25],
+  "shuttle": true
+ }
+}

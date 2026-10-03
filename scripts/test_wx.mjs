@@ -1,13 +1,13 @@
 // Outlook tests: node --test scripts/test_wx.mjs
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseMetar, parseTaf, tafAt, predictDay, zoned, hourKey, localDate } from "../assets/wx.js";
+import { readFileSync } from "node:fs";
+import { parseMetar, parseTaf, tafAt, predictDay, zoned, hourKey, localDate, flightsFor } from "../assets/wx.js";
 
-const SCHED = [
-  { flight: "AC8376", kind: "arrival", sched_dep: "09:05", sched_arr: "10:14", status: "schedule" },
-  { flight: "AC8377", kind: "departure", sched_dep: "10:50", sched_arr: "12:05", status: "schedule" },
-];
-const day = (dateIso, opts = {}) => predictDay({ dateIso, flights: SCHED, history: [], ...opts });
+const AIRPORTS = JSON.parse(readFileSync(new URL("../assets/airports.json", import.meta.url)));
+const YCG = AIRPORTS.ycg;
+const SCHED = flightsFor(YCG, "", []);
+const day = (dateIso, opts = {}) => predictDay({ ap: YCG, dateIso, flights: SCHED, history: [], ...opts });
 
 test("parseMetar reads ceiling, visibility and weather", () => {
   const m = parseMetar("METAR CYCG 031700Z 00000KT 1/2SM FG VV002 05/05 A3010", new Date("2026-10-03T18:00Z"));

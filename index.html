@@ -10,7 +10,7 @@
 <meta property="og:description" content="Castlegar (YCG) Air Canada flights: live status, weather and a cancellation outlook for today and the next two days.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alukach.com/ycg/">
-<link rel="alternate" type="application/atom+xml" title="YCG flight status changes" href="data/feed.xml">
+<link rel="alternate" type="application/atom+xml" title="YCG flight status changes" href="data/ycg/feed.xml">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -25,7 +25,7 @@
     </div>
     <div class="meta">
       <span id="updated">Loading…</span>
-      <a href="data/feed.xml" title="Atom feed of status changes (delays, cancellations, diversions)">Alerts feed</a>
+      <a href="data/ycg/feed.xml" title="Atom feed of status changes (delays, cancellations, diversions)">Alerts feed</a>
       <button id="theme" class="ghost" type="button" aria-label="Toggle colour theme">◐</button>
     </div>
   </div>
@@ -106,7 +106,7 @@
     <div class="card" id="skill"></div>
     <details class="card raw">
       <summary>All recorded flights</summary>
-      <p class="src">Data: <a href="data/history.json">history.json</a> · <a href="data/latest.json">latest.json</a> · <a href="https://github.com/alukach/ycg/commits/main/data/history.json" target="_blank" rel="noopener">change log</a>. Flight links open FlightStats, which only serves ±3 days; "archive" opens the Iowa Environmental Mesonet METAR archive for that date.</p>
+      <p class="src">Data: <a href="data/ycg/history.json">history.json</a> · <a href="data/ycg/latest.json">latest.json</a> · <a href="https://github.com/alukach/ycg/commits/main/data/ycg/history.json" target="_blank" rel="noopener">change log</a>. Flight links open FlightStats, which only serves ±3 days; "archive" opens the Iowa Environmental Mesonet METAR archive for that date.</p>
       <div class="table-wrap"><table id="hist-table"></table></div>
     </details>
   </section>
@@ -115,8 +115,8 @@
     <h2>How the outlook works</h2>
     <p>The cancellation outlook is a hand-tuned estimate, not an airline forecast. It starts from a <b>base rate</b>: the share of arrivals cancelled or diverted over the last 30 days, blended with a seasonal estimate until about a month of history exists. When a weather source covers the flight, it starts from a clear day instead, then adds risk for a low ceiling, poor visibility or fog (the worst of the three, since they come together), snow, freezing precipitation and strong gusts.</p>
     <p>Weather sources, best first: the latest <abbr title="routine airport weather observation">METAR</abbr> (full weight within 75 min of the flight, fading over the following hours), the <abbr title="terminal aerodrome forecast, the airport's official forecast">TAF</abbr> including its temporary and changing conditions, and the Open-Meteo weather model. The model's weight shrinks with lead time (about half at 24 h, a quarter at 48 h), and 12 h or more ahead it uses all 51 runs of the ECMWF ensemble, whose spread gives the range shown. That's why the day after tomorrow is mostly seasonal. The departure (AC8377) uses the same aircraft as the inbound AC8376, so its risk follows the arrival until that aircraft is on the ground. Live airline status always overrides the outlook. Every prediction is logged, and the History section scores it against what happened.</p>
-    <p>Context: Castlegar's day-only approach uses an unusually steep glideslope through mountainous terrain (<a href="https://en.wikipedia.org/wiki/West_Kootenay_Regional_Airport" target="_blank" rel="noopener">Wikipedia</a>). Air Canada reported an 84% landing/take-off success rate on the Vancouver route between December 2023 and September 2024, with a bus shuttle via Kelowna on cancellation days (<a href="https://www.nelsonstar.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017" target="_blank" rel="noopener">Nelson Star</a>). The seasonal base rates are estimates, not published figures; see <code>MONTH_BASE</code> in <a href="https://github.com/alukach/ycg/blob/main/assets/wx.js" target="_blank" rel="noopener">wx.js</a>.</p>
-    <p class="muted">Sources: flight status from <a href="https://www.flightstats.com/v2/flight-tracker/arrivals/YCG" target="_blank" rel="noopener">FlightStats</a> (scraped every 15 min by a <a href="https://github.com/alukach/ycg/actions/workflows/update.yml" target="_blank" rel="noopener">GitHub Action</a>), METAR/TAF from the <a href="https://aviationweather.gov/data/api/" target="_blank" rel="noopener">aviationweather.gov Data API</a>, hourly forecast from <a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener">Open-Meteo</a>, historical METARs via <a href="https://mesonet.agron.iastate.edu/request/download.phtml?network=CA_BC_ASOS" target="_blank" rel="noopener">Iowa Environmental Mesonet</a>. Recorded data: <a href="data/history.json">history.json</a>. Code: <a href="https://github.com/alukach/ycg" target="_blank" rel="noopener">github.com/alukach/ycg</a>. Not affiliated with Air Canada or the airport; always confirm with the airline.</p>
+    <p>Context: Castlegar's day-only approach uses an unusually steep glideslope through mountainous terrain (<a href="https://en.wikipedia.org/wiki/West_Kootenay_Regional_Airport" target="_blank" rel="noopener">Wikipedia</a>). Air Canada reported an 84% landing/take-off success rate on the Vancouver route between December 2023 and September 2024, with a bus shuttle via Kelowna on cancellation days (<a href="https://www.nelsonstar.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017" target="_blank" rel="noopener">Nelson Star</a>). The seasonal base rates are estimates, not published figures; see <code>month_base</code> in <a href="https://github.com/alukach/ycg/blob/main/assets/airports.json" target="_blank" rel="noopener">airports.json</a>.</p>
+    <p class="muted">Sources: flight status from <a href="https://www.flightstats.com/v2/flight-tracker/arrivals/YCG" target="_blank" rel="noopener">FlightStats</a> (scraped every 15 min by a <a href="https://github.com/alukach/ycg/actions/workflows/update.yml" target="_blank" rel="noopener">GitHub Action</a>), METAR/TAF from the <a href="https://aviationweather.gov/data/api/" target="_blank" rel="noopener">aviationweather.gov Data API</a>, hourly forecast from <a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener">Open-Meteo</a>, historical METARs via <a href="https://mesonet.agron.iastate.edu/request/download.phtml?network=CA_BC_ASOS" target="_blank" rel="noopener">Iowa Environmental Mesonet</a>. Recorded data: <a href="data/ycg/history.json">history.json</a>. Code: <a href="https://github.com/alukach/ycg" target="_blank" rel="noopener">github.com/alukach/ycg</a>. Not affiliated with Air Canada or the airport; always confirm with the airline.</p>
   </section>
 </main>
 
