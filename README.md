@@ -43,3 +43,17 @@ python -m http.server                       # http://localhost:8000
 - FlightStats has no public API contract; if its markup changes, the scraper will need adjusting (the Action logs a warning and the page shows a banner).
 - The outlook is not an airline forecast. Always confirm with Air Canada.
 - Not affiliated with Air Canada, Jazz, or the airport.
+
+## Data sources
+
+| Data | Source | Used for |
+|---|---|---|
+| Flight status (±3 days) | [FlightStats flight tracker](https://www.flightstats.com/v2/flight-tracker/arrivals/YCG) | Today/tomorrow status, history outcomes |
+| METAR / TAF | [aviationweather.gov Data API](https://aviationweather.gov/data/api/) ([CYCG METAR](https://aviationweather.gov/api/data/metar?ids=CYCG&format=raw&hours=24), [TAF](https://aviationweather.gov/api/data/taf?ids=CYCG&format=raw)) | Observations, TAF, weather attached to history |
+| Hourly forecast | [Open-Meteo](https://open-meteo.com/en/docs) | Chart, model-based risk terms |
+| Historical METAR archive | [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/request/download.phtml?network=CA_BC_ASOS) | Linked from history rows; candidate for weather backfill |
+| 84% success rate, shuttle | [Boundary Creek Times, 2024](https://www.boundarycreektimes.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017) | Reference line, context |
+| Airport / approach | [Wikipedia](https://en.wikipedia.org/wiki/West_Kootenay_Regional_Airport) | Context |
+| Optional fallback | [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) | Status if FlightStats fails |
+
+Seasonal base rates (`MONTH_BASE` in `assets/wx.js`) are hand-set estimates, not published figures.

@@ -178,3 +178,9 @@ td.metar { white-space: normal; min-width: 260px; color: var(--text-2); font-fam
 #rolling { margin-top: 14px; }
 #rolling svg { width: 100%; height: auto; display: block; }
 #rolling text { fill: var(--muted); font-size: 11px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.f-num a { color: inherit; }
+.src { font-size: .78rem; color: var(--muted); margin: 8px 0 0; }
+.about code { font-size: .85em; }

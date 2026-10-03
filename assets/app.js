@@ -18,6 +18,17 @@ const STATUS_PILL = {
 };
 
 const $ = (s) => document.querySelector(s);
+const REPO = "https://github.com/alukach/ycg";
+const SRC = {
+  metar: "https://aviationweather.gov/api/data/metar?ids=CYCG&format=raw&hours=24",
+  taf: "https://aviationweather.gov/api/data/taf?ids=CYCG&format=raw",
+  awcPage: "https://aviationweather.gov/data/metar/?id=CYCG&hours=24&decoded=yes&taf=yes",
+  shuttle: "https://www.boundarycreektimes.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017",
+  historyCommits: `${REPO}/commits/main/data/history.json`,
+};
+const fsUrl = (flight, iso) => `https://www.flightstats.com/v2/flight-tracker/AC/${flight.replace(/^AC/, "")}?year=${+iso.slice(0, 4)}&month=${+iso.slice(5, 7)}&date=${+iso.slice(8, 10)}`;
+const iemUrl = (iso) => { const [y, m, d] = iso.split("-").map(Number); const n = new Date(Date.UTC(y, m - 1, d + 1)); return `https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=CYCG&data=metar&year1=${y}&month1=${m}&day1=${d}&year2=${n.getUTCFullYear()}&month2=${n.getUTCMonth() + 1}&day2=${n.getUTCDate()}&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=3&report_type=4`; };
+const ext = (href, text) => `<a href="${esc(href)}" target="_blank" rel="noopener">${text}</a>`;
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const pct = (p) => `${Math.round(p * 100)}%`;
 
@@ -65,7 +76,8 @@ async function loadForecast() {
     latitude: LAT, longitude: LON, timezone: TZ, forecast_days: "3", wind_speed_unit: "kn",
     hourly: "temperature_2m,precipitation,rain,snowfall,cloud_cover_low,visibility,wind_speed_10m,wind_gusts_10m,weather_code",
   });
-  const j = await getJSON(`https://api.open-meteo.com/v1/forecast?${p}`);
+  state.forecastUrl = `https://api.open-meteo.com/v1/forecast?${p}`;
+  const j = await getJSON(state.forecastUrl);
   const h = j.hourly;
   return h.time.map((t, i) => Object.fromEntries([["time", t], ...Object.keys(h).filter((k) => k !== "time").map((k) => [k, h[k][i]])]));
 }
@@ -129,7 +141,7 @@ function flightCard(f, pred, compact = false) {
   const baseNote = pred.final ? "" : `<div class="risk-basis" title="${esc(pred.factors[0].detail || "")}">Base ${pct(pred.factors[0].p)} (${esc(pred.factors[0].label)})${factors ? "; adding:" : "; no weather risk factors"}</div>`;
   return `<article class="card flight">
     <div class="f-head">
-      <div><div class="f-num">${f.flight}</div><div class="f-dir">${f.kind === "arrival" ? "Arrival from Vancouver" : "Departure to Vancouver"} · Air Canada Express (Jazz)</div></div>
+      <div><div class="f-num">${ext(f.source_url || fsUrl(f.flight, f.date), f.flight)}</div><div class="f-dir">${f.kind === "arrival" ? "Arrival from Vancouver" : "Departure to Vancouver"} · Air Canada Express (Jazz)</div></div>
       <span class="pill ${pillCls}"><span class="dot"></span>${esc(pillText)}</span>
     </div>
     <div class="route">
@@ -137,7 +149,7 @@ function flightCard(f, pred, compact = false) {
       <div class="line" aria-hidden="true"></div>
       <div class="end"><div class="iata">${f.to}</div>${timeCell("Arr", f.sched_arr, f.arr_time, f.arr_is_actual, cancelled)}</div>
     </div>
-    ${f.status_text && !compact ? `<div class="f-dir">Airline status: ${esc(f.status_text)}</div>` : ""}
+    ${f.status_text && !compact ? `<div class="f-dir">Airline status: ${esc(f.status_text)} · ${ext(f.source_url || fsUrl(f.flight, f.date), "FlightStats ↗")}</div>` : ""}
     <div class="risk">
       ${gauge(pred.p, rl.key)}
       <div>
@@ -174,7 +186,7 @@ function renderObs() {
   const clouds = m.layers.length ? m.layers.map((l) => (l.base != null ? `${l.cover} ${l.base.toLocaleString()} ft` : l.cover)).join(", ") : "Clear";
   const wxMap = { BR: "mist", FG: "fog", RA: "rain", SN: "snow", DZ: "drizzle", FU: "smoke", HZ: "haze", SH: "showers", TS: "thunder", FZ: "freezing " };
   const wxText = m.wx.map((w) => w.replace(/^[+-]/, (s) => (s === "+" ? "heavy " : "light ")).replace(/FZ|SH|TS|BR|FG|RA|SN|DZ|FU|HZ/g, (k) => wxMap[k] + " ").trim()).join(", ");
-  $("#obs").innerHTML = `<div class="chart-title">Latest observation <span class="muted">METAR ${m.time ? fmtTime(m.time) + " · " + ago(m.time) : ""}</span></div>
+  $("#obs").innerHTML = `<div class="chart-title">Latest observation <span class="muted">${ext(SRC.awcPage, "METAR")} ${m.time ? fmtTime(m.time) + " · " + ago(m.time) : ""}</span></div>
     <div class="obs-top"><span class="obs-temp">${m.temp ?? "—"}°C</span><span class="muted">dew point ${m.dew ?? "—"}°</span></div>
     <dl class="kv">
       <dt>Ceiling</dt><dd>${m.ceiling != null ? m.ceiling.toLocaleString() + " ft" : "None (no broken/overcast layer)"}</dd>
@@ -185,6 +197,7 @@ function renderObs() {
     </dl>
     ${m.time && Date.now() - m.time > 3 * 3600e3 ? `<p class="muted" style="font-size:.8rem;margin:10px 0 0">YCG reports only during airport hours; the last observation may be from the previous evening.</p>` : ""}`;
   $("#raw-wx").textContent = [...(L.metars || []).slice(0, 6), "", L.taf || "No TAF in effect (YCG TAFs are issued during operating hours)."].join("\n");
+  $("#raw-src").innerHTML = `Source: ${ext(SRC.metar, "METAR API")} · ${ext(SRC.taf, "TAF API")} · ${ext(SRC.awcPage, "aviationweather.gov decoded view")} · fetched ${L.generated_at ? ago(new Date(L.generated_at)) : "—"}`;
 }
 
 // --------------------------------------------------------- forecast chart
@@ -195,7 +208,7 @@ function renderForecast() {
   const day = addDays(localDate(), state.fcDay);
   const rows = state.forecast.filter((h) => h.time.startsWith(day) && +h.time.slice(11, 13) >= 5 && +h.time.slice(11, 13) <= 20);
   if (!rows.length) { el.innerHTML = `<p class="muted">No forecast hours for ${day}.</p>`; return; }
-  $("#fc-src").textContent = `· Open-Meteo · ${fmtDay(day, { weekday: "short", month: "short", day: "numeric" })}`;
+  $("#fc-src").innerHTML = `· ${ext(state.forecastUrl || "https://open-meteo.com/", "Open-Meteo")} · ${fmtDay(day, { weekday: "short", month: "short", day: "numeric" })}`;
 
   const W = Math.max(320, Math.min(720, el.clientWidth || 640)), padL = 40, padR = 12, ph = 74, gap = 22, padT = 16;
   const panels = [
@@ -320,14 +333,14 @@ function renderHistory() {
     const fail = b.filter((r) => ["cancelled", "diverted"].includes(r.outcome)).length;
     return `<tr><td>${label}</td><td>${b.length}</td><td>${fail}</td><td>${b.length ? pct(fail / b.length) : "—"}</td></tr>`;
   });
-  $("#by-ceiling").innerHTML = `<div class="chart-title">Arrival outcomes by observed ceiling <span class="muted">METAR nearest scheduled arrival · ${arr.length} flights</span></div>
+  $("#by-ceiling").innerHTML = `<div class="chart-title">Arrival outcomes by observed ceiling <span class="muted">METAR nearest scheduled arrival (${ext("https://aviationweather.gov/data/api/", "aviationweather.gov")}) · ${arr.length} flights</span></div>
     <div class="table-wrap"><table><thead><tr><th>Ceiling</th><th>Flights</th><th>Cancelled / diverted</th><th>Rate</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>
     ${arr.length < 30 ? `<p class="muted" style="font-size:.8rem;margin:8px 0 0">Too few flights recorded to draw conclusions yet; this fills in as the tracker runs and is what the heuristic should be re-tuned against.</p>` : ""}`;
 
   // full table
   $("#hist-table").innerHTML = `<thead><tr><th>Date</th><th>Flight</th><th>Outcome</th><th>Dep sched / act</th><th>Arr sched / act</th><th>Arr delay</th><th>METAR at YCG</th></tr></thead><tbody>` +
-    [...state.history.flights].reverse().map((r) => `<tr><td>${r.date}</td><td>${r.flight}</td><td>${r.outcome ? `<span class="sw ${r.outcome}"></span> ${OUTCOMES[r.outcome].label}` : esc(r.status)}</td>
-      <td>${r.sched_dep} / ${r.dep_time || "—"}</td><td>${r.sched_arr} / ${r.arr_time || "—"}</td><td>${r.arr_delay_min ?? "—"}${r.arr_delay_min != null ? " min" : ""}</td><td class="metar">${esc(r.metar || "")}</td></tr>`).join("") + `</tbody>`;
+    [...state.history.flights].reverse().map((r) => `<tr><td>${r.date}</td><td>${ext(fsUrl(r.flight, r.date), r.flight)}</td><td>${r.outcome ? `<span class="sw ${r.outcome}"></span> ${OUTCOMES[r.outcome].label}` : esc(r.status)}</td>
+      <td>${r.sched_dep} / ${r.dep_time || "—"}</td><td>${r.sched_arr} / ${r.arr_time || "—"}</td><td>${r.arr_delay_min ?? "—"}${r.arr_delay_min != null ? " min" : ""}</td><td class="metar">${esc(r.metar || "")} ${ext(iemUrl(r.date), "archive ↗")}</td></tr>`).join("") + `</tbody>`;
 }
 
 function renderRolling() {
@@ -353,7 +366,7 @@ function renderRolling() {
   const y = (v) => padT + (1 - v) * (H - padT - padB);
   let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Trailing 30-day completion rate">`;
   [0, 0.5, 0.84, 1].forEach((t) => { svg += `<line x1="${padL}" x2="${W - padR}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)" ${t === 0.84 ? 'stroke-dasharray="4 3" stroke="var(--neutral)"' : ""}/><text x="${padL - 6}" y="${y(t) + 4}" text-anchor="end">${Math.round(t * 100)}%</text>`; });
-  svg += `<text x="${W - padR}" y="${y(0.84) - 4}" text-anchor="end">84% (Dec 2023–Sep 2024 avg)</text>`;
+  svg += `<a href="${SRC.shuttle}" target="_blank" rel="noopener"><text x="${W - padR}" y="${y(0.84) - 4}" text-anchor="end" style="text-decoration:underline">84% (Dec 2023–Sep 2024 avg)</text></a>`;
   svg += `<path d="${pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.ok / p.n).toFixed(1)}`).join("")}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
   [0, pts.length - 1].forEach((i) => { svg += `<text x="${x(i)}" y="${H - 4}" text-anchor="${i ? "end" : "start"}">${fmtDay(pts[i].d, { month: "short", day: "numeric" })}</text>`; });
   svg += `<circle id="rdot" r="4" fill="var(--series-1)" stroke="var(--surface)" stroke-width="2" opacity="0"/><rect id="rhit" x="${padL}" y="0" width="${W - padL - padR}" height="${H}" fill="transparent"/></svg>`;
