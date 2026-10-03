@@ -164,6 +164,29 @@ export function tafAt(taf, t) {
 // Dec 2023–Sep 2024; winter fog/low cloud dominate) and are meant to be re-tuned
 // against data/history.json as it accumulates.
 
+/**
+ * Base rate from the trailing window of observed arrivals, shrunk toward the seasonal prior
+ * (beta-binomial: (failures + K*prior) / (n + K)). With few recorded flights it stays near the
+ * prior; after ~30 days the recent regime (e.g. a valley-cloud inversion spell) dominates.
+ */
+export const PRIOR_WEIGHT = 15;
+export function rollingBase(history, beforeIso, when, days = 30) {
+  const month = Number(new Intl.DateTimeFormat("en-CA", { timeZone: TZ, month: "numeric" }).format(when)) - 1;
+  const prior = MONTH_BASE[month];
+  const start = new Date(beforeIso + "T12:00:00Z");
+  start.setUTCDate(start.getUTCDate() - days);
+  const from = start.toISOString().slice(0, 10);
+  const recs = history.filter((r) => r.flight === "AC8376" && r.outcome && r.date >= from && r.date < beforeIso);
+  const n = recs.length;
+  const fails = recs.filter((r) => r.outcome === "cancelled" || r.outcome === "diverted").length;
+  const p = (fails + PRIOR_WEIGHT * prior) / (n + PRIOR_WEIGHT);
+  return {
+    p, n, fails, prior,
+    label: n ? `Last ${days} days: ${fails}/${n} arrivals failed` : `Seasonal base (no recent history)`,
+    detail: `${fails}/${n} observed, blended with ${Math.round(prior * 100)}% seasonal prior`,
+  };
+}
+
 export const MONTH_BASE = [0.22, 0.18, 0.12, 0.08, 0.05, 0.04, 0.05, 0.06, 0.06, 0.1, 0.2, 0.25];
 const logit = (p) => Math.log(p / (1 - p));
 const sigmoid = (x) => 1 / (1 + Math.exp(-x));
@@ -247,8 +270,9 @@ export function omConditions(h) {
  */
 export function predict(ctx) {
   const month = Number(new Intl.DateTimeFormat("en-CA", { timeZone: TZ, month: "numeric" }).format(ctx.when)) - 1;
-  const base = MONTH_BASE[month];
-  const factors = [{ label: `Seasonal base (${new Intl.DateTimeFormat("en-CA", { month: "long", timeZone: TZ }).format(ctx.when)})`, v: logit(base), isBase: true, p: base }];
+  const seasonal = MONTH_BASE[month];
+  const base = ctx.base?.p ?? seasonal;
+  const factors = [{ label: ctx.base?.label ?? `Seasonal base (${new Intl.DateTimeFormat("en-CA", { month: "long", timeZone: TZ }).format(ctx.when)})`, v: logit(base), isBase: true, p: base, detail: ctx.base?.detail }];
 
   // --- live status overrides
   const st = ctx.status;

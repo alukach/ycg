@@ -1,4 +1,4 @@
-import { TZ, parseMetar, parseTaf, tafAt, predict, riskLabel, fmtVis } from "./wx.js";
+import { TZ, parseMetar, parseTaf, tafAt, predict, riskLabel, fmtVis, rollingBase } from "./wx.js";
 
 const LAT = 49.2961, LON = -117.6325;
 const SCHEDULE = [
@@ -89,7 +89,8 @@ function omHourAt(when) {
 
 function predictionsFor(dateIso, flights, metar, taf) {
   const [arr, dep] = flights;
-  const ctxFor = (f) => ({ when: zoned(dateIso, f.kind === "arrival" ? f.sched_arr : f.sched_dep), metar, taf, kind: f.kind, status: f.status, omHour: null });
+  const base = rollingBase(state.history.flights, dateIso, zoned(dateIso, arr.sched_arr));
+  const ctxFor = (f) => ({ when: zoned(dateIso, f.kind === "arrival" ? f.sched_arr : f.sched_dep), metar, taf, kind: f.kind, status: f.status, omHour: null, base });
   const a = ctxFor(arr);
   a.omHour = omHourAt(a.when);
   const pa = predict(a);
@@ -125,7 +126,7 @@ function flightCard(f, pred, compact = false) {
   const maxV = 3.5;
   const factors = pred.final ? "" : pred.factors.filter((x) => !x.isBase).sort((a, b) => b.v - a.v).slice(0, 4)
     .map((x) => `<li><span>${esc(x.label)}</span><span class="bar"><i style="width:${Math.min(100, (x.v / maxV) * 100)}%"></i></span></li>`).join("");
-  const baseNote = pred.final ? "" : `<div class="risk-basis">Seasonal base ${pct(pred.factors[0].p)}${factors ? "; adding:" : "; no weather risk factors"}</div>`;
+  const baseNote = pred.final ? "" : `<div class="risk-basis" title="${esc(pred.factors[0].detail || "")}">Base ${pct(pred.factors[0].p)} (${esc(pred.factors[0].label)})${factors ? "; adding:" : "; no weather risk factors"}</div>`;
   return `<article class="card flight">
     <div class="f-head">
       <div><div class="f-num">${f.flight}</div><div class="f-dir">${f.kind === "arrival" ? "Arrival from Vancouver" : "Departure to Vancouver"} · Air Canada Express (Jazz)</div></div>
@@ -309,6 +310,8 @@ function renderHistory() {
   });
   $("#hist-legend").innerHTML = Object.values(OUTCOMES).map((o) => `<span><span class="sw ${o.cls}"></span>${o.label}</span>`).join("") + `<span><span class="sw none"></span>No record</span>`;
 
+  renderRolling();
+
   // by ceiling at scheduled time (arrivals only — the weather-sensitive leg)
   const buckets = [["No ceiling", (c) => c == null], ["4,000 ft +", (c) => c >= 4000], ["2,000–3,900 ft", (c) => c >= 2000 && c < 4000], ["Below 2,000 ft", (c) => c != null && c < 2000]];
   const arr = recs.filter((r) => r.flight === "AC8376" && r.metar);
@@ -325,6 +328,46 @@ function renderHistory() {
   $("#hist-table").innerHTML = `<thead><tr><th>Date</th><th>Flight</th><th>Outcome</th><th>Dep sched / act</th><th>Arr sched / act</th><th>Arr delay</th><th>METAR at YCG</th></tr></thead><tbody>` +
     [...state.history.flights].reverse().map((r) => `<tr><td>${r.date}</td><td>${r.flight}</td><td>${r.outcome ? `<span class="sw ${r.outcome}"></span> ${OUTCOMES[r.outcome].label}` : esc(r.status)}</td>
       <td>${r.sched_dep} / ${r.dep_time || "—"}</td><td>${r.sched_arr} / ${r.arr_time || "—"}</td><td>${r.arr_delay_min ?? "—"}${r.arr_delay_min != null ? " min" : ""}</td><td class="metar">${esc(r.metar || "")}</td></tr>`).join("") + `</tbody>`;
+}
+
+function renderRolling() {
+  const el = $("#rolling");
+  const arr = state.history.flights.filter((r) => r.flight === "AC8376" && r.outcome);
+  const today = localDate();
+  const first = arr[0]?.date;
+  const pts = [];
+  if (first) {
+    for (let d = first; d <= today; d = addDays(d, 1)) {
+      const from = addDays(d, -29);
+      const win = arr.filter((r) => r.date >= from && r.date <= d);
+      if (win.length >= 5) pts.push({ d, n: win.length, ok: win.filter((r) => !["cancelled", "diverted"].includes(r.outcome)).length });
+    }
+  }
+  const head = `<div class="chart-title">Trailing 30-day arrival completion rate <span class="muted">share of AC8376 arrivals that landed at YCG</span></div>`;
+  if (pts.length < 2) {
+    el.innerHTML = head + `<p class="muted" style="font-size:.85rem;margin:0">Plotted once at least 5 arrivals fall inside a 30-day window (${arr.length} recorded so far).</p>`;
+    return;
+  }
+  const W = Math.max(320, Math.min(1040, el.clientWidth - 32 || 640)), H = 160, padL = 40, padR = 10, padT = 10, padB = 22;
+  const x = (i) => padL + (i / (pts.length - 1)) * (W - padL - padR);
+  const y = (v) => padT + (1 - v) * (H - padT - padB);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Trailing 30-day completion rate">`;
+  [0, 0.5, 0.84, 1].forEach((t) => { svg += `<line x1="${padL}" x2="${W - padR}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)" ${t === 0.84 ? 'stroke-dasharray="4 3" stroke="var(--neutral)"' : ""}/><text x="${padL - 6}" y="${y(t) + 4}" text-anchor="end">${Math.round(t * 100)}%</text>`; });
+  svg += `<text x="${W - padR}" y="${y(0.84) - 4}" text-anchor="end">84% (Dec 2023–Sep 2024 avg)</text>`;
+  svg += `<path d="${pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.ok / p.n).toFixed(1)}`).join("")}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
+  [0, pts.length - 1].forEach((i) => { svg += `<text x="${x(i)}" y="${H - 4}" text-anchor="${i ? "end" : "start"}">${fmtDay(pts[i].d, { month: "short", day: "numeric" })}</text>`; });
+  svg += `<circle id="rdot" r="4" fill="var(--series-1)" stroke="var(--surface)" stroke-width="2" opacity="0"/><rect id="rhit" x="${padL}" y="0" width="${W - padL - padR}" height="${H}" fill="transparent"/></svg>`;
+  el.innerHTML = head + svg;
+  const s = el.querySelector("svg"), dot = el.querySelector("#rdot");
+  el.querySelector("#rhit").addEventListener("pointermove", (ev) => {
+    const pt = s.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    const lx = pt.matrixTransform(s.getScreenCTM().inverse()).x;
+    const i = Math.max(0, Math.min(pts.length - 1, Math.round(((lx - padL) / (W - padL - padR)) * (pts.length - 1))));
+    const p = pts[i];
+    dot.setAttribute("cx", x(i)); dot.setAttribute("cy", y(p.ok / p.n)); dot.setAttribute("opacity", "1");
+    showTip(ev, `<b>30 days to ${fmtDay(p.d, { month: "short", day: "numeric" })}</b><div class="row"><span>Completed</span><span>${pct(p.ok / p.n)}</span></div><div class="row"><span>Arrivals</span><span>${p.ok} of ${p.n}</span></div>`);
+  });
+  el.querySelector("#rhit").addEventListener("pointerleave", () => { hideTip(); dot.setAttribute("opacity", "0"); });
 }
 
 // ------------------------------------------------------------------- misc

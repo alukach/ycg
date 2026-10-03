@@ -74,6 +74,7 @@
       <div id="hist-strip" class="strip"></div>
       <div class="legend" id="hist-legend"></div>
     </div>
+    <div class="card" id="rolling"></div>
     <div class="card" id="by-ceiling"></div>
     <details class="card raw">
       <summary>All recorded flights</summary>
@@ -83,7 +84,7 @@
 
   <section class="card about">
     <h2>How the outlook works</h2>
-    <p>The cancellation outlook is a hand-tuned heuristic, not an airline forecast. It starts from a seasonal base rate and adds risk for low ceilings, poor visibility, fog, snow, freezing precipitation and strong gusts at the scheduled YCG time, using the latest METAR when it is within ~75 minutes, the TAF when it covers the flight, and the Open-Meteo model otherwise. The departure (AC8377) uses the same aircraft as the inbound AC8376, so its risk follows the arrival until that aircraft is on the ground. Live airline status (cancelled, diverted, arrived) always overrides the model.</p>
+    <p>The cancellation outlook is a hand-tuned heuristic, not an airline forecast. It starts from a base rate, which is the share of arrivals cancelled or diverted over the trailing 30 days blended with a seasonal prior (the prior dominates until about a month of history exists), and adds risk for low ceilings, poor visibility, fog, snow, freezing precipitation and strong gusts at the scheduled YCG time, using the latest METAR when it is within ~75 minutes, the TAF when it covers the flight, and the Open-Meteo model otherwise. The departure (AC8377) uses the same aircraft as the inbound AC8376, so its risk follows the arrival until that aircraft is on the ground. Live airline status (cancelled, diverted, arrived) always overrides the model.</p>
     <p>Context: Castlegar's day-only approach uses an unusually steep glideslope through mountainous terrain. Air Canada reported an 84% landing/take-off success rate on the Vancouver route between December 2023 and September 2024, with a bus shuttle via Kelowna on cancellation days.</p>
     <p class="muted">Sources: flight status from FlightStats (scraped every 15 min by a GitHub Action), METAR/TAF from aviationweather.gov, hourly forecast from Open-Meteo. Not affiliated with Air Canada or the airport; always confirm with the airline.</p>
   </section>

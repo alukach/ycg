@@ -174,3 +174,7 @@ td.metar { white-space: normal; min-width: 260px; color: var(--text-2); font-fam
 .tip b { font-weight: 650; }
 .tip .row { display: flex; justify-content: space-between; gap: 14px; color: var(--text-2); }
 .tip .row span:last-child { color: var(--text); font-weight: 600; }
+
+#rolling { margin-top: 14px; }
+#rolling svg { width: 100%; height: auto; display: block; }
+#rolling text { fill: var(--muted); font-size: 11px; }
