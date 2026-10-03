@@ -43,7 +43,7 @@ jobs:
         env:
           AERODATABOX_KEY: ${{ secrets.AERODATABOX_KEY }}
         run: |
-          python scripts/fetch.py --debug || echo "::warning::Flight status could not be read for today; see the debug-html artifact."
+          python scripts/fetch.py --debug || echo "failed=true" >> "$GITHUB_OUTPUT"
 
       - name: Upload raw HTML for debugging
         if: always()
@@ -76,3 +76,10 @@ jobs:
           path: _site
       - id: deploy
         uses: actions/deploy-pages@v4
+
+      # Deploy first (the page shows a banner), then fail the run so GitHub notifies the owner.
+      - name: Fail if flight status could not be read
+        if: steps.fetch.outputs.failed == 'true'
+        run: |
+          echo "::error::FlightStats returned nothing usable for today or tomorrow; see the debug-html artifact."
+          exit 1

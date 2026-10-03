@@ -19,6 +19,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - Outlook no longer counts bad weather twice. The seasonal base already includes bad-weather days, so a clear METAR, TAF or model forecast now pulls the risk *below* the base (e.g. clear December ≈ 11%, not 25%).
 - Low ceiling, poor visibility and fog are scored as one risk (the worst of the three) instead of being added together, which pushed foggy days to ~99%.
 - TAF handling: a BECMG change still in progress counts its worse state; TEMPO/PROB risk is measured against the METAR when the METAR is the worse source; a `BCFG` group no longer hides reported `FG`.
+- A broken scraper now fails the GitHub Actions run (after deploying), so GitHub emails the owner instead of logging a warning nobody sees.
 
 ### Removed
 - The unexplained ×0.5 risk discount once the inbound aircraft is airborne. Turning back is how YCG arrivals usually fail.

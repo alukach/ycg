@@ -41,7 +41,7 @@ python -m http.server                       # http://localhost:8000
 
 ## Caveats
 
-- FlightStats has no public API contract; if its markup changes, the scraper will need adjusting (the Action logs a warning and the page shows a banner).
+- FlightStats has no public API contract; if its markup changes, the scraper will need adjusting (the run fails, which emails the repo owner, and the page shows a banner).
 - The outlook is not an airline forecast. Always confirm with Air Canada.
 - Not affiliated with Air Canada, Jazz, or the airport.
 
