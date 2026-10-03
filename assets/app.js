@@ -450,6 +450,7 @@ function hideTip() { tip.hidden = true; }
 function renderHeader() {
   const today = localDate();
   $("#today-label").textContent = fmtDay(today);
+  $("#day2-tab").textContent = fmtDay(addDays(today, 2), { weekday: "long" });
   const L = state.latest;
   if (L?.generated_at) {
     const g = new Date(L.generated_at);
