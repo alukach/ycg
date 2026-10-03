@@ -40,3 +40,11 @@ test("a clear forecast pulls risk below the seasonal base; no forecast leaves it
   assert.ok(Math.abs(none.p - none.factors[0].p) < 1e-9);
   assert.ok(clear.p < none.p / 1.5);
 });
+
+test("ceiling, visibility and fog are not stacked", () => {
+  const now = new Date("2026-12-15T12:00Z");
+  const fog = parseTaf("TAF CYCG 151140Z 1512/1600 00000KT 1/4SM FG VV002", now);
+  const [a] = day("2026-12-15", { now, taf: fog });
+  assert.equal(a.factors.filter((f) => !f.isBase).length, 1);
+  assert.ok(a.p > 0.6 && a.p < 0.95, `p=${a.p}`);
+});

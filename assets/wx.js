@@ -227,11 +227,14 @@ function wxTerm(wx) {
   if (has(/FZ(RA|DZ)/)) { s += 2.0; notes.push("freezing precip"); }
   if (has(/^\+.*SN|^\+SHSN/)) { s += 1.6; notes.push("heavy snow"); }
   else if (has(/SN/)) { s += 0.9; notes.push("snow"); }
-  if (has(/FG/) && !has(/^(MI|BC|PR)FG/)) { s += 1.0; notes.push("fog"); }
-  else if (has(/BR/)) { s += 0.3; notes.push("mist"); }
   if (has(/FU/)) { s += 0.6; notes.push("smoke"); }
   if (has(/TS/)) { s += 0.8; notes.push("thunderstorm"); }
   return { s, notes };
+}
+function fogTerm(wx) {
+  if (wx.some((w) => /FG/.test(w) && !/^(MI|BC|PR)FG/.test(w))) return ["fog", 1.0];
+  if (wx.some((w) => /BR/.test(w))) return ["mist", 0.3];
+  return ["", 0];
 }
 function windTerm(w) {
   const g = w ? Math.max(w.gust || 0, w.speed || 0) : 0;
@@ -244,8 +247,9 @@ function conditionScore(c) {
   // c: {ceiling, vis, wx[], wind}
   const parts = [];
   const add = (label, v) => v > 0 && parts.push({ label, v });
-  add(`ceiling ${c.ceiling?.toLocaleString()} ft`, ceilingTerm(c.ceiling));
-  add(`visibility ${fmtVis(c.vis)}`, visTerm(c.vis));
+  // Low ceiling, low visibility and fog are one phenomenon seen three ways: count the worst, not the sum.
+  const obsc = [[`ceiling ${c.ceiling?.toLocaleString()} ft`, ceilingTerm(c.ceiling)], [`visibility ${fmtVis(c.vis)}`, visTerm(c.vis)], fogTerm(c.wx || [])].filter((o) => o[1] > 0);
+  if (obsc.length) add(obsc.map((o) => o[0]).join(", "), Math.max(...obsc.map((o) => o[1])));
   const w = wxTerm(c.wx || []);
   add(w.notes.join(", "), w.s);
   const wt = windTerm(c.wind);
