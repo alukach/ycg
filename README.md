@@ -10,7 +10,8 @@ GitHub Actions (cron, every 15 min in the flight window)
                    ├─► aviationweather.gov METAR (72 h) + TAF  ├─► data/latest.json  (deployed only)
                    ├─► adsb.lol (inbound aircraft position)    │
                    ├─► NAV CANADA CFPS (CYCG NOTAMs)           │
-                   └─► AeroDataBox (optional fallback)         ─┘   data/history.json (committed when it changes)
+                   └─► AeroDataBox (optional fallback)         ─┘   data/history.json, events.json (committed when changed)
+                                                                    data/feed.xml (Atom), ntfy.sh push (optional)
   └─► GitHub Pages deploy (actions/deploy-pages)
 
 Browser: index.html + assets/app.js
@@ -28,7 +29,8 @@ Browser: index.html + assets/app.js
 2. **Settings → Pages → Source: GitHub Actions.**
 3. **Settings → Actions → General → Workflow permissions: Read and write.**
 4. Run the workflow once from the Actions tab (`workflow_dispatch`).
-5. Optional: add a RapidAPI key for [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) as the `AERODATABOX_KEY` secret. It is used only when FlightStats returns nothing usable.
+5. Optional: set an `NTFY_TOPIC` secret to push status changes (delays, cancellations, diversions) to [ntfy.sh](https://ntfy.sh). Anyone can subscribe to the same changes through the Atom feed at `data/feed.xml`.
+6. Optional: add a RapidAPI key for [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) as the `AERODATABOX_KEY` secret. It is used only when FlightStats returns nothing usable.
 
 GitHub disables scheduled workflows after 60 days without repository activity; the daily history commits keep it alive.
 

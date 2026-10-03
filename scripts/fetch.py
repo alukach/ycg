@@ -450,6 +450,64 @@ def enrich(f: dict, day: dt.date, res: dict) -> dict:
     return rec
 
 
+# -------------------------------------------------------------------- alerts
+
+SITE_URL = os.environ.get("SITE_URL", "https://alukach.com/ycg/")
+EVENT_LABEL = {"scheduled": "Scheduled", "delayed": "Delayed", "en_route": "En route", "arrived": "Arrived",
+               "cancelled": "Cancelled", "diverted": "Diverted", "unknown": "Status unknown"}
+
+
+def describe(rec: dict) -> str:
+    s = EVENT_LABEL.get(rec["status"], rec["status"])
+    if rec["status"] == "delayed" and rec.get("dep_delay_min"):
+        s += f" {rec['dep_delay_min']} min (dep {rec.get('dep_time')})"
+    if rec["status"] == "diverted" and rec.get("diverted_to"):
+        s += f" to {rec['diverted_to']}"
+    if rec["status"] == "arrived" and rec.get("arr_time"):
+        s += f" at {rec['arr_time']}"
+    return s
+
+
+def new_events(events: list[dict], recs: list[dict], now: dt.datetime) -> list[dict]:
+    """One event per (date, flight) status change. The first sighting of a plain 'scheduled' is not news."""
+    last = {(e["date"], e["flight"]): e["status"] for e in events}
+    out = []
+    for r in recs:
+        prev = last.get((r["date"], r["flight"]))
+        if r["status"] == prev or (prev is None and r["status"] == "scheduled"):
+            continue
+        out.append({"date": r["date"], "flight": r["flight"], "status": r["status"], "text": describe(r),
+                    "prev": prev, "at": now.isoformat(timespec="seconds")})
+    return out
+
+
+def atom(events: list[dict]) -> str:
+    esc = lambda t: htmllib.escape(str(t))
+    entries = "".join(
+        f"<entry><id>tag:ycg-flight-watch,{e['date']}:{e['flight']}:{e['at']}</id>"
+        f"<title>{esc(e['flight'])} {esc(e['date'])}: {esc(e['text'])}</title><updated>{e['at']}</updated>"
+        f"<link href=\"{SITE_URL}#date={e['date']}\"/><content>{esc(e['flight'])} on {esc(e['date'])} is now {esc(e['text'])}"
+        f"{' (was ' + esc(EVENT_LABEL.get(e['prev'], e['prev'])) + ')' if e['prev'] else ''}.</content></entry>"
+        for e in reversed(events[-50:]))
+    updated = events[-1]["at"] if events else "2026-10-03T00:00:00-07:00"
+    return (f'<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom"><title>YCG Flight Watch</title>'
+            f'<id>{SITE_URL}</id><link href="{SITE_URL}"/><link rel="self" href="{SITE_URL}data/feed.xml"/><updated>{updated}</updated>'
+            f"<author><name>YCG Flight Watch</name></author>{entries}</feed>\n")
+
+
+def notify(events: list[dict]) -> None:
+    """Push to ntfy.sh when NTFY_TOPIC is set (subscribe in the ntfy app to that topic)."""
+    topic = os.environ.get("NTFY_TOPIC")
+    for e in events if topic else []:
+        req = urllib.request.Request(f"https://ntfy.sh/{topic}", data=f"{e['flight']} {e['date']}: {e['text']}".encode(),
+                                     headers={"Title": "YCG Flight Watch", "Click": f"{SITE_URL}#date={e['date']}",
+                                              "Priority": "high" if e["status"] in ("cancelled", "diverted") else "default"})
+        try:
+            urllib.request.urlopen(req, timeout=15).close()
+        except Exception as ex:  # noqa: BLE001
+            print(f"  ! ntfy: {ex}", file=sys.stderr)
+
+
 # ---------------------------------------------------------------------- main
 
 def load(path: Path, default):
@@ -543,6 +601,15 @@ def main() -> int:
         "notams": notams,
     }
     (DATA / "latest.json").write_text(json.dumps(latest, indent=1) + "\n")
+
+    events = load(DATA / "events.json", {"events": []})
+    fresh = new_events(events["events"], flights_today + flights_tomorrow, now)
+    if fresh:
+        events["events"] = (events["events"] + fresh)[-300:]
+        (DATA / "events.json").write_text(json.dumps(events, indent=1) + "\n")
+        notify(fresh)
+        print(f"  {len(fresh)} new event(s)")
+    (DATA / "feed.xml").write_text(atom(events["events"]))
 
     history["flights"] = sorted(hist_idx.values(), key=lambda r: (r["date"], r["flight"]))
     new_hist = json.dumps(history, indent=1) + "\n"

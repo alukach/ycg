@@ -108,6 +108,16 @@ class Parsers(unittest.TestCase):
             fetch.get = orig
         self.assertEqual([(x["key"], x["text"]) for x in n], [(True, "RSC 15 6/6/3 DRY, DRY, SLUSH."), (False, "CRANE ERECTED")])
 
+    def test_events_on_status_change(self):
+        now = dt.datetime(2026, 10, 3, 9, tzinfo=fetch.TZ)
+        r = lambda st, **k: {"date": "2026-10-03", "flight": "AC8376", "status": st, **k}
+        self.assertEqual(fetch.new_events([], [r("scheduled")], now), [])
+        ev = fetch.new_events([], [r("delayed", dep_delay_min=25, dep_time="09:30")], now)
+        self.assertEqual(ev[0]["text"], "Delayed 25 min (dep 09:30)")
+        self.assertEqual(fetch.new_events(ev, [r("delayed")], now), [])
+        self.assertEqual(fetch.new_events(ev, [r("cancelled")], now)[0]["prev"], "delayed")
+        self.assertIn("<entry>", fetch.atom(ev))
+
     def test_nearest_metar(self):
         metars = ["METAR CYCG 021800Z VRB02KT 15SM SCT085 15/08 A3006", "METAR CYCG 021700Z 00000KT 15SM FEW140 13/08 A3008"]
         when = dt.datetime(2026, 10, 2, 17, 14, tzinfo=dt.timezone.utc)
