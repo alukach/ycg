@@ -46,6 +46,9 @@ jobs:
         run: |
           python scripts/fetch.py --debug || echo "failed=true" >> "$GITHUB_OUTPUT"
 
+      - name: Log the outlook at fixed lead times
+        run: node scripts/predict.mjs || echo "::warning::Prediction logging failed"
+
       - name: Upload raw HTML for debugging
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,11 +58,11 @@ jobs:
           retention-days: 3
           if-no-files-found: ignore
 
-      - name: Commit history and events if changed
+      - name: Commit history, events and predictions if changed
         run: |
           git config user.name "ycg-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/history.json data/events.json 2>/dev/null || git add data/history.json
+          git add data/history.json $(ls data/events.json data/predictions.json 2>/dev/null)
           if ! git diff --cached --quiet; then
             git commit -m "data: update flight history"
             git push

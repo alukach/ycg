@@ -1,6 +1,20 @@
 // METAR / TAF parsing and the cancellation heuristic. No dependencies.
 
 export const TZ = "America/Vancouver";
+const LAT = 49.2961, LON = -117.6325;
+// Published schedule; fetched records override it. Keep in sync with SCHEDULE in scripts/fetch.py.
+export const SCHEDULE = [
+  { flight: "AC8376", from: "YVR", to: "YCG", kind: "arrival", sched_dep: "09:05", sched_arr: "10:14" },
+  { flight: "AC8377", from: "YCG", to: "YVR", kind: "departure", sched_dep: "10:50", sched_arr: "12:05" },
+];
+
+/** Today's/tomorrow's fetched records merged over the published schedule -> [arrival, departure]. */
+export function flightsFor(dateIso, recs) {
+  return SCHEDULE.map((s) => {
+    const r = (recs || []).find((x) => x.flight === s.flight && (!x.date || x.date === dateIso));
+    return r ? { ...s, ...r, sched_dep: r.sched_dep || s.sched_dep, sched_arr: r.sched_arr || s.sched_arr } : { ...s, date: dateIso, status: "schedule" };
+  });
+}
 
 // BC moved to permanent UTC−7 on 2026-11-01 (tz database 2026b). The rule is written out here
 // because JS runtimes ship stale tz data (Node ≤24 and older browsers still switch to PST).
@@ -438,6 +452,15 @@ export function predictDay({ dateIso, flights, metar, taf, forecast, ensemble, h
   const pa = predict(ctxFor(arr));
   const pd = predict({ ...ctxFor(dep), inbound: arr, inboundP: pa.p, inboundRange: pa.range });
   return [pa, pd];
+}
+
+const OM = { latitude: LAT, longitude: LON, timezone: TZ, forecast_days: "3", wind_speed_unit: "kn" };
+export const forecastUrl = () => `https://api.open-meteo.com/v1/forecast?${new URLSearchParams({ ...OM, hourly: "temperature_2m,precipitation,rain,snowfall,cloud_cover_low,visibility,wind_speed_10m,wind_gusts_10m,weather_code" })}`;
+export const ensembleUrl = () => `https://ensemble-api.open-meteo.com/v1/ensemble?${new URLSearchParams({ ...OM, models: ENSEMBLE_MODEL, hourly: ENSEMBLE_VARS.join(",") })}`;
+/** Open-Meteo hourly columns -> [{time, var: value, ...}] */
+export function hourlyRows(j) {
+  const h = j.hourly;
+  return h.time.map((t, i) => Object.fromEntries([["time", t], ...Object.keys(h).filter((k) => k !== "time").map((k) => [k, h[k][i]])]));
 }
 
 export const ENSEMBLE_MODEL = "ecmwf_ifs025"; // the only Open-Meteo ensemble with low cloud at YCG (checked 2026-10-03)

@@ -1,10 +1,5 @@
-import { TZ, localDate, wall, parseMetar, parseTaf, predictDay, riskLabel, fmtVis, ensembleByHour, ENSEMBLE_MODEL, ENSEMBLE_VARS } from "./wx.js";
+import { localDate, wall, parseMetar, parseTaf, predictDay, riskLabel, fmtVis, ensembleByHour, forecastUrl, ensembleUrl, hourlyRows, flightsFor } from "./wx.js";
 
-const LAT = 49.2961, LON = -117.6325;
-const SCHEDULE = [
-  { flight: "AC8376", from: "YVR", to: "YCG", kind: "arrival", sched_dep: "09:05", sched_arr: "10:14" },
-  { flight: "AC8377", from: "YCG", to: "YVR", kind: "departure", sched_dep: "10:50", sched_arr: "12:05" },
-];
 const OUTCOMES = {
   on_time: { label: "On time", cls: "on_time", status: "good" },
   delayed: { label: "Delayed >15 min", cls: "delayed", status: "warning" },
@@ -66,31 +61,14 @@ async function getJSON(url) {
   return r.json();
 }
 async function loadForecast() {
-  const p = new URLSearchParams({
-    latitude: LAT, longitude: LON, timezone: TZ, forecast_days: "3", wind_speed_unit: "kn",
-    hourly: "temperature_2m,precipitation,rain,snowfall,cloud_cover_low,visibility,wind_speed_10m,wind_gusts_10m,weather_code",
-  });
-  state.forecastUrl = `https://api.open-meteo.com/v1/forecast?${p}`;
-  const j = await getJSON(state.forecastUrl);
-  const h = j.hourly;
-  return h.time.map((t, i) => Object.fromEntries([["time", t], ...Object.keys(h).filter((k) => k !== "time").map((k) => [k, h[k][i]])]));
+  state.forecastUrl = forecastUrl();
+  return hourlyRows(await getJSON(state.forecastUrl));
 }
+const loadEnsemble = async () => ensembleByHour(await getJSON(ensembleUrl()));
 
-async function loadEnsemble() {
-  const p = new URLSearchParams({ latitude: LAT, longitude: LON, timezone: TZ, forecast_days: "3", wind_speed_unit: "kn", models: ENSEMBLE_MODEL, hourly: ENSEMBLE_VARS.join(",") });
-  return ensembleByHour(await getJSON(`https://ensemble-api.open-meteo.com/v1/ensemble?${p}`));
-}
-
-const state = { latest: null, history: { flights: [] }, forecast: null, fcDay: 0, range: 30 };
+const state = { latest: null, history: { flights: [] }, predictions: [], forecast: null, fcDay: 0, range: 30 };
 
 // --------------------------------------------------------------- render
-
-function flightsFor(dateIso, recs) {
-  return SCHEDULE.map((s) => {
-    const r = (recs || []).find((x) => x.flight === s.flight && (!x.date || x.date === dateIso));
-    return r ? { ...s, ...r, sched_dep: r.sched_dep || s.sched_dep, sched_arr: r.sched_arr || s.sched_arr } : { ...s, date: dateIso, status: "schedule" };
-  });
-}
 
 function predictionsFor(dateIso, flights, metar, taf) {
   return predictDay({ dateIso, flights, metar, taf, forecast: state.forecast, ensemble: state.ensemble, history: state.history.flights });
@@ -331,6 +309,7 @@ function renderHistory() {
   $("#hist-legend").innerHTML = Object.values(OUTCOMES).map((o) => `<span><span class="sw ${o.cls}"></span>${o.label}</span>`).join("") + `<span><span class="sw unknown"></span>Unknown</span><span><span class="sw none"></span>No record</span>`;
 
   renderRolling();
+  renderSkill();
 
   // by ceiling at scheduled time (arrivals only — the weather-sensitive leg)
   const buckets = [["No ceiling", (c) => c == null], ["4,000 ft +", (c) => c >= 4000], ["2,000–3,900 ft", (c) => c >= 2000 && c < 4000], ["Below 2,000 ft", (c) => c != null && c < 2000]];
@@ -348,6 +327,21 @@ function renderHistory() {
   $("#hist-table").innerHTML = `<thead><tr><th>Date</th><th>Flight</th><th>Outcome</th><th>Dep sched / act</th><th>Arr sched / act</th><th>Arr delay</th><th>METAR at YCG</th></tr></thead><tbody>` +
     [...state.history.flights].reverse().map((r) => `<tr><td>${r.date}</td><td>${ext(fsUrl(r.flight, r.date), r.flight)}</td><td>${r.outcome ? `<span class="sw ${outcomeOf(r).cls}"></span> ${outcomeOf(r).label}${r.diverted_to ? ` (${esc(r.diverted_to)})` : ""}` : esc(r.status)}</td>
       <td>${r.sched_dep} / ${r.dep_time || "—"}</td><td>${r.sched_arr} / ${r.arr_time || "—"}</td><td>${r.arr_delay_min ?? "—"}${r.arr_delay_min != null ? " min" : ""}</td><td class="metar">${esc(r.metar || "")} ${ext(iemUrl(r.date), "archive ↗")}</td></tr>`).join("") + `</tbody>`;
+}
+
+// Brier score of the logged outlook vs. the base rate alone, per lead time (scripts/predict.mjs)
+function renderSkill() {
+  const outcome = Object.fromEntries(state.history.flights.filter(known).map((r) => [`${r.date}|${r.flight}`, ["cancelled", "diverted"].includes(r.outcome) ? 1 : 0]));
+  const rows = [48, 24, 12, 6, 3, 1].map((lead) => {
+    const ps = state.predictions.filter((r) => r.lead === lead && `${r.date}|${r.flight}` in outcome);
+    const brier = (key) => ps.reduce((a, r) => a + (r[key] - outcome[`${r.date}|${r.flight}`]) ** 2, 0) / ps.length;
+    const b = ps.length ? brier("p") : null, b0 = ps.length ? brier("base") : null;
+    return `<tr><td>${lead} h</td><td>${ps.length}</td><td>${b == null ? "—" : b.toFixed(3)}</td><td>${b0 == null ? "—" : b0.toFixed(3)}</td><td>${b != null && b0 > 0 ? `${Math.round((1 - b / b0) * 100)}%` : "—"}</td></tr>`;
+  });
+  const n = state.predictions.length;
+  $("#skill").innerHTML = `<div class="chart-title">How good is the outlook? <span class="muted">Brier score (lower is better) of predictions logged before each flight, vs. the base rate alone</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Lead time</th><th>Flights</th><th>Outlook</th><th>Base rate</th><th>Skill</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>
+    <p class="muted" style="font-size:.8rem;margin:8px 0 0">${n} predictions logged since tracking began; skill above 0% means the weather terms help at that lead time. It takes a winter with cancellations before these numbers mean much. ${ext("data/predictions.json", "predictions.json")}</p>`;
 }
 
 function renderRolling() {
@@ -449,7 +443,8 @@ $("#theme").addEventListener("click", () => {
 
 async function load() {
   const bust = `?t=${Math.floor(Date.now() / 60000)}`;
-  const [latest, history, forecast, ensemble] = await Promise.allSettled([getJSON(`data/latest.json${bust}`), getJSON(`data/history.json${bust}`), loadForecast(), loadEnsemble()]);
+  const [latest, history, forecast, ensemble, preds] = await Promise.allSettled([getJSON(`data/latest.json${bust}`), getJSON(`data/history.json${bust}`), loadForecast(), loadEnsemble(), getJSON(`data/predictions.json${bust}`)]);
+  if (preds.status === "fulfilled") state.predictions = preds.value.predictions;
   if (latest.status === "fulfilled") state.latest = latest.value;
   if (history.status === "fulfilled") state.history = history.value;
   if (forecast.status === "fulfilled") state.forecast = forecast.value;

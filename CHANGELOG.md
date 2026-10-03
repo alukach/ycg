@@ -14,6 +14,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - Today's arrival card shows where the inbound aircraft is right now (tail number from FlightStats, live position from adsb.lol), e.g. *on the ground at YVR* or *airborne, 48 nm from YCG*.
 - CYCG NOTAMs from NAV CANADA, with runway, approach, lighting and navaid notices and contaminated-runway reports flagged. Flagged temporary NOTAMs in force today appear as an alert at the top of the page.
 - Status-change alerts: delays, cancellations, diversions and arrivals are logged to `data/events.json` and published as an Atom feed (`data/feed.xml`, linked in the header). Set `NTFY_TOPIC` to also push them to ntfy.sh.
+- The outlook is logged at fixed lead times (48, 24, 12, 6, 3 and 1 h before each flight) to `data/predictions.json`. History shows its Brier score against the base rate alone, per lead time, so you can see whether the weather terms help.
 
 ### Changed
 - Weather-model evidence is weighted down with lead time (≈0.5 at 24 h, 0.25 at 48 h), so tomorrow and the day after lean on the seasonal base and say so.

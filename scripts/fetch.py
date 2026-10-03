@@ -36,7 +36,7 @@ FLIGHTS = [
     {"flight": "AC8377", "carrier": "AC", "number": "8377", "from": "YCG", "to": "YVR", "kind": "departure"},
 ]
 STATION = "CYCG"
-# Published times, used only for records FlightStats never returned (keep in sync with assets/app.js)
+# Published times, used only for records FlightStats never returned (keep in sync with assets/wx.js)
 SCHEDULE = [
     {"flight": "AC8376", "sched_dep": "09:05", "sched_arr": "10:14"},
     {"flight": "AC8377", "sched_dep": "10:50", "sched_arr": "12:05"},

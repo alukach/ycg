@@ -19,5 +19,5 @@ python -m http.server                      # view at http://localhost:8000
 ## Conventions
 
 - No build step and no dependencies: Python stdlib, plain ES modules, no frameworks.
-- `data/history.json` and `data/events.json` are committed by the Action. Don't hand-edit them except to correct bad records, and note any correction in the changelog.
-- The outlook weights are hand-set until enough history exists to fit them. If you change a weight, explain why in a comment.
+- `data/history.json`, `data/events.json` and `data/predictions.json` (written by `scripts/predict.mjs`) are committed by the Action. Don't hand-edit them except to correct bad records, and note any correction in the changelog.
+- The outlook weights are hand-set until enough history exists to fit them; the page's "How good is the outlook?" table (Brier score per lead time from `data/predictions.json`) is the yardstick. If you change a weight, explain why in a comment.

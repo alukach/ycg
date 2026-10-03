@@ -88,3 +88,8 @@ test("ensemble spread gives a range around the estimate", () => {
   assert.ok(d.range && d.range[1] >= a.range[1]);
   assert.ok(a.sources.includes("ensemble"));
 });
+
+test("predictions are logged once per lead window", async () => {
+  const { leadBucket } = await import("./predict.mjs");
+  assert.deepEqual([47, 24.5, 13, 0.5, 49, 0].map(leadBucket), [48, 48, 24, 1, null, null]);
+});

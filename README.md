@@ -12,6 +12,7 @@ GitHub Actions (cron, every 15 min in the flight window)
                    ├─► NAV CANADA CFPS (CYCG NOTAMs)           │
                    └─► AeroDataBox (optional fallback)         ─┘   data/history.json, events.json (committed when changed)
                                                                     data/feed.xml (Atom), ntfy.sh push (optional)
+  scripts/predict.mjs ──► data/predictions.json (outlook logged at fixed lead times)
   └─► GitHub Pages deploy (actions/deploy-pages)
 
 Browser: index.html + assets/app.js
@@ -21,6 +22,7 @@ Browser: index.html + assets/app.js
 
 - **Flight status** is scraped from FlightStats' public tracker pages. The parser tries the embedded Next.js state first and falls back to the rendered text. Each run uploads the raw HTML as a `debug-html` artifact (kept 3 days) so a markup change can be fixed quickly.
 - **History**: past days are finalised once FlightStats reports Arrived / Cancelled / Diverted. Each record keeps the METAR closest to the scheduled YCG time, so outcomes can be compared against the observed ceiling and visibility. Records are ~0.5 KB, so a year is well under 1 MB and stays in git.
+- **Prediction log**: `scripts/predict.mjs` runs the same outlook code under Node and records one prediction per flight in each lead window (48/24/12/6/3/1 h). The page scores these against outcomes (Brier score per lead time), and that's the data for fitting the weights.
 - **Outlook**: `assets/wx.js` is a transparent heuristic: a seasonal base rate (`MONTH_BASE`) plus logit terms for ceiling, visibility, fog/snow/freezing precipitation and gusts, taken from the METAR (if within ~75 min), the TAF (incl. TEMPO/PROB groups) or Open-Meteo. AC8377 follows AC8376 because it is the same aircraft. Live status overrides everything. Re-tune the weights against `data/history.json` once a winter of data exists.
 
 ## Setup
