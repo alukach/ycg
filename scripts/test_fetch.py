@@ -27,7 +27,7 @@ TEXT_ESTIMATED = """<div>on behalf of Air Canada</div><div>Scheduled</div><div>D
 OUT_OF_RANGE = "<div>Flight Status Not Available</div><div>DATE IS OUT OF RANGE</div>"
 
 NEXT = {"props": {"initialState": {"flightTracker": {"flight": {
-    "status": {"status": "Arrived", "statusCode": "A", "statusDescription": "Delayed by 19m"},
+    "status": {"status": "Arrived", "statusCode": "L", "statusDescription": "Delayed by 19m"},
     "schedule": {"scheduledDeparture": "2026-10-02T10:50:00.000", "scheduledArrival": "2026-10-02T12:05:00.000",
                  "estimatedActualDeparture": "2026-10-02T10:49:00.000", "estimatedActualArrival": "2026-10-02T12:24:00.000",
                  "estimatedActualDepartureTitle": "Actual", "estimatedActualArrivalTitle": "Actual"},

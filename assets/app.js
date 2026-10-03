@@ -172,10 +172,14 @@ function renderFlights() {
   const preds = predictionsFor(today, flights, metar, taf);
   $("#flights").innerHTML = flights.map((f, i) => flightCard(f, preds[i])).join("");
 
-  const tmr = addDays(today, 1);
-  const tFlights = flightsFor(tmr, (L?.tomorrow || []).filter((r) => r.date === tmr));
-  const tPreds = predictionsFor(tmr, tFlights, null, taf);
-  $("#tomorrow").innerHTML = tFlights.map((f, i) => flightCard(f, tPreds[i], true)).join("");
+  // ponytail: horizon is bounded by Open-Meteo forecast_days (3); beyond that it's base rate only
+  $("#tomorrow").innerHTML = [1, 2].map((n) => {
+    const d = addDays(today, n);
+    const fs = flightsFor(d, (L?.tomorrow || []).filter((r) => r.date === d));
+    const ps = predictionsFor(d, fs, null, taf);
+    return `<h3>${n === 1 ? "Tomorrow" : fmtDay(d, { weekday: "long" })} · ${fmtDay(d, { month: "short", day: "numeric" })}</h3>
+      <div class="flights small">${fs.map((f, i) => flightCard(f, ps[i], true)).join("")}</div>`;
+  }).join("");
 }
 
 function renderObs() {

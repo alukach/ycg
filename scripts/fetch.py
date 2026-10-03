@@ -64,7 +64,7 @@ STATUS_WORDS = [
     ("delayed", "delayed"),
     ("scheduled", "scheduled"),
 ]
-STATUS_CODES = {"A": "arrived", "L": "arrived", "C": "cancelled", "D": "diverted", "S": "scheduled", "R": "diverted", "U": "unknown"}
+STATUS_CODES = {"A": "en_route", "L": "arrived", "C": "cancelled", "NO": "cancelled", "D": "diverted", "S": "scheduled", "R": "diverted", "U": "unknown"}
 
 
 def norm_status(text: str | None) -> str:

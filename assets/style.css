@@ -184,3 +184,4 @@ a:hover { text-decoration: underline; }
 .f-num a { color: inherit; }
 .src { font-size: .78rem; color: var(--muted); margin: 8px 0 0; }
 .about code { font-size: .85em; }
+#tomorrow h3 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted); }
