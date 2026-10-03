@@ -167,6 +167,9 @@ def parse_flightstats_json(page: str) -> dict | None:
             if div or (isinstance(st, dict) and st.get("diverted")):
                 out["status"] = "diverted"
                 out["diverted_to"] = div
+            track = (d.get("positional") or {}).get("flexTrack") or {}
+            out["tail"] = track.get("tailNumber")
+            out["equipment"] = ((d.get("additionalFlightInfo") or {}).get("equipment") or {}).get("iata") or track.get("equipment")
             if out["sched_dep"] or out["sched_arr"]:
                 return out
     return None
@@ -271,6 +274,36 @@ def fetch_aerodatabox(f: dict, day: dt.date) -> dict | None:
         "dep_is_actual": bool(dep_act), "arr_is_actual": bool(arr_act),
         "diverted_to": (arr.get("airport") or {}).get("iata") if raw.lower() == "diverted" else None,
     }
+
+
+# ------------------------------------------------------------------ aircraft
+
+AIRPORTS = {"YVR": (49.1939, -123.1844), "YCG": (49.2964, -117.6325), "YLW": (49.9561, -119.3778), "YXC": (49.6108, -115.7820)}
+
+
+def nm_between(a: tuple, b: tuple) -> float:
+    import math
+    la1, lo1, la2, lo2 = map(math.radians, (*a, *b))
+    h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
+    return 3440.1 * 2 * math.asin(math.sqrt(h))
+
+
+def fetch_aircraft(tail: str) -> dict | None:
+    """Live ADS-B position of the inbound aircraft from adsb.lol (ODbL). None if the lookup failed."""
+    try:
+        j = json.loads(get(f"https://api.adsb.lol/v2/reg/{tail}", timeout=15))
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! adsb.lol {tail}: {e}", file=sys.stderr)
+        return None
+    ac = next((a for a in j.get("ac") or [] if a.get("lat") is not None), None)
+    if not ac:
+        return {"tail": tail, "seen": False}
+    pos = (ac["lat"], ac["lon"])
+    near = min(AIRPORTS, key=lambda k: nm_between(pos, AIRPORTS[k]))
+    alt = ac.get("alt_baro")
+    return {"tail": tail, "seen": True, "on_ground": alt == "ground", "alt_ft": alt if isinstance(alt, (int, float)) else None,
+            "gs_kt": ac.get("gs"), "nearest": near, "nearest_nm": round(nm_between(pos, AIRPORTS[near])),
+            "age_s": round(ac.get("seen_pos", ac.get("seen", 0)))}
 
 
 # ------------------------------------------------------------------- weather
@@ -463,6 +496,9 @@ def main() -> int:
             archive.setdefault(r["date"], fetch_iem_metars(day))
             r["metar"] = nearest_metar(archive[r["date"]], when)
 
+    inbound = next((r for r in flights_today if r["flight"] == "AC8376"), None)
+    aircraft = fetch_aircraft(inbound["tail"]) if inbound and inbound.get("tail") and not inbound["outcome"] else None
+
     latest = {
         "generated_at": now.isoformat(timespec="seconds"),
         "date": today.isoformat(),
@@ -472,6 +508,7 @@ def main() -> int:
         "metars": metars[:30],
         "taf": taf,
         "failures": failures,
+        "aircraft": aircraft,
     }
     (DATA / "latest.json").write_text(json.dumps(latest, indent=1) + "\n")
 

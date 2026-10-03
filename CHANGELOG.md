@@ -11,6 +11,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - For flights 12 h+ ahead, the outlook averages the 51-member ECMWF ensemble (Open-Meteo) instead of a single model run, and cards show the range across runs.
 - History keeps gaps visible: a flight with no final status by the time FlightStats stops serving it (3 days), or a day the job never ran, is recorded as *Unknown* and excluded from rates.
 - History records without weather get the METAR nearest the flight time from the Iowa Environmental Mesonet archive.
+- Today's arrival card shows where the inbound aircraft is right now (tail number from FlightStats, live position from adsb.lol), e.g. *on the ground at YVR* or *airborne, 48 nm from YCG*.
 
 ### Changed
 - Weather-model evidence is weighted down with lead time (≈0.5 at 24 h, 0.25 at 48 h), so tomorrow and the day after lean on the seasonal base and say so.

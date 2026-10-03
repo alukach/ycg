@@ -113,6 +113,13 @@ function timeCell(label, sched, t, isActual, cancelled) {
   return `<div class="time">${label} <s>${sched}</s> <b>${t}</b> <span class="${cls}">${d > 0 ? "+" : ""}${d}m</span>${isActual ? "" : " est."}</div>`;
 }
 
+function aircraftLine(a) {
+  const name = `Aircraft ${ext(`https://adsb.lol/?reg=${encodeURIComponent(a.tail)}`, esc(a.tail))}`;
+  if (!a.seen) return `${name}: not currently visible on ADS-B`;
+  const where = a.on_ground ? `on the ground${a.nearest_nm <= 5 ? ` at ${a.nearest}` : ""}` : `airborne, ${a.nearest_nm} nm from ${a.nearest}${a.alt_ft ? ` at ${a.alt_ft.toLocaleString()} ft` : ""}`;
+  return `${name}: ${where}${a.age_s > 120 ? ` (${Math.round(a.age_s / 60)} min ago)` : ""}`;
+}
+
 function flightCard(f, pred, compact = false) {
   const [pillText, pillCls] = STATUS_PILL[f.status] || STATUS_PILL.unknown;
   const cancelled = f.status === "cancelled";
@@ -132,6 +139,7 @@ function flightCard(f, pred, compact = false) {
       <div class="end"><div class="iata">${f.to}</div>${timeCell("Arr", f.sched_arr, f.arr_time, f.arr_is_actual, cancelled)}</div>
     </div>
     ${f.status === "diverted" && f.diverted_to ? `<div class="f-dir"><b>${f.diverted_to === f.from ? `Returned to ${esc(f.from)}` : `Diverted to ${esc(f.diverted_to)}`}</b></div>` : ""}
+    ${f.aircraft ? `<div class="f-dir">${aircraftLine(f.aircraft)}</div>` : ""}
     ${f.status_text && !compact ? `<div class="f-dir">Airline status: ${esc(f.status_text)} · ${ext(f.source_url || fsUrl(f.flight, f.date), "FlightStats ↗")}</div>` : ""}
     <div class="risk">
       ${gauge(pred.p, rl.key)}
@@ -151,6 +159,7 @@ function renderFlights() {
   const L = state.latest;
   const recs = L && L.date === today ? L.flights : (L?.tomorrow || []).filter((r) => r.date === today);
   const flights = flightsFor(today, recs);
+  if (L?.aircraft && L.date === today && !flights[0].outcome) flights[0].aircraft = L.aircraft;
   const metar = L?.metars?.length ? parseMetar(L.metars[0]) : null;
   const taf = parseTaf(L?.taf);
   const preds = predictionsFor(today, flights, metar, taf);

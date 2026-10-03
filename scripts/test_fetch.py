@@ -88,6 +88,13 @@ class Parsers(unittest.TestCase):
         # Fails if the runner's tz database predates 2026b (BC on UTC-7 year-round from 2026-11-01).
         self.assertEqual(dt.datetime(2026, 12, 15, 10, tzinfo=fetch.TZ).utcoffset(), dt.timedelta(hours=-7))
 
+    def test_next_data_tail(self):
+        nxt = json.loads(json.dumps(NEXT))
+        nxt["props"]["initialState"]["flightTracker"]["flight"]["positional"] = {"flexTrack": {"tailNumber": "C-GGMZ", "equipment": "DH4"}}
+        r = fetch.parse_flightstats_json(f'<script id="__NEXT_DATA__" type="application/json">{json.dumps(nxt)}</script>')
+        self.assertEqual((r["tail"], r["equipment"]), ("C-GGMZ", "DH4"))
+        self.assertAlmostEqual(fetch.nm_between(fetch.AIRPORTS["YVR"], fetch.AIRPORTS["YCG"]), 218, delta=3)  # ~404 km
+
     def test_nearest_metar(self):
         metars = ["METAR CYCG 021800Z VRB02KT 15SM SCT085 15/08 A3006", "METAR CYCG 021700Z 00000KT 15SM FEW140 13/08 A3008"]
         when = dt.datetime(2026, 10, 2, 17, 14, tzinfo=dt.timezone.utc)

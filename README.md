@@ -8,6 +8,7 @@ A static dashboard for Castlegar / West Kootenay Regional Airport (YCG): today's
 GitHub Actions (cron, every 15 min in the flight window)
   scripts/fetch.py ──► FlightStats flight tracker (±3 days)   ─┐
                    ├─► aviationweather.gov METAR (72 h) + TAF  ├─► data/latest.json  (deployed only)
+                   ├─► adsb.lol (inbound aircraft position)    │
                    └─► AeroDataBox (optional fallback)         ─┘   data/history.json (committed when it changes)
   └─► GitHub Pages deploy (actions/deploy-pages)
 
@@ -56,6 +57,7 @@ python -m http.server                       # http://localhost:8000
 | Historical METAR archive | [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/request/download.phtml?network=CA_BC_ASOS) | Linked from history rows; candidate for weather backfill |
 | 84% success rate, shuttle | [Boundary Creek Times, 2024](https://www.boundarycreektimes.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017) | Reference line, context |
 | Airport / approach | [Wikipedia](https://en.wikipedia.org/wiki/West_Kootenay_Regional_Airport) | Context |
+| Inbound aircraft position | [adsb.lol API](https://api.adsb.lol/docs) (ODbL) | Where today's aircraft is now |
 | Optional fallback | [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) | Status if FlightStats fails |
 
 Seasonal base rates (`MONTH_BASE` in `assets/wx.js`) are hand-set estimates, not published figures.
