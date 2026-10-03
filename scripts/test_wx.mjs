@@ -56,3 +56,12 @@ test("model evidence shrinks toward the base as lead time grows", () => {
   assert.ok(near.p > far.p && far.p > far.factors[0].p, `${near.p} ${far.p}`);
   assert.ok(far.modelWeight < 0.3);
 });
+
+test("a low-cloud METAR two hours out still counts, at reduced weight", () => {
+  const now = new Date("2026-10-03T15:05Z");
+  const metar = parseMetar("METAR CYCG 031500Z 02006KT 15SM OVC016 12/09 A3010", now);
+  const [a] = day("2026-10-03", { now, metar });
+  const f = a.factors.find((x) => x.label.startsWith("ceiling"));
+  assert.ok(f && f.v > 0 && f.v < 1.2, JSON.stringify(f));
+  assert.ok(a.sources.includes("METAR"));
+});

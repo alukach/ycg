@@ -208,6 +208,14 @@ export const CLEAR_DAY = -1.0;
  * ponytail: τ=36 h is a guess; fit it per lead bucket from data/predictions.json once outcomes accrue.
  */
 export const modelWeight = (leadH) => Math.exp(-leadH / 36);
+/**
+ * Weight on the latest METAR as a persistence forecast, by hours from the observation to the
+ * flight: full within 75 min, then fading (≈0.6 at 2 h, 0.15 at 5 h), none beyond 6 h or if stale.
+ */
+export function metarWeight(gapH) {
+  if (gapH == null || gapH < -1.25 || gapH > 6) return 0;
+  return gapH <= 1.25 ? 1 : Math.exp(-(gapH - 1.25) / 2);
+}
 const logit = (p) => Math.log(p / (1 - p));
 const sigmoid = (x) => 1 / (1 + Math.exp(-x));
 
@@ -307,12 +315,14 @@ export function predict(ctx) {
 
   // --- weather at the scheduled YCG time
   const now = ctx.now ?? new Date();
-  const metarFresh = ctx.metar && ctx.metar.time && Math.abs(ctx.when - ctx.metar.time) < 75 * 60e3;
   const taf = tafAt(ctx.taf, ctx.when);
   const sources = [];
   let main = { total: 0, parts: [] };
-  if (metarFresh) {
-    main = conditionScore(ctx.metar);
+  const mtw = metarWeight(ctx.metar?.time ? (ctx.when - ctx.metar.time) / 3600e3 : null);
+  if (mtw > 0) {
+    const m = conditionScore(ctx.metar);
+    const tag = mtw < 1 ? ` (now, ×${mtw.toFixed(2)})` : "";
+    main = { total: m.total * mtw, parts: m.parts.map((p) => ({ ...p, v: p.v * mtw, label: p.label + tag })) };
     sources.push("METAR");
   }
   if (taf?.prevailing) {
@@ -343,7 +353,8 @@ export function predict(ctx) {
   // The base rate is an average over all days, bad weather included, so weather terms measured
   // from zero would count bad days twice. Once a weather source covers the flight, start from a
   // clear day instead. ponytail: hand-set (clear December ≈ 11% vs 25% average); fit from history.
-  if (sources.length) factors.push({ label: "Clear-day adjustment", v: CLEAR_DAY * (modelOnly ? mw : 1), isBase: true });
+  const evidenceW = Math.max(mtw, taf?.prevailing ? 1 : 0, om ? mw : 0);
+  if (sources.length) factors.push({ label: "Clear-day adjustment", v: CLEAR_DAY * evidenceW, isBase: true });
 
   let x = factors.reduce((a, f) => a + f.v, 0);
   let p = sigmoid(x);
