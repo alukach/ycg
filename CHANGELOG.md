@@ -19,6 +19,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - "If the flight is cancelled" panel: how Air Canada's free shuttle via Kelowna works in each direction, typical timings, eligibility, and links to flight status, bookings and the airport FAQ. It opens automatically on disrupted or Elevated-risk days.
 - Keyboard and screen-reader access: history cells can be reached with Tab and arrow keys (tooltips on focus), the forecast and 30-day charts have text equivalents, and the day/range tabs support arrow keys.
 - Links to a specific day (`#date=YYYY-MM-DD`, also used by feed entries) jump to and highlight that day's cards or history rows. Day headings are shareable links, and the page has link-preview (OpenGraph) tags.
+- "Arrivals that land, by month" table for planning trips weeks ahead: the seasonal estimate next to recorded outcomes.
 
 ### Changed
 - Weather-model evidence is weighted down with lead time (≈0.5 at 24 h, 0.25 at 48 h), so tomorrow and the day after lean on the seasonal base and say so.

@@ -165,7 +165,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .strip text { fill: var(--muted); font-size: 10px; }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .8rem; color: var(--text-2); margin-top: 8px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
-#by-ceiling, #skill { margin-top: 14px; }
+#by-ceiling, #by-month, #skill { margin-top: 14px; }
 .table-wrap { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-size: .82rem; margin-top: 10px; }
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }

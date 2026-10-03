@@ -1,4 +1,4 @@
-import { localDate, wall, parseMetar, parseTaf, predictDay, riskLabel, fmtVis, ensembleByHour, forecastUrl, ensembleUrl, hourlyRows, flightsFor } from "./wx.js";
+import { MONTH_BASE, localDate, wall, parseMetar, parseTaf, predictDay, riskLabel, fmtVis, ensembleByHour, forecastUrl, ensembleUrl, hourlyRows, flightsFor } from "./wx.js";
 
 const OUTCOMES = {
   on_time: { label: "On time", cls: "on_time", status: "good" },
@@ -344,6 +344,7 @@ function renderHistory() {
   $("#hist-legend").innerHTML = Object.values(OUTCOMES).map((o) => `<span><span class="sw ${o.cls}"></span>${o.label}</span>`).join("") + `<span><span class="sw unknown"></span>Unknown</span><span><span class="sw none"></span>No record</span>`;
 
   renderRolling();
+  renderMonths();
   renderSkill();
 
   // by ceiling at scheduled time (arrivals only — the weather-sensitive leg)
@@ -362,6 +363,19 @@ function renderHistory() {
   $("#hist-table").innerHTML = `<thead><tr><th>Date</th><th>Flight</th><th>Outcome</th><th>Dep sched / act</th><th>Arr sched / act</th><th>Arr delay</th><th>METAR at YCG</th></tr></thead><tbody>` +
     [...state.history.flights].reverse().map((r) => `<tr data-date="${r.date}"><td>${r.date}</td><td>${ext(fsUrl(r.flight, r.date), r.flight)}</td><td>${r.outcome ? `<span class="sw ${outcomeOf(r).cls}"></span> ${outcomeOf(r).label}${r.diverted_to ? ` (${esc(r.diverted_to)})` : ""}` : esc(r.status)}</td>
       <td>${r.sched_dep} / ${r.dep_time || "—"}</td><td>${r.sched_arr} / ${r.arr_time || "—"}</td><td>${r.arr_delay_min ?? "—"}${r.arr_delay_min != null ? " min" : ""}</td><td class="metar">${esc(r.metar || "")} ${ext(iemUrl(r.date), "archive ↗")}</td></tr>`).join("") + `</tbody>`;
+}
+
+// For trip planning: the seasonal estimate beside what's actually been recorded, per calendar month
+function renderMonths() {
+  const arr = state.history.flights.filter((r) => r.flight === "AC8376" && known(r));
+  const name = (m) => new Intl.DateTimeFormat("en-CA", { month: "short", timeZone: "UTC" }).format(new Date(Date.UTC(2026, m, 15)));
+  const rows = MONTH_BASE.map((est, m) => {
+    const recs = arr.filter((r) => +r.date.slice(5, 7) === m + 1), fails = recs.filter((r) => ["cancelled", "diverted"].includes(r.outcome)).length;
+    return `<tr><td>${name(m)}</td><td>${pct(1 - est)}</td><td>${recs.length ? `${pct(1 - fails / recs.length)} <span class="muted">(${recs.length - fails} of ${recs.length})</span>` : "—"}</td></tr>`;
+  });
+  $("#by-month").innerHTML = `<div class="chart-title">Arrivals that land, by month <span class="muted">for planning a trip weeks ahead</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Month</th><th>Estimated</th><th>Recorded</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>
+    <p class="muted" style="font-size:.8rem;margin:8px 0 0">"Estimated" is a hand-set seasonal guess (winter fog and low cloud cause most failures), not a published figure. "Recorded" fills in as the tracker runs.</p>`;
 }
 
 // Brier score of the logged outlook vs. the base rate alone, per lead time (scripts/predict.mjs)
