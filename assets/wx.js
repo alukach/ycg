@@ -431,10 +431,10 @@ function pick(g) {
 }
 
 export function riskLabel(p) {
-  if (p >= 0.6) return { key: "critical", text: "High" };
-  if (p >= 0.3) return { key: "serious", text: "Elevated" };
-  if (p >= 0.12) return { key: "warning", text: "Moderate" };
-  return { key: "good", text: "Low" };
+  if (p >= 0.6) return { key: "critical", text: "High", advice: "Disruption likely. Consider rebooking, or plan on the Kelowna shuttle." };
+  if (p >= 0.3) return { key: "serious", text: "Elevated", advice: "Real chance of cancellation. Know your shuttle option and check status before leaving." };
+  if (p >= 0.12) return { key: "warning", text: "Moderate", advice: "Probably fine. Check again in the morning; the airport forecast updates around 5 a.m." };
+  return { key: "good", text: "Low", advice: "No action needed." };
 }
 
 /**

@@ -74,14 +74,26 @@ function predictionsFor(dateIso, flights, metar, taf) {
   return predictDay({ dateIso, flights, metar, taf, forecast: state.forecast, ensemble: state.ensemble, history: state.history.flights });
 }
 
-function gauge(p, statusKey) {
+// The outlook is a hand-tuned estimate: show it to the nearest 5%, never as a precise figure.
+const approx = (p) => (p < 0.03 ? "<5%" : p > 0.97 ? ">95%" : `~${Math.round(p * 20) * 5}%`);
+
+function gauge(p, statusKey, final, status) {
+  if (final) {
+    const [icon, cls, label] = status === "arrived" ? ["✓", "good", "Flight completed"] : status === "diverted" ? ["↪", "serious", "Flight diverted"] : ["✕", "critical", "Flight cancelled"];
+    return `<div class="gauge done ${cls}" role="img" aria-label="${label}">${icon}</div>`;
+  }
   const r = 30, c = 2 * Math.PI * r, v = Math.max(0.02, Math.min(1, p));
-  return `<svg class="gauge" viewBox="0 0 76 76" role="img" aria-label="${pct(p)} chance of cancellation or diversion">
+  return `<svg class="gauge" viewBox="0 0 76 76" role="img" aria-label="About ${pct(p)} chance of cancellation or diversion">
     <circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="8"/>
-    <circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--${statusKey})" stroke-width="8" stroke-linecap="round"
+    <circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--${statusKey}-ring, var(--${statusKey}))" stroke-width="8" stroke-linecap="round"
       stroke-dasharray="${c * v} ${c}" transform="rotate(-90 38 38)"/>
-    <text x="38" y="44" text-anchor="middle">${pct(p)}</text></svg>`;
+    <text x="38" y="44" text-anchor="middle">${approx(p)}</text></svg>`;
 }
+
+/** Forecast shorthand -> plain words, for factor labels. */
+const plain = (label) => label
+  .replace(/^PROB(\d+): /, "$1% chance of ").replace(/^TEMPO: /, "at times, ").replace(/^BECMG: /, "changing to ")
+  .replace(/ \(model\)/, " (weather model)").replace(/ \(now, ×([\d.]+)\)/, " (observed now)");
 
 function timeCell(label, sched, t, isActual, cancelled) {
   if (cancelled) return `<div class="time">${label} <s>${sched}</s></div>`;
@@ -104,8 +116,9 @@ function flightCard(f, pred, compact = false) {
   const rl = riskLabel(pred.p);
   const maxV = 3.5;
   const factors = pred.final ? "" : pred.factors.filter((x) => !x.isBase).sort((a, b) => b.v - a.v).slice(0, 4)
-    .map((x) => `<li><span>${esc(x.label)}</span><span class="bar"><i style="width:${Math.min(100, (x.v / maxV) * 100)}%"></i></span></li>`).join("");
-  const baseNote = pred.final ? "" : `<div class="risk-basis" title="${esc(pred.factors[0].detail || "")}">Base ${pct(pred.factors[0].p)} (${esc(pred.factors[0].label)})${factors ? "; adding:" : "; no weather risk factors"}</div>`;
+    .map((x) => `<li><span>${esc(plain(x.label))}</span><span class="bar" title="Relative weight in the estimate"><i style="width:${Math.min(100, (x.v / maxV) * 100)}%"></i></span></li>`).join("");
+  const seasonal = !pred.final && pred.modelWeight < 0.4;
+  const baseNote = pred.final ? "" : `<div class="risk-basis" title="${esc(pred.factors[0].detail || "")}">Starting point ${approx(pred.factors[0].p)} (${esc(pred.factors[0].label)})${factors ? "; adding:" : "; no weather risk factors"}</div>`;
   return `<article class="card flight">
     <div class="f-head">
       <div><div class="f-num">${ext(f.source_url || fsUrl(f.flight, f.date), f.flight)}</div><div class="f-dir">${f.kind === "arrival" ? "Arrival from Vancouver" : "Departure to Vancouver"} · Air Canada Express (Jazz)</div></div>
@@ -120,11 +133,12 @@ function flightCard(f, pred, compact = false) {
     ${f.aircraft ? `<div class="f-dir">${aircraftLine(f.aircraft)}</div>` : ""}
     ${f.status_text && !compact ? `<div class="f-dir">Airline status: ${esc(f.status_text)} · ${ext(f.source_url || fsUrl(f.flight, f.date), "FlightStats ↗")}</div>` : ""}
     <div class="risk">
-      ${gauge(pred.p, rl.key)}
+      ${gauge(pred.p, rl.key, pred.final, f.status)}
       <div>
-        <div class="risk-title">${pred.final ? esc(pred.basis) : `${rl.text} risk of cancellation or diversion`}</div>
+        <div class="risk-title">${pred.final ? esc(pred.basis) : `${rl.text} risk of cancellation or diversion${seasonal ? " (mostly seasonal)" : ""}`}</div>
+        ${pred.final ? "" : `<div class="advice">${esc(rl.advice)}</div>`}
         ${pred.final ? "" : `<div class="risk-basis">${esc(pred.basis)}</div>`}
-        ${pred.range && pct(pred.range[0]) !== pct(pred.range[1]) ? `<div class="risk-basis">Range across forecast runs: ${pct(pred.range[0])}–${pct(pred.range[1])}</div>` : ""}
+        ${pred.range && pct(pred.range[0]) !== pct(pred.range[1]) ? `<div class="risk-basis">Range across forecast runs: ${approx(pred.range[0])}–${approx(pred.range[1])}</div>` : ""}
         ${compact ? "" : baseNote}
         ${compact || !factors ? "" : `<ul class="factors">${factors}</ul>`}
       </div>
@@ -142,6 +156,11 @@ function renderFlights() {
   const taf = parseTaf(L?.taf);
   const preds = predictionsFor(today, flights, metar, taf);
   $("#flights").innerHTML = flights.map((f, i) => flightCard(f, preds[i])).join("");
+  $("#summary").innerHTML = flights.map((f, i) => {
+    const p = preds[i], [pill] = STATUS_PILL[f.status] || STATUS_PILL.unknown;
+    const delay = f.status === "delayed" && f.dep_delay_min ? ` ${f.dep_delay_min} min` : "";
+    return `<span><b>${f.flight}</b> ${f.kind === "arrival" ? "from" : "to"} Vancouver: ${esc(pill)}${delay}${p.final ? "" : ` · ${riskLabel(p.p).text.toLowerCase()} risk`}</span>`;
+  }).join("");
   // open the cancellation plan when it's likely to be needed today
   if (flights.some((f) => ["cancelled", "diverted"].includes(f.status)) || preds.some((p) => !p.final && p.p >= 0.3)) $("#if-cancelled").open = true;
 

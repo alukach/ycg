@@ -22,6 +22,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - Weather-model evidence is weighted down with lead time (≈0.5 at 24 h, 0.25 at 48 h), so tomorrow and the day after lean on the seasonal base and say so.
 - The latest METAR now counts up to 6 h before the flight, with weight fading after 75 min. Previously an 08:00 low-cloud report was ignored for a 10:14 arrival.
 - The page refreshes only while visible (and immediately when you return to it), and auto-refresh no longer scrolls the history strip back to the end.
+- Cards lead with a plain answer: a one-line summary per flight at the top, risk in words with advice (e.g. *No action needed*), and the estimate rounded to the nearest 5% ("~10%"). Forecast shorthand is spelled out ("30% chance of…", "at times…"), and "Coming days" sits above the weather charts.
 
 ### Fixed
 - FlightStats status code `A` means *Active* (airborne), not arrived. In-flight runs no longer finalise a flight early. Code `NO` (not operational) now counts as cancelled.
@@ -32,6 +33,7 @@ Notable changes to the dashboard, fetcher and outlook model. Newest first.
 - Diversions, including an AC8376 that turns back to Vancouver, are recorded from FlightStats' diverted-airport fields even when the status code says *landed*. The card and history show where the flight went.
 - Times are correct after BC moves to permanent UTC−7 on 1 Nov 2026. The page no longer relies on the browser's (often stale) time-zone data, and CI fails if the runner's tz database predates the change.
 - Dead link to the 2024 shuttle article (Boundary Creek Times returns 404) now points to the same story on the Nelson Star.
+- Cancelled, diverted and completed flights show a status icon instead of a misleading "100%"/"0%" risk gauge.
 
 ### Removed
 - The unexplained ×0.5 risk discount once the inbound aircraft is airborne. Turning back is how YCG arrivals usually fail.

@@ -32,6 +32,7 @@
 
   <section aria-labelledby="h-today">
     <h2 id="h-today">Today's flights</h2>
+    <p class="summary" id="summary" aria-live="polite"></p>
     <div id="flights" class="flights"><article class="card skeleton" aria-busy="true">Loading today's flights…</article></div>
   </section>
 
@@ -46,6 +47,11 @@
     <p class="muted">Track record, Dec 2023 – Sep 2024: 84% of flights operated; counting the shuttle, 97% of trips were completed the same day (<a href="https://www.nelsonstar.com/local-news/weather-cancellation-shuttle-to-continue-at-castlegar-airport-7619017" target="_blank" rel="noopener">Nelson Star</a>).</p>
     <p class="links"><a href="https://www.aircanada.com/flightstatus" target="_blank" rel="noopener">Air Canada flight status</a> · <a href="https://www.aircanada.com/ca/en/aco/home/book/manage-bookings.html" target="_blank" rel="noopener">Manage booking</a> · <a href="https://www.aircanada.com/ca/en/aco/home/fly/customer-support.html" target="_blank" rel="noopener">Customer support</a> · <a href="https://www.wkrairport.ca/passengers/faqs-flight-disruption-shuttle/" target="_blank" rel="noopener">Airport shuttle FAQ</a></p>
   </details>
+
+  <section aria-labelledby="h-tomorrow" id="tomorrow-sec">
+    <h2 id="h-tomorrow">Coming days</h2>
+    <div id="tomorrow"></div>
+  </section>
 
   <section aria-labelledby="h-wx">
     <div class="sec-head">
@@ -72,11 +78,6 @@
       <ul class="notams" id="notams"></ul>
       <p class="src">Source: <a href="https://plan.navcanada.ca/wxrecall/" target="_blank" rel="noopener">NAV CANADA CFPS</a>. Flagged: runway, approach, lighting, navaid or closure notices, and runway condition codes of 4 or lower.</p>
     </details>
-  </section>
-
-  <section aria-labelledby="h-tomorrow" id="tomorrow-sec">
-    <h2 id="h-tomorrow">Coming days</h2>
-    <div id="tomorrow"></div>
   </section>
 
   <section aria-labelledby="h-hist">
