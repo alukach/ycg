@@ -122,6 +122,30 @@
   },
   {
    "date": "2026-10-03",
+   "flight": "AC8376",
+   "from": "YVR",
+   "to": "YCG",
+   "kind": "arrival",
+   "status": "diverted",
+   "status_text": "Diverted to YVR Vancouver",
+   "sched_dep": "09:05",
+   "sched_arr": "10:14",
+   "dep_time": "09:56",
+   "arr_time": "12:29",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "diverted_to": "YVR",
+   "tail": "C-GGMZ",
+   "equipment": "DH4",
+   "dep_delay_min": 51,
+   "arr_delay_min": 135,
+   "outcome": "diverted",
+   "metar": "METAR CYCG 031700Z 36006KT 340V050 15SM OVC021 13/09 A3027 RMK SC8 SLP259",
+   "recorded_at": "2026-10-03T14:53:46-07:00"
+  },
+  {
+   "date": "2026-10-03",
    "flight": "AC8377",
    "from": "YCG",
    "to": "YVR",
@@ -131,17 +155,17 @@
    "sched_dep": "10:50",
    "sched_arr": "12:05",
    "dep_time": "12:10",
-   "arr_time": "13:25",
+   "arr_time": "13:19",
    "dep_is_actual": false,
    "arr_is_actual": false,
    "parser": "flightstats-json",
    "tail": "C-GGMZ",
    "equipment": "DH4",
    "dep_delay_min": 80,
-   "arr_delay_min": 80,
+   "arr_delay_min": 74,
    "outcome": "cancelled",
    "metar": "METAR CYCG 031800Z 33008KT 15SM BKN024 BKN180 14/09 A3027 RMK SC6AC1 SLP259",
-   "recorded_at": "2026-10-03T11:53:30-07:00"
+   "recorded_at": "2026-10-03T14:53:46-07:00"
   }
  ]
 }

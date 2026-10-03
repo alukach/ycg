@@ -159,7 +159,7 @@
    "arr_delay_min": null,
    "outcome": "cancelled",
    "metar": "METAR CYCG 031800Z 33008KT 15SM BKN024 BKN180 14/09 A3027 RMK SC6AC1 SLP259",
-   "recorded_at": "2026-10-03T11:53:30-07:00"
+   "recorded_at": "2026-10-03T14:53:46-07:00"
   },
   {
    "date": "2026-10-03",
@@ -182,7 +182,7 @@
    "arr_delay_min": null,
    "outcome": "cancelled",
    "metar": "METAR CYCG 031800Z 33008KT 15SM BKN024 BKN180 14/09 A3027 RMK SC6AC1 SLP259",
-   "recorded_at": "2026-10-03T11:53:30-07:00"
+   "recorded_at": "2026-10-03T14:53:46-07:00"
   }
  ]
 }
