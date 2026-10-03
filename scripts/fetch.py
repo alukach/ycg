@@ -156,6 +156,12 @@ def parse_flightstats_json(page: str) -> dict | None:
                 "arr_is_actual": "actual" in arr_est_title.lower(),
                 "parser": "flightstats-json",
             }
+            # A diversion (including a return to the origin) shows up as divertedAirport and/or
+            # status.diverted; the status code alone may still read "L" (landed).
+            div = (d.get("divertedAirport") or {}).get("iata") or (d.get("positional") or {}).get("divertedAirportCode")
+            if div or (isinstance(st, dict) and st.get("diverted")):
+                out["status"] = "diverted"
+                out["diverted_to"] = div
             if out["sched_dep"] or out["sched_arr"]:
                 return out
     return None

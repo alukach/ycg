@@ -130,6 +130,7 @@ function flightCard(f, pred, compact = false) {
       <div class="line" aria-hidden="true"></div>
       <div class="end"><div class="iata">${f.to}</div>${timeCell("Arr", f.sched_arr, f.arr_time, f.arr_is_actual, cancelled)}</div>
     </div>
+    ${f.status === "diverted" && f.diverted_to ? `<div class="f-dir"><b>${f.diverted_to === f.from ? `Returned to ${esc(f.from)}` : `Diverted to ${esc(f.diverted_to)}`}</b></div>` : ""}
     ${f.status_text && !compact ? `<div class="f-dir">Airline status: ${esc(f.status_text)} · ${ext(f.source_url || fsUrl(f.flight, f.date), "FlightStats ↗")}</div>` : ""}
     <div class="risk">
       ${gauge(pred.p, rl.key)}
@@ -325,7 +326,7 @@ function renderHistory() {
 
   // full table
   $("#hist-table").innerHTML = `<thead><tr><th>Date</th><th>Flight</th><th>Outcome</th><th>Dep sched / act</th><th>Arr sched / act</th><th>Arr delay</th><th>METAR at YCG</th></tr></thead><tbody>` +
-    [...state.history.flights].reverse().map((r) => `<tr><td>${r.date}</td><td>${ext(fsUrl(r.flight, r.date), r.flight)}</td><td>${r.outcome ? `<span class="sw ${r.outcome}"></span> ${OUTCOMES[r.outcome].label}` : esc(r.status)}</td>
+    [...state.history.flights].reverse().map((r) => `<tr><td>${r.date}</td><td>${ext(fsUrl(r.flight, r.date), r.flight)}</td><td>${r.outcome ? `<span class="sw ${r.outcome}"></span> ${OUTCOMES[r.outcome].label}${r.diverted_to ? ` (${esc(r.diverted_to)})` : ""}` : esc(r.status)}</td>
       <td>${r.sched_dep} / ${r.dep_time || "—"}</td><td>${r.sched_arr} / ${r.arr_time || "—"}</td><td>${r.arr_delay_min ?? "—"}${r.arr_delay_min != null ? " min" : ""}</td><td class="metar">${esc(r.metar || "")} ${ext(iemUrl(r.date), "archive ↗")}</td></tr>`).join("") + `</tbody>`;
 }
 

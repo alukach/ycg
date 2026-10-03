@@ -70,6 +70,15 @@ class Parsers(unittest.TestCase):
         rec = fetch.enrich(fetch.FLIGHTS[1], dt.date(2026, 10, 2), r)
         self.assertEqual((rec["arr_delay_min"], rec["outcome"]), (19, "delayed"))
 
+    def test_next_data_returned_to_origin(self):
+        nxt = json.loads(json.dumps(NEXT))
+        f = nxt["props"]["initialState"]["flightTracker"]["flight"]
+        f["status"] = {"status": "Landed", "statusCode": "L", "diverted": True}
+        f["divertedAirport"] = {"iata": "YVR"}
+        r = fetch.parse_flightstats_json(f'<script id="__NEXT_DATA__" type="application/json">{json.dumps(nxt)}</script>')
+        self.assertEqual((r["status"], r["diverted_to"]), ("diverted", "YVR"))
+        self.assertEqual(fetch.enrich(fetch.FLIGHTS[0], dt.date(2026, 10, 2), r)["outcome"], "diverted")
+
     def test_nearest_metar(self):
         metars = ["METAR CYCG 021800Z VRB02KT 15SM SCT085 15/08 A3006", "METAR CYCG 021700Z 00000KT 15SM FEW140 13/08 A3008"]
         when = dt.datetime(2026, 10, 2, 17, 14, tzinfo=dt.timezone.utc)
