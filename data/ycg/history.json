@@ -119,6 +119,29 @@
    "arr_delay_min": 19,
    "outcome": "delayed",
    "metar": "METAR CYCG 021800Z VRB02KT 15SM SCT085 BKN150 BKN200 15/08 A3006 RMK AC4AC2CI2 SLP187"
+  },
+  {
+   "date": "2026-10-03",
+   "flight": "AC8377",
+   "from": "YCG",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "cancelled",
+   "status_text": "Cancelled",
+   "sched_dep": "10:50",
+   "sched_arr": "12:05",
+   "dep_time": "12:10",
+   "arr_time": "13:25",
+   "dep_is_actual": false,
+   "arr_is_actual": false,
+   "parser": "flightstats-json",
+   "tail": "C-GGMZ",
+   "equipment": "DH4",
+   "dep_delay_min": 80,
+   "arr_delay_min": 80,
+   "outcome": "cancelled",
+   "metar": "METAR CYCG 031800Z 33008KT 15SM BKN024 BKN180 14/09 A3027 RMK SC6AC1 SLP259",
+   "recorded_at": "2026-10-03T11:53:30-07:00"
   }
  ]
 }
