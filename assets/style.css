@@ -189,3 +189,6 @@ a:hover { text-decoration: underline; }
 .notams { margin: 10px 0 0; padding-left: 18px; font-size: .82rem; color: var(--text-2); display: grid; gap: 6px; }
 .notams li.key { color: var(--text); }
 .notams li.key::marker { content: "⚠ "; }
+.skeleton { min-height: 180px; color: var(--muted); animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }

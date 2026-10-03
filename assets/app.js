@@ -407,6 +407,12 @@ function renderHeader() {
     $("#updated").title = g.toString();
   } else $("#updated").textContent = "No flight data yet";
   const alerts = [];
+  if (state.loadError) alerts.push("Couldn't load flight status. Showing the published schedule; the outlook below uses weather only.");
+  if (L?.generated_at) {
+    // the updater runs every 15 min 05:00–15:00 local and every 3 h otherwise
+    const ageMin = (Date.now() - new Date(L.generated_at)) / 60e3, h = wall(new Date()).getUTCHours();
+    if (ageMin > (h >= 5 && h < 15 ? 45 : 240)) alerts.push(`Flight data is ${ago(new Date(L.generated_at)).replace(" ago", "")} old; the updater may be down. Check the airline before travelling.`);
+  }
   if (L && L.date !== today) alerts.push(`Flight status data is from ${L.date}; today's status hasn't been fetched yet. Showing the published schedule.`);
   if (L?.failures?.length) alerts.push(`The last update couldn't read status for ${L.failures.join(", ")}.`);
   // flagged, temporary NOTAMs in force today (permanent chart notes would alert every day)
@@ -446,6 +452,7 @@ async function load() {
   const [latest, history, forecast, ensemble, preds] = await Promise.allSettled([getJSON(`data/latest.json${bust}`), getJSON(`data/history.json${bust}`), loadForecast(), loadEnsemble(), getJSON(`data/predictions.json${bust}`)]);
   if (preds.status === "fulfilled") state.predictions = preds.value.predictions;
   if (latest.status === "fulfilled") state.latest = latest.value;
+  state.loadError = latest.status === "rejected" && !state.latest;
   if (history.status === "fulfilled") state.history = history.value;
   if (forecast.status === "fulfilled") state.forecast = forecast.value;
   if (ensemble.status === "fulfilled") state.ensemble = ensemble.value;
