@@ -155,6 +155,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; background: var(--neutral); }
 .sw.on_time { background: var(--good); } .sw.delayed { background: var(--warning); }
 .sw.cancelled { background: var(--critical); } .sw.diverted { background: var(--serious); }
+.sw.unknown { background: var(--neutral); }
 .sw.none { background: transparent; outline: 1px dashed var(--neutral); outline-offset: -1px; }
 .strip { overflow-x: auto; padding-bottom: 4px; }
 .strip svg { display: block; }

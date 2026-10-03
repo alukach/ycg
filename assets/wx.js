@@ -190,7 +190,7 @@ export function rollingBase(history, beforeIso, when, days = 30) {
   const start = new Date(beforeIso + "T12:00:00Z");
   start.setUTCDate(start.getUTCDate() - days);
   const from = start.toISOString().slice(0, 10);
-  const recs = history.filter((r) => r.flight === "AC8376" && r.outcome && r.date >= from && r.date < beforeIso);
+  const recs = history.filter((r) => r.flight === "AC8376" && r.outcome && r.outcome !== "unknown" && r.date >= from && r.date < beforeIso);
   const n = recs.length;
   const fails = recs.filter((r) => r.outcome === "cancelled" || r.outcome === "diverted").length;
   const p = (fails + PRIOR_WEIGHT * prior) / (n + PRIOR_WEIGHT);

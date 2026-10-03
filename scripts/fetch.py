@@ -36,6 +36,11 @@ FLIGHTS = [
     {"flight": "AC8377", "carrier": "AC", "number": "8377", "from": "YCG", "to": "YVR", "kind": "departure"},
 ]
 STATION = "CYCG"
+# Published times, used only for records FlightStats never returned (keep in sync with assets/app.js)
+SCHEDULE = [
+    {"flight": "AC8376", "sched_dep": "09:05", "sched_arr": "10:14"},
+    {"flight": "AC8377", "sched_dep": "10:50", "sched_arr": "12:05"},
+]
 UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
@@ -288,6 +293,20 @@ def fetch_taf() -> str | None:
         return None
 
 
+def fetch_iem_metars(day: dt.date) -> list[str]:
+    """Archived METARs for a local day from Iowa Environmental Mesonet (for days we missed)."""
+    a, b = day - dt.timedelta(days=1), day + dt.timedelta(days=1)
+    url = ("https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=" + STATION +
+           f"&data=metar&year1={a.year}&month1={a.month}&day1={a.day}&year2={b.year}&month2={b.month}&day2={b.day}"
+           "&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=3&report_type=4")
+    try:
+        rows = get(url).splitlines()[1:]
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! iem {day}: {e}", file=sys.stderr)
+        return []
+    return ["METAR " + r.split(",", 2)[2] for r in rows if r.count(",") >= 2]
+
+
 def metar_time(raw: str, ref: dt.datetime) -> dt.datetime | None:
     m = re.search(r"\b(\d{2})(\d{2})(\d{2})Z\b", raw)
     if not m:
@@ -322,6 +341,15 @@ def nearest_metar(metars: list[str], when: dt.datetime, max_gap_h: float = 2.0) 
 
 # ------------------------------------------------------------------- outcomes
 
+def ycg_time(rec: dict, day: dt.date) -> dt.datetime | None:
+    """Scheduled time at YCG (arrival for the inbound, departure for the outbound), in UTC."""
+    t = rec.get("sched_arr") if rec["kind"] == "arrival" else rec.get("sched_dep")
+    if not t:
+        return None
+    h, m = map(int, t.split(":"))
+    return dt.datetime.combine(day, dt.time(h, m), TZ).astimezone(dt.timezone.utc)
+
+
 def outcome(rec: dict) -> str | None:
     s = rec.get("status")
     if s == "cancelled":
@@ -332,6 +360,12 @@ def outcome(rec: dict) -> str | None:
         d = rec.get("arr_delay_min")
         return "delayed" if d is not None and d > 15 else "on_time"
     return None
+
+
+def unknown_record(f: dict, day: dt.date, now: dt.datetime) -> dict:
+    sched = next(s for s in SCHEDULE if s["flight"] == f["flight"])
+    return {"date": day.isoformat(), **{k: f[k] for k in ("flight", "from", "to", "kind")}, "status": "unknown",
+            "sched_dep": sched["sched_dep"], "sched_arr": sched["sched_arr"], "outcome": "unknown", "parser": "none", "recorded_at": now.isoformat(timespec="seconds")}
 
 
 def minutes_between(a: str | None, b: str | None) -> int | None:
@@ -391,22 +425,43 @@ def main() -> int:
             if not res or res.get("status") == "unavailable":
                 if offset >= 0:
                     failures.append(f"{f['flight']} {day}")
+                if offset == -args.days_back and key not in hist_idx:
+                    hist_idx[key] = unknown_record(f, day, now)
                 continue
             rec = enrich(f, day, res)
+            if offset == -args.days_back and not rec["outcome"]:
+                # last day FlightStats serves and still no final status: keep the gap visible
+                rec["outcome"] = "unknown"
             print(f"  {day} {f['flight']}: {rec['status']} ({rec.get('parser')}) dep {rec.get('sched_dep')}->{rec.get('dep_time')} arr {rec.get('sched_arr')}->{rec.get('arr_time')}")
             if offset == 0:
                 flights_today.append(rec)
             elif offset == 1:
                 flights_tomorrow.append(rec)
             if offset <= 0 and rec["outcome"]:
-                # weather at scheduled YCG time (arrival for inbound, departure for outbound)
-                ycg_time = rec["sched_arr"] if f["kind"] == "arrival" else rec["sched_dep"]
-                if ycg_time:
-                    h, m = map(int, ycg_time.split(":"))
-                    when = dt.datetime.combine(day, dt.time(h, m), TZ).astimezone(dt.timezone.utc)
-                    rec["metar"] = nearest_metar(metars, when) or (hist_idx.get(key) or {}).get("metar")
+                when = ycg_time(rec, day)
+                m = (nearest_metar(metars, when) if when else None) or (hist_idx.get(key) or {}).get("metar")
+                if m:
+                    rec["metar"] = m
                 rec["recorded_at"] = now.isoformat(timespec="seconds")
                 hist_idx[key] = {k: v for k, v in rec.items() if k not in ("source_url",)}
+
+    # Days the job never saw (e.g. cron stalled > 3 days) can no longer be fetched: record them as unknown.
+    if hist_idx:
+        d = dt.date.fromisoformat(min(k[0] for k in hist_idx))
+        while d < today - dt.timedelta(days=args.days_back):
+            for f in FLIGHTS:
+                hist_idx.setdefault((d.isoformat(), f["flight"]), unknown_record(f, d, now))
+            d += dt.timedelta(days=1)
+    # Attach archived weather to finalised records that lack it (a few per run, oldest first).
+    # "metar" absent = not yet tried; None = the archive had nothing near the flight time.
+    missing = [r for r in sorted(hist_idx.values(), key=lambda r: r["date"]) if r.get("outcome") and "metar" not in r]
+    archive: dict[str, list[str]] = {}
+    for r in missing[:6]:
+        day = dt.date.fromisoformat(r["date"])
+        when = ycg_time(r, day)
+        if when:
+            archive.setdefault(r["date"], fetch_iem_metars(day))
+            r["metar"] = nearest_metar(archive[r["date"]], when)
 
     latest = {
         "generated_at": now.isoformat(timespec="seconds"),

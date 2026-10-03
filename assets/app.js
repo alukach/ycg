@@ -11,6 +11,10 @@ const OUTCOMES = {
   diverted: { label: "Diverted", cls: "diverted", status: "serious" },
   cancelled: { label: "Cancelled", cls: "cancelled", status: "critical" },
 };
+// Records with no final status (FlightStats never reported one). Shown, but excluded from rates.
+const UNKNOWN = { label: "Unknown", cls: "unknown", status: "neutral" };
+const outcomeOf = (r) => OUTCOMES[r.outcome] || UNKNOWN;
+const known = (r) => r.outcome in OUTCOMES;
 const STATUS_PILL = {
   scheduled: ["Scheduled", ""], delayed: ["Delayed", "warning"], en_route: ["En route", "good"],
   arrived: ["Arrived", "good"], cancelled: ["Cancelled", "critical"], diverted: ["Diverted", "serious"],
@@ -264,7 +268,7 @@ function renderForecast() {
 
 function renderHistory() {
   const today = localDate();
-  const all = state.history.flights.filter((r) => r.outcome);
+  const all = state.history.flights.filter(known);
   const start = state.range ? addDays(today, -state.range) : (all[0]?.date || today);
   const recs = all.filter((r) => r.date >= start);
   const n = recs.length;
@@ -289,7 +293,7 @@ function renderHistory() {
     ["AC8376", "AC8377"].forEach((f, row) => {
       const r = state.history.flights.find((x) => x.date === d && x.flight === f);
       const o = r?.outcome;
-      const fill = o ? `var(--${OUTCOMES[o].status})` : "transparent";
+      const fill = o ? `var(--${outcomeOf(r).status})` : "transparent";
       const stroke = o ? "none" : "var(--neutral)";
       svg += `<rect data-d="${d}" data-f="${f}" x="${padL + i * (cell + g)}" y="${padT + row * (cell + g)}" width="${cell}" height="${cell}" rx="3" fill="${fill}" stroke="${stroke}" stroke-dasharray="${o ? "" : "2 2"}"/>`;
     });
@@ -303,12 +307,12 @@ function renderHistory() {
     rc.addEventListener("pointerenter", (ev) => {
       const r = state.history.flights.find((x) => x.date === rc.dataset.d && x.flight === rc.dataset.f);
       showTip(ev, `<b>${rc.dataset.f} · ${fmtDay(rc.dataset.d, { weekday: "short", month: "short", day: "numeric" })}</b>` + (r?.outcome
-        ? `<div class="row"><span>Outcome</span><span>${OUTCOMES[r.outcome].label}</span></div><div class="row"><span>Arrival</span><span>${r.arr_time || "—"} (sched ${r.sched_arr})</span></div>${r.metar ? `<div style="margin-top:4px;font-size:.72rem;color:var(--muted)">${esc(r.metar)}</div>` : ""}`
+        ? `<div class="row"><span>Outcome</span><span>${outcomeOf(r).label}</span></div><div class="row"><span>Arrival</span><span>${r.arr_time || "—"} (sched ${r.sched_arr})</span></div>${r.metar ? `<div style="margin-top:4px;font-size:.72rem;color:var(--muted)">${esc(r.metar)}</div>` : ""}`
         : `<div class="row"><span>No record</span><span></span></div>`));
     });
     rc.addEventListener("pointerleave", hideTip);
   });
-  $("#hist-legend").innerHTML = Object.values(OUTCOMES).map((o) => `<span><span class="sw ${o.cls}"></span>${o.label}</span>`).join("") + `<span><span class="sw none"></span>No record</span>`;
+  $("#hist-legend").innerHTML = Object.values(OUTCOMES).map((o) => `<span><span class="sw ${o.cls}"></span>${o.label}</span>`).join("") + `<span><span class="sw unknown"></span>Unknown</span><span><span class="sw none"></span>No record</span>`;
 
   renderRolling();
 
@@ -326,13 +330,13 @@ function renderHistory() {
 
   // full table
   $("#hist-table").innerHTML = `<thead><tr><th>Date</th><th>Flight</th><th>Outcome</th><th>Dep sched / act</th><th>Arr sched / act</th><th>Arr delay</th><th>METAR at YCG</th></tr></thead><tbody>` +
-    [...state.history.flights].reverse().map((r) => `<tr><td>${r.date}</td><td>${ext(fsUrl(r.flight, r.date), r.flight)}</td><td>${r.outcome ? `<span class="sw ${r.outcome}"></span> ${OUTCOMES[r.outcome].label}${r.diverted_to ? ` (${esc(r.diverted_to)})` : ""}` : esc(r.status)}</td>
+    [...state.history.flights].reverse().map((r) => `<tr><td>${r.date}</td><td>${ext(fsUrl(r.flight, r.date), r.flight)}</td><td>${r.outcome ? `<span class="sw ${outcomeOf(r).cls}"></span> ${outcomeOf(r).label}${r.diverted_to ? ` (${esc(r.diverted_to)})` : ""}` : esc(r.status)}</td>
       <td>${r.sched_dep} / ${r.dep_time || "—"}</td><td>${r.sched_arr} / ${r.arr_time || "—"}</td><td>${r.arr_delay_min ?? "—"}${r.arr_delay_min != null ? " min" : ""}</td><td class="metar">${esc(r.metar || "")} ${ext(iemUrl(r.date), "archive ↗")}</td></tr>`).join("") + `</tbody>`;
 }
 
 function renderRolling() {
   const el = $("#rolling");
-  const arr = state.history.flights.filter((r) => r.flight === "AC8376" && r.outcome);
+  const arr = state.history.flights.filter((r) => r.flight === "AC8376" && known(r));
   const today = localDate();
   const first = arr[0]?.date;
   const pts = [];
