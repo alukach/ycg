@@ -34,6 +34,7 @@ GitHub disables scheduled workflows after 60 days without repository activity; t
 
 ```sh
 python -m unittest scripts/test_fetch.py   # parser tests (offline)
+node --test scripts/test_wx.mjs            # outlook tests (offline)
 python scripts/fetch.py --debug             # refresh data/ (needs network)
 python -m http.server                       # http://localhost:8000
 ```

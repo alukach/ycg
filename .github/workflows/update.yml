@@ -33,8 +33,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Parser tests
-        run: python -m unittest scripts/test_fetch.py
+      - name: Tests
+        run: |
+          python -m unittest scripts/test_fetch.py
+          node --test scripts/test_wx.mjs
 
       - name: Fetch flight status + weather
         id: fetch

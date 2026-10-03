@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Static dashboard for Air Canada flights at Castlegar (YCG). A GitHub Action runs `scripts/fetch.py`, which writes `data/*.json`. The page (`index.html`, `assets/app.js`) renders that data. The cancellation outlook lives in `assets/wx.js`.
+Static dashboard for Air Canada flights at Castlegar (YCG). A GitHub Action runs `scripts/fetch.py`, which writes `data/*.json`. The page (`index.html`, `assets/app.js`) renders that data. The cancellation outlook lives in `assets/wx.js`, which has no DOM dependencies, so it also runs under Node.
 
 ## Every change
 
@@ -12,6 +12,7 @@ Static dashboard for Air Canada flights at Castlegar (YCG). A GitHub Action runs
 
 ```sh
 python -m unittest scripts/test_fetch.py   # fetcher/parser tests
+node --test scripts/test_wx.mjs            # outlook tests (wx.js)
 python -m http.server                      # view at http://localhost:8000
 ```
 
