@@ -5,25 +5,26 @@ A static dashboard for Castlegar / West Kootenay Regional Airport (YCG): today's
 ## How it works
 
 ```
-GitHub Actions (cron, every 15 min in the flight window)
-  scripts/fetch.py ──► FlightStats flight tracker (±3 days)   ─┐
-                   ├─► aviationweather.gov METAR (72 h) + TAF  ├─► data/latest.json  (deployed only)
-                   ├─► adsb.lol (inbound aircraft position)    │
-                   ├─► NAV CANADA CFPS (CYCG NOTAMs)           │
-                   └─► AeroDataBox (optional fallback)         ─┘   data/history.json, events.json (committed when changed)
-                                                                    data/feed.xml (Atom), ntfy.sh push (optional)
-  scripts/predict.mjs ──► data/predictions.json (outlook logged at fixed lead times)
-  └─► GitHub Pages deploy (actions/deploy-pages)
+GitHub Actions (every 15 min in the flight window, every 3 h otherwise)
+  scripts/fetch.py      FlightStats status (±3 days) · aviationweather.gov METAR/TAF
+                        NAV CANADA NOTAMs · adsb.lol aircraft position · IEM METAR archive
+                        AeroDataBox (optional fallback)
+     └─► data/latest.json             deployed only
+         data/history.json            committed: outcomes + METAR at flight time
+         data/events.json → feed.xml  committed: status changes → Atom feed, ntfy.sh (optional)
+  scripts/predict.mjs
+     └─► data/predictions.json        committed: outlook at 48/24/12/6/3/1 h before each flight
+  └─► GitHub Pages deploy
 
-Browser: index.html + assets/app.js
-  ├─ data/latest.json, data/history.json
-  └─ Open-Meteo hourly + ensemble forecasts (fetched live, CORS-enabled)
+Browser: index.html + assets/app.js + assets/wx.js
+  ├─ data/*.json
+  └─ Open-Meteo hourly forecast + ECMWF ensemble (fetched live)
 ```
 
 - **Flight status** is scraped from FlightStats' public tracker pages. The parser tries the embedded Next.js state first and falls back to the rendered text. Each run uploads the raw HTML as a `debug-html` artifact (kept 3 days) so a markup change can be fixed quickly.
-- **History**: past days are finalised once FlightStats reports Arrived / Cancelled / Diverted. Each record keeps the METAR closest to the scheduled YCG time, so outcomes can be compared against the observed ceiling and visibility. Records are ~0.5 KB, so a year is well under 1 MB and stays in git.
+- **History**: past days are finalised once FlightStats reports Arrived, Cancelled or Diverted (including returns to YVR). A flight still unresolved when it drops out of FlightStats' 3-day window, or a day the job missed, is recorded as `unknown`, so gaps stay visible. Each record keeps the METAR nearest the scheduled YCG time, taken from the IEM archive if it was missed live. A year of records is well under 1 MB.
 - **Prediction log**: `scripts/predict.mjs` runs the same outlook code under Node and records one prediction per flight in each lead window (48/24/12/6/3/1 h). The page scores these against outcomes (Brier score per lead time), and that's the data for fitting the weights.
-- **Outlook**: `assets/wx.js` is a transparent heuristic: a seasonal base rate (`MONTH_BASE`) plus logit terms for ceiling, visibility, fog/snow/freezing precipitation and gusts, taken from the METAR (if within ~75 min), the TAF (incl. TEMPO/PROB groups) or Open-Meteo. AC8377 follows AC8376 because it is the same aircraft. Live status overrides everything. Re-tune the weights against `data/history.json` once a winter of data exists.
+- **Outlook**: `assets/wx.js` is a transparent heuristic with no dependencies. It starts from a base rate (trailing 30 days blended with `MONTH_BASE`) and adds logit terms for weather from the METAR, the TAF or Open-Meteo (the ECMWF ensemble 12 h+ ahead). Model evidence shrinks with lead time. AC8377 follows AC8376, because it is the same aircraft. Live status overrides everything. Fit the weights against `data/predictions.json` and `data/history.json` once a winter of data exists.
 
 ## Setup
 
