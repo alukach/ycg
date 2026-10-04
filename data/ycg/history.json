@@ -188,7 +188,30 @@
    "arr_delay_min": 56,
    "outcome": "delayed",
    "metar": "SPECI CYCG 041723Z 35006KT 340V040 15SM SCT024 15/09 A3020 RMK SC4 SLP232",
-   "recorded_at": "2026-10-04T12:34:33-07:00"
+   "recorded_at": "2026-10-04T15:31:11-07:00"
+  },
+  {
+   "date": "2026-10-04",
+   "flight": "AC8377",
+   "from": "YCG",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "arrived",
+   "status_text": "Arrived Delayed by 1h 21m",
+   "sched_dep": "10:50",
+   "sched_arr": "12:05",
+   "dep_time": "12:27",
+   "arr_time": "13:26",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GGOI",
+   "equipment": "DH4",
+   "dep_delay_min": 97,
+   "arr_delay_min": 81,
+   "outcome": "delayed",
+   "metar": "METAR CYCG 041800Z 01006KT 340V040 15SM FEW025 15/09 A3018 RMK SC2 SLP226",
+   "recorded_at": "2026-10-04T15:31:11-07:00"
   }
  ]
 }
