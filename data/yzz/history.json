@@ -251,7 +251,7 @@
    "arr_delay_min": 22,
    "outcome": "delayed",
    "metar": "SPECI CYCG 051816Z 33003KT 280V340 3SM BR OVC005 11/09 A3010 RMK ST8 VIS BTR S SLP204",
-   "recorded_at": "2026-10-05T18:03:20-07:00"
+   "recorded_at": "2026-10-05T19:10:43-07:00"
   },
   {
    "date": "2026-10-05",
@@ -274,7 +274,7 @@
    "arr_delay_min": 123,
    "outcome": "delayed",
    "metar": "SPECI CYCG 051844Z VRB02KT 8SM SCT008 BKN100 BKN230 11/10 A3009 RMK ST4AC2CI1 SLP197",
-   "recorded_at": "2026-10-05T18:03:20-07:00"
+   "recorded_at": "2026-10-05T19:10:43-07:00"
   }
  ]
 }

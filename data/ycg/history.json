@@ -234,7 +234,7 @@
    "arr_delay_min": 197,
    "outcome": "delayed",
    "metar": "METAR CYCG 051700Z VRB02KT 3SM BR OVC004 10/09 A3011 RMK ST8 VIS BTR S SLP204",
-   "recorded_at": "2026-10-05T18:03:20-07:00"
+   "recorded_at": "2026-10-05T19:10:43-07:00"
   },
   {
    "date": "2026-10-05",
@@ -257,7 +257,7 @@
    "arr_delay_min": 201,
    "outcome": "delayed",
    "metar": "METAR CYCG 051800Z 34004KT 310V010 3SM BR OVC004 11/09 A3011 RMK ST8 VIS BTR S SLP207",
-   "recorded_at": "2026-10-05T18:03:20-07:00"
+   "recorded_at": "2026-10-05T19:10:43-07:00"
   }
  ]
 }
