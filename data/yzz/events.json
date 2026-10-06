@@ -31,6 +31,22 @@
    "text": "Arrived at 13:36",
    "prev": null,
    "at": "2026-10-04T15:31:11-07:00"
+  },
+  {
+   "date": "2026-10-05",
+   "flight": "8P451",
+   "status": "arrived",
+   "text": "Arrived at 11:33",
+   "prev": null,
+   "at": "2026-10-05T18:03:20-07:00"
+  },
+  {
+   "date": "2026-10-05",
+   "flight": "8P452",
+   "status": "arrived",
+   "text": "Arrived at 14:53",
+   "prev": null,
+   "at": "2026-10-05T18:03:20-07:00"
   }
  ]
 }
