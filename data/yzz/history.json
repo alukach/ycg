@@ -321,6 +321,29 @@
    "outcome": "on_time",
    "metar": "METAR CYCG 061900Z 19003KT 160V280 15SM FEW180 BKN220 17/10 A3015 RMK AC1CI5 SLP217 DENSITY ALT 2000FT",
    "recorded_at": "2026-10-06T22:47:52-07:00"
+  },
+  {
+   "date": "2026-10-07",
+   "flight": "8P451",
+   "from": "YVR",
+   "to": "YZZ",
+   "kind": "arrival",
+   "status": "arrived",
+   "status_text": "Arrived On time",
+   "sched_dep": "09:55",
+   "sched_arr": "11:11",
+   "dep_time": "09:54",
+   "arr_time": "11:03",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GPCW",
+   "equipment": "BEH",
+   "dep_delay_min": -1,
+   "arr_delay_min": -8,
+   "outcome": "on_time",
+   "metar": "METAR CYCG 071800Z 36006KT 15SM SCT230 13/08 A3020 RMK CI3 SLP236",
+   "recorded_at": "2026-10-07T11:07:31-07:00"
   }
  ]
 }
