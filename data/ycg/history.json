@@ -350,6 +350,29 @@
    "outcome": "delayed",
    "metar": "METAR CYCG 071800Z 36006KT 15SM SCT230 13/08 A3020 RMK CI3 SLP236",
    "recorded_at": "2026-10-07T22:53:28-07:00"
+  },
+  {
+   "date": "2026-10-08",
+   "flight": "AC8376",
+   "from": "YVR",
+   "to": "YCG",
+   "kind": "arrival",
+   "status": "arrived",
+   "status_text": "Arrived Delayed by 21m",
+   "sched_dep": "09:05",
+   "sched_arr": "10:14",
+   "dep_time": "09:19",
+   "arr_time": "10:35",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GJZX",
+   "equipment": "DH4",
+   "dep_delay_min": 14,
+   "arr_delay_min": 21,
+   "outcome": "delayed",
+   "metar": "SPECI CYCG 081708Z 00000KT 15SM SCT002 SCT010 BKN200 12/08 RMK ST3SF1CI3 SF TR WND ESTD LO CLD ALQDS VIA CYXY DENSITY ALT MISG",
+   "recorded_at": "2026-10-08T11:09:51-07:00"
   }
  ]
 }
