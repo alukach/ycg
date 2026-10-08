@@ -343,7 +343,7 @@
    "arr_delay_min": -8,
    "outcome": "on_time",
    "metar": "METAR CYCG 071800Z 36006KT 15SM SCT230 13/08 A3020 RMK CI3 SLP236",
-   "recorded_at": "2026-10-07T16:02:20-07:00"
+   "recorded_at": "2026-10-07T18:46:33-07:00"
   },
   {
    "date": "2026-10-07",
@@ -366,7 +366,7 @@
    "arr_delay_min": 8,
    "outcome": "on_time",
    "metar": "METAR CYCG 071900Z 35005KT 290V020 15SM SCT240 15/08 A3018 RMK CI3 CONTRAILS SLP226",
-   "recorded_at": "2026-10-07T16:02:20-07:00"
+   "recorded_at": "2026-10-07T18:46:33-07:00"
   }
  ]
 }
