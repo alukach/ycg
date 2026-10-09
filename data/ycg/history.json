@@ -372,7 +372,7 @@
    "arr_delay_min": 21,
    "outcome": "delayed",
    "metar": "SPECI CYCG 081708Z 00000KT 15SM SCT002 SCT010 BKN200 12/08 RMK ST3SF1CI3 SF TR WND ESTD LO CLD ALQDS VIA CYXY DENSITY ALT MISG",
-   "recorded_at": "2026-10-08T16:18:11-07:00"
+   "recorded_at": "2026-10-08T18:57:51-07:00"
   },
   {
    "date": "2026-10-08",
@@ -395,7 +395,7 @@
    "arr_delay_min": 50,
    "outcome": "delayed",
    "metar": "METAR CYCG 081800Z 32005KT 15SM BKN200 21/08 RMK CI6 WND ESTD VIA CYXY DENSITY ALT MISG",
-   "recorded_at": "2026-10-08T16:18:11-07:00"
+   "recorded_at": "2026-10-08T18:57:51-07:00"
   }
  ]
 }
