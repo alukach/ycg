@@ -418,7 +418,7 @@
    "arr_delay_min": 42,
    "outcome": "delayed",
    "metar": "SPECI CYCG 091708Z 14004KT 100V180 15SM -RA BKN090 11/08 A2956 RMK AC7 PRESFR SLP016 DENSITY ALT 2000FT",
-   "recorded_at": "2026-10-09T18:39:32-07:00"
+   "recorded_at": "2026-10-09T22:42:04-07:00"
   },
   {
    "date": "2026-10-09",
@@ -441,7 +441,7 @@
    "arr_delay_min": 55,
    "outcome": "delayed",
    "metar": "SPECI CYCG 091742Z 14006KT 100V170 15SM FEW090 BKN130 11/08 A2957 RMK AC2AC5 SLP019 DENSITY ALT 2000FT",
-   "recorded_at": "2026-10-09T18:39:32-07:00"
+   "recorded_at": "2026-10-09T22:42:04-07:00"
   }
  ]
 }
