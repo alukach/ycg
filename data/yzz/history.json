@@ -480,8 +480,8 @@
    "dep_delay_min": null,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "recorded_at": "2026-10-10T05:23:09-07:00",
-   "metar": null
+   "metar": "METAR CYCG 101600Z 00000KT 15SM FEW005 FEW045 SCT065 BKN110 BKN230 06/05 A2974 RMK SF1SC1SC3AC2CI1 SF TR SC TR SLP084",
+   "recorded_at": "2026-10-10T09:35:16-07:00"
   },
   {
    "date": "2026-10-10",
@@ -503,8 +503,8 @@
    "dep_delay_min": null,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "recorded_at": "2026-10-10T05:23:09-07:00",
-   "metar": null
+   "metar": "METAR CYCG 101600Z 00000KT 15SM FEW005 FEW045 SCT065 BKN110 BKN230 06/05 A2974 RMK SF1SC1SC3AC2CI1 SF TR SC TR SLP084",
+   "recorded_at": "2026-10-10T09:35:16-07:00"
   }
  ]
 }
