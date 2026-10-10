@@ -435,7 +435,7 @@
    "arr_delay_min": -4,
    "outcome": "on_time",
    "metar": "METAR CYCG 091800Z 17005KT 120V210 15SM FEW090 SCT110 BKN140 11/08 A2956 RMK AC2AC1AC4 SLP017 DENSITY ALT 2000FT",
-   "recorded_at": "2026-10-09T14:52:54-07:00"
+   "recorded_at": "2026-10-09T18:39:32-07:00"
   },
   {
    "date": "2026-10-09",
@@ -458,7 +458,7 @@
    "arr_delay_min": 31,
    "outcome": "delayed",
    "metar": "METAR CYCG 091900Z 15005KT 130V270 15SM FEW085 SCT110 BKN140 BKN240 14/08 A2955 RMK AC2AC1AC3CI1 CI TR SLP012 DENSITY ALT 2300FT",
-   "recorded_at": "2026-10-09T14:52:54-07:00"
+   "recorded_at": "2026-10-09T18:39:32-07:00"
   }
  ]
 }
