@@ -602,7 +602,30 @@
    "arr_delay_min": -4,
    "outcome": "on_time",
    "metar": "METAR CYCG 131700Z 19004KT 15SM BKN093 BKN110 BKN150 05/01 A3020 RMK AC5AC2AC1 AC TR SLP246",
-   "recorded_at": "2026-10-13T11:39:41-07:00"
+   "recorded_at": "2026-10-13T16:07:09-07:00"
+  },
+  {
+   "date": "2026-10-13",
+   "flight": "AC8377",
+   "from": "YCG",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "arrived",
+   "status_text": "Arrived Delayed by 20m",
+   "sched_dep": "10:50",
+   "sched_arr": "12:05",
+   "dep_time": "11:12",
+   "arr_time": "12:25",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GGNZ",
+   "equipment": "DH4",
+   "dep_delay_min": 22,
+   "arr_delay_min": 20,
+   "outcome": "delayed",
+   "metar": "METAR CYCG 131800Z 18005KT 15SM BKN088 BKN110 BKN210 07/01 A3020 RMK AC5AC2CI1 CI TR SLP245",
+   "recorded_at": "2026-10-13T16:07:09-07:00"
   }
  ]
 }
