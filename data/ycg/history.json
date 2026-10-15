@@ -694,7 +694,7 @@
    "arr_delay_min": null,
    "outcome": "cancelled",
    "metar": "METAR CYCG 151700Z 00000KT 15SM FEW002 05/05 A3065 RMK SF1 SF TR SLP396",
-   "recorded_at": "2026-10-15T12:41:43-07:00"
+   "recorded_at": "2026-10-15T15:40:24-07:00"
   },
   {
    "date": "2026-10-15",
@@ -717,7 +717,7 @@
    "arr_delay_min": 0,
    "outcome": "cancelled",
    "metar": "METAR CYCG 151800Z 32003KT 230V020 15SM SKC 09/06 A3064 RMK SLP390",
-   "recorded_at": "2026-10-15T12:41:43-07:00"
+   "recorded_at": "2026-10-15T15:40:24-07:00"
   }
  ]
 }
