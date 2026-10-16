@@ -335,6 +335,22 @@
    "text": "Cancelled",
    "prev": null,
    "at": "2026-10-15T08:57:59-07:00"
+  },
+  {
+   "date": "2026-10-16",
+   "flight": "AC8376",
+   "status": "delayed",
+   "text": "Delayed 25 min (dep 09:30)",
+   "prev": null,
+   "at": "2026-10-16T08:46:15-07:00"
+  },
+  {
+   "date": "2026-10-16",
+   "flight": "AC8377",
+   "status": "delayed",
+   "text": "Delayed 20 min (dep 11:10)",
+   "prev": null,
+   "at": "2026-10-16T08:46:15-07:00"
   }
  ]
 }
