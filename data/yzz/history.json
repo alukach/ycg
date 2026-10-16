@@ -757,7 +757,30 @@
    "arr_delay_min": -9,
    "outcome": "on_time",
    "metar": "METAR CYCG 161800Z 00000KT 15SM BKN230 07/06 A3044 RMK CI6 SLP325",
-   "recorded_at": "2026-10-16T12:07:48-07:00"
+   "recorded_at": "2026-10-16T15:03:44-07:00"
+  },
+  {
+   "date": "2026-10-16",
+   "flight": "8P452",
+   "from": "YZZ",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "arrived",
+   "status_text": "Arrived On time",
+   "sched_dep": "11:35",
+   "sched_arr": "12:50",
+   "dep_time": "11:26",
+   "arr_time": "12:47",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GPCW",
+   "equipment": "BEH",
+   "dep_delay_min": -9,
+   "arr_delay_min": -3,
+   "outcome": "on_time",
+   "metar": "METAR CYCG 161900Z 00000KT 15SM BKN230 11/04 A3040 RMK CI5 SLP309",
+   "recorded_at": "2026-10-16T15:03:44-07:00"
   }
  ]
 }

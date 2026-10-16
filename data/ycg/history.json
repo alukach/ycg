@@ -740,7 +740,30 @@
    "arr_delay_min": 17,
    "outcome": "delayed",
    "metar": "SPECI CYCG 161714Z VRB02KT 15SM FEW002 BKN230 04/04 A3046 RMK SF1CI5 LO CLD FNL RWY 33 SLP333",
-   "recorded_at": "2026-10-16T12:07:48-07:00"
+   "recorded_at": "2026-10-16T15:03:44-07:00"
+  },
+  {
+   "date": "2026-10-16",
+   "flight": "AC8377",
+   "from": "YCG",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "arrived",
+   "status_text": "Arrived On time",
+   "sched_dep": "10:50",
+   "sched_arr": "12:05",
+   "dep_time": "11:06",
+   "arr_time": "12:15",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GJZH",
+   "equipment": "DH4",
+   "dep_delay_min": 16,
+   "arr_delay_min": 10,
+   "outcome": "on_time",
+   "metar": "METAR CYCG 161800Z 00000KT 15SM BKN230 07/06 A3044 RMK CI6 SLP325",
+   "recorded_at": "2026-10-16T15:03:44-07:00"
   }
  ]
 }

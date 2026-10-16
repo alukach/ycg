@@ -271,6 +271,14 @@
    "text": "En route",
    "prev": null,
    "at": "2026-10-16T12:07:48-07:00"
+  },
+  {
+   "date": "2026-10-16",
+   "flight": "8P452",
+   "status": "arrived",
+   "text": "Arrived at 12:47",
+   "prev": "en_route",
+   "at": "2026-10-16T15:03:44-07:00"
   }
  ]
 }
