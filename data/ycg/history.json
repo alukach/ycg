@@ -718,6 +718,29 @@
    "outcome": "cancelled",
    "metar": "METAR CYCG 151800Z 32003KT 230V020 15SM SKC 09/06 A3064 RMK SLP390",
    "recorded_at": "2026-10-15T21:22:06-07:00"
+  },
+  {
+   "date": "2026-10-16",
+   "flight": "AC8376",
+   "from": "YVR",
+   "to": "YCG",
+   "kind": "arrival",
+   "status": "arrived",
+   "status_text": "Arrived Delayed by 17m",
+   "sched_dep": "09:05",
+   "sched_arr": "10:14",
+   "dep_time": "09:23",
+   "arr_time": "10:31",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GJZH",
+   "equipment": "DH4",
+   "dep_delay_min": 18,
+   "arr_delay_min": 17,
+   "outcome": "delayed",
+   "metar": "SPECI CYCG 161714Z VRB02KT 15SM FEW002 BKN230 04/04 A3046 RMK SF1CI5 LO CLD FNL RWY 33 SLP333",
+   "recorded_at": "2026-10-16T12:07:48-07:00"
   }
  ]
 }
