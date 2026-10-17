@@ -802,8 +802,8 @@
    "dep_delay_min": null,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "recorded_at": "2026-10-17T07:38:51-07:00",
-   "metar": null
+   "metar": "METAR CYCG 171700Z 14006KT 15SM FEW110 BKN190 08/03 A2999 RMK AC1AS6 SLP170",
+   "recorded_at": "2026-10-17T10:32:01-07:00"
   },
   {
    "date": "2026-10-17",
@@ -825,8 +825,8 @@
    "dep_delay_min": null,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "recorded_at": "2026-10-17T07:38:51-07:00",
-   "metar": null
+   "metar": "METAR CYCG 171700Z 14006KT 15SM FEW110 BKN190 08/03 A2999 RMK AC1AS6 SLP170",
+   "recorded_at": "2026-10-17T10:32:01-07:00"
   }
  ]
 }
