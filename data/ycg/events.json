@@ -391,6 +391,22 @@
    "text": "Delayed 25 min (dep 11:15)",
    "prev": null,
    "at": "2026-10-17T10:32:01-07:00"
+  },
+  {
+   "date": "2026-10-17",
+   "flight": "AC8376",
+   "status": "arrived",
+   "text": "Arrived at 10:34",
+   "prev": "en_route",
+   "at": "2026-10-17T12:42:49-07:00"
+  },
+  {
+   "date": "2026-10-17",
+   "flight": "AC8377",
+   "status": "arrived",
+   "text": "Arrived at 12:40",
+   "prev": "delayed",
+   "at": "2026-10-17T12:42:49-07:00"
   }
  ]
 }
