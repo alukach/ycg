@@ -786,7 +786,7 @@
    "arr_delay_min": 20,
    "outcome": "delayed",
    "metar": "METAR CYCG 171700Z 14006KT 15SM FEW110 BKN190 08/03 A2999 RMK AC1AS6 SLP170",
-   "recorded_at": "2026-10-17T12:42:49-07:00"
+   "recorded_at": "2026-10-17T14:45:30-07:00"
   },
   {
    "date": "2026-10-17",
@@ -795,21 +795,21 @@
    "to": "YVR",
    "kind": "departure",
    "status": "arrived",
-   "status_text": "Arrived Delayed by 35m",
+   "status_text": "Arrived Delayed by 36m",
    "sched_dep": "10:50",
    "sched_arr": "12:05",
    "dep_time": "11:17",
-   "arr_time": "12:40",
+   "arr_time": "12:41",
    "dep_is_actual": true,
    "arr_is_actual": true,
    "parser": "flightstats-json",
    "tail": "C-GJZH",
    "equipment": "DH4",
    "dep_delay_min": 27,
-   "arr_delay_min": 35,
+   "arr_delay_min": 36,
    "outcome": "delayed",
    "metar": "METAR CYCG 171800Z 17006KT 15SM FEW074 SCT100 BKN190 09/03 A3001 RMK AC2AC1AS4 SLP175",
-   "recorded_at": "2026-10-17T12:42:49-07:00"
+   "recorded_at": "2026-10-17T14:45:30-07:00"
   }
  ]
 }
