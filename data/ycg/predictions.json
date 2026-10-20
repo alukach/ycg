@@ -2011,6 +2011,36 @@
     "model"
    ],
    "at": "2026-10-20T11:26:14.180Z"
+  },
+  {
+   "date": "2026-10-20",
+   "flight": "AC8376",
+   "lead": 3,
+   "lead_h": 1.21,
+   "p": 0.0393,
+   "range": null,
+   "base": 0.1,
+   "sources": [
+    "METAR",
+    "TAF",
+    "model"
+   ],
+   "at": "2026-10-20T16:01:37.322Z"
+  },
+  {
+   "date": "2026-10-20",
+   "flight": "AC8377",
+   "lead": 3,
+   "lead_h": 1.81,
+   "p": 0.0585,
+   "range": null,
+   "base": 0.1,
+   "sources": [
+    "METAR",
+    "TAF",
+    "model"
+   ],
+   "at": "2026-10-20T16:01:37.322Z"
   }
  ]
 }
