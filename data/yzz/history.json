@@ -895,7 +895,7 @@
    "arr_delay_min": 0,
    "outcome": "cancelled",
    "metar": "METAR CYCG 191800Z 31003KT 270V010 15SM FEW085 SCT150 BKN200 08/03 A3002 RMK AC1AC2CS3 SLP181",
-   "recorded_at": "2026-10-19T18:01:20-07:00"
+   "recorded_at": "2026-10-19T21:40:23-07:00"
   },
   {
    "date": "2026-10-19",
@@ -918,7 +918,7 @@
    "arr_delay_min": 0,
    "outcome": "cancelled",
    "metar": "METAR CYCG 191900Z VRB02KT 15SM BKN200 BKN240 09/02 A3001 RMK CI5CI2 SLP176",
-   "recorded_at": "2026-10-19T18:01:20-07:00"
+   "recorded_at": "2026-10-19T21:40:23-07:00"
   }
  ]
 }
