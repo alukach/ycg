@@ -970,7 +970,7 @@
    "arr_delay_min": 15,
    "outcome": "on_time",
    "metar": "METAR CYCG 211700Z 00000KT 15SM FEW240 04/04 A3011 RMK CI2 SLP213",
-   "recorded_at": "2026-10-21T13:15:48-07:00"
+   "recorded_at": "2026-10-21T16:29:05-07:00"
   },
   {
    "date": "2026-10-21",
@@ -993,7 +993,7 @@
    "arr_delay_min": 35,
    "outcome": "delayed",
    "metar": "METAR CYCG 211800Z 36005KT 15SM FEW240 07/03 A3009 RMK CI1 SLP204",
-   "recorded_at": "2026-10-21T13:15:48-07:00"
+   "recorded_at": "2026-10-21T16:29:05-07:00"
   }
  ]
 }
