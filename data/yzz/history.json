@@ -941,7 +941,7 @@
    "arr_delay_min": 0,
    "outcome": "cancelled",
    "metar": "METAR CYCG 201800Z 01009KT 15SM FEW220 10/02 A3022 RMK CI1 CI TR SLP247",
-   "recorded_at": "2026-10-20T15:58:43-07:00"
+   "recorded_at": "2026-10-20T17:31:02-07:00"
   },
   {
    "date": "2026-10-20",
@@ -964,7 +964,7 @@
    "arr_delay_min": 0,
    "outcome": "cancelled",
    "metar": "METAR CYCG 201900Z 01004KT 310V060 15SM FEW240 11/03 A3020 RMK CI1 CI TR SLP240",
-   "recorded_at": "2026-10-20T15:58:43-07:00"
+   "recorded_at": "2026-10-20T17:31:02-07:00"
   }
  ]
 }
