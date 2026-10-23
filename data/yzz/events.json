@@ -383,6 +383,14 @@
    "text": "Cancelled",
    "prev": null,
    "at": "2026-10-23T04:30:32-07:00"
+  },
+  {
+   "date": "2026-10-23",
+   "flight": "8P451",
+   "status": "arrived",
+   "text": "Arrived at 12:09",
+   "prev": null,
+   "at": "2026-10-23T12:56:27-07:00"
   }
  ]
 }
