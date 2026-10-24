@@ -1124,8 +1124,8 @@
    "dep_delay_min": null,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "recorded_at": "2026-10-24T08:03:32-07:00",
-   "metar": null
+   "metar": "METAR CYCG 241700Z VRB02KT 15SM FEW110 BKN140 02/M02 A3027 RMK AC2AC5 SLP267",
+   "recorded_at": "2026-10-24T11:05:42-07:00"
   },
   {
    "date": "2026-10-24",
@@ -1147,8 +1147,8 @@
    "dep_delay_min": null,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "recorded_at": "2026-10-24T08:03:32-07:00",
-   "metar": null
+   "metar": "METAR CYCG 241700Z VRB02KT 15SM FEW110 BKN140 02/M02 A3027 RMK AC2AC5 SLP267",
+   "recorded_at": "2026-10-24T11:05:42-07:00"
   }
  ]
 }
