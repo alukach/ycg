@@ -1125,7 +1125,7 @@
    "arr_delay_min": null,
    "outcome": "cancelled",
    "metar": "METAR CYCG 241800Z 00000KT 15SM SCT110 BKN140 BKN200 05/M02 A3024 RMK AC4AC2CI1 SLP259",
-   "recorded_at": "2026-10-24T13:43:26-07:00"
+   "recorded_at": "2026-10-24T15:43:47-07:00"
   },
   {
    "date": "2026-10-24",
@@ -1148,7 +1148,7 @@
    "arr_delay_min": null,
    "outcome": "cancelled",
    "metar": "METAR CYCG 241800Z 00000KT 15SM SCT110 BKN140 BKN200 05/M02 A3024 RMK AC4AC2CI1 SLP259",
-   "recorded_at": "2026-10-24T13:43:26-07:00"
+   "recorded_at": "2026-10-24T15:43:47-07:00"
   }
  ]
 }
