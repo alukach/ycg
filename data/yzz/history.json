@@ -1124,7 +1124,7 @@
    "dep_delay_min": null,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "recorded_at": "2026-10-24T03:50:11-07:00",
+   "recorded_at": "2026-10-24T08:03:32-07:00",
    "metar": null
   },
   {
@@ -1147,7 +1147,7 @@
    "dep_delay_min": null,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "recorded_at": "2026-10-24T03:50:11-07:00",
+   "recorded_at": "2026-10-24T08:03:32-07:00",
    "metar": null
   }
  ]
