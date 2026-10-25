@@ -591,6 +591,14 @@
    "text": "Arrived at 10:30",
    "prev": null,
    "at": "2026-10-25T11:29:59-07:00"
+  },
+  {
+   "date": "2026-10-25",
+   "flight": "AC8377",
+   "status": "arrived",
+   "text": "Arrived at 12:49",
+   "prev": null,
+   "at": "2026-10-25T14:06:56-07:00"
   }
  ]
 }
