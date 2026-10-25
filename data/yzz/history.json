@@ -1149,6 +1149,29 @@
    "outcome": "cancelled",
    "metar": "METAR CYCG 241800Z 00000KT 15SM SCT110 BKN140 BKN200 05/M02 A3024 RMK AC4AC2CI1 SLP259",
    "recorded_at": "2026-10-24T21:30:59-07:00"
+  },
+  {
+   "date": "2026-10-25",
+   "flight": "8P451",
+   "from": "YVR",
+   "to": "YZZ",
+   "kind": "arrival",
+   "status": "arrived",
+   "status_text": "Arrived On time",
+   "sched_dep": "09:55",
+   "sched_arr": "11:11",
+   "dep_time": "09:55",
+   "arr_time": "11:11",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-FWZK",
+   "equipment": "BEH",
+   "dep_delay_min": 0,
+   "arr_delay_min": 0,
+   "outcome": "on_time",
+   "metar": "METAR CYCG 251800Z 33008KT 15SM FEW015 FEW030 BKN120 OVC200 07/04 A3018 RMK SF1SF2AC3CI3 SF TR SLP233",
+   "recorded_at": "2026-10-25T11:29:59-07:00"
   }
  ]
 }
