@@ -1154,7 +1154,7 @@
    "arr_delay_min": -13,
    "outcome": "on_time",
    "metar": "METAR CYCG 251800Z 33008KT 15SM FEW015 FEW030 BKN120 OVC200 07/04 A3018 RMK SF1SF2AC3CI3 SF TR SLP233",
-   "recorded_at": "2026-10-25T17:05:30-07:00"
+   "recorded_at": "2026-10-25T21:35:54-07:00"
   },
   {
    "date": "2026-10-25",
@@ -1177,7 +1177,7 @@
    "arr_delay_min": 20,
    "outcome": "delayed",
    "metar": "METAR CYCG 251800Z 33008KT 15SM FEW015 FEW030 BKN120 OVC200 07/04 A3018 RMK SF1SF2AC3CI3 SF TR SLP233",
-   "recorded_at": "2026-10-25T17:05:30-07:00"
+   "recorded_at": "2026-10-25T21:35:54-07:00"
   }
  ]
 }
