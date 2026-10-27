@@ -1262,8 +1262,8 @@
    "dep_delay_min": 0,
    "arr_delay_min": 0,
    "outcome": "cancelled",
-   "recorded_at": "2026-10-27T10:01:34-07:00",
-   "metar": null
+   "metar": "SPECI CYCG 271821Z 18007KT 8SM -RA FEW003 SCT007 BKN027 OVC050 07/06 A2987 RMK SF2ST1SC3SC2 SLP129",
+   "recorded_at": "2026-10-27T14:17:08-07:00"
   },
   {
    "date": "2026-10-27",
@@ -1285,8 +1285,8 @@
    "dep_delay_min": 0,
    "arr_delay_min": 0,
    "outcome": "cancelled",
-   "recorded_at": "2026-10-27T10:01:34-07:00",
-   "metar": null
+   "metar": "SPECI CYCG 271821Z 18007KT 8SM -RA FEW003 SCT007 BKN027 OVC050 07/06 A2987 RMK SF2ST1SC3SC2 SLP129",
+   "recorded_at": "2026-10-27T14:17:08-07:00"
   }
  ]
 }
