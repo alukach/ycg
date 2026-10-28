@@ -1247,7 +1247,7 @@
    "arr_delay_min": 140,
    "outcome": "diverted",
    "metar": "METAR CYCG 271800Z CCA 17006KT 8SM SCT006 BKN028 BKN050 OVC070 07/06 A2988 RMK ST3SC3SC1AC1 SLP130",
-   "recorded_at": "2026-10-27T17:36:09-07:00"
+   "recorded_at": "2026-10-27T18:08:40-07:00"
   },
   {
    "date": "2026-10-27",
@@ -1270,7 +1270,7 @@
    "arr_delay_min": 61,
    "outcome": "cancelled",
    "metar": "SPECI CYCG 271821Z 18007KT 8SM -RA FEW003 SCT007 BKN027 OVC050 07/06 A2987 RMK SF2ST1SC3SC2 SLP129",
-   "recorded_at": "2026-10-27T17:36:09-07:00"
+   "recorded_at": "2026-10-27T18:08:40-07:00"
   }
  ]
 }
