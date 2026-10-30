@@ -719,6 +719,22 @@
    "text": "En route",
    "prev": null,
    "at": "2026-10-30T10:27:14-07:00"
+  },
+  {
+   "date": "2026-10-30",
+   "flight": "AC8376",
+   "status": "arrived",
+   "text": "Arrived at 10:33",
+   "prev": "en_route",
+   "at": "2026-10-30T14:38:56-07:00"
+  },
+  {
+   "date": "2026-10-30",
+   "flight": "AC8377",
+   "status": "arrived",
+   "text": "Arrived at 12:26",
+   "prev": null,
+   "at": "2026-10-30T14:38:56-07:00"
   }
  ]
 }
