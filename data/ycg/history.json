@@ -1432,7 +1432,7 @@
    "arr_delay_min": 108,
    "outcome": "diverted",
    "metar": "METAR CYCG 311800Z 34007KT 15SM FEW006 FEW016 BKN024 BKN033 04/03 A3010 RMK SF1SC1SC5SC2 SF TR SC TR SLP212",
-   "recorded_at": "2026-10-31T17:56:52-07:00"
+   "recorded_at": "2026-10-31T22:52:45-07:00"
   },
   {
    "date": "2026-10-31",
@@ -1455,7 +1455,7 @@
    "arr_delay_min": 54,
    "outcome": "cancelled",
    "metar": "METAR CYCG 311800Z 34007KT 15SM FEW006 FEW016 BKN024 BKN033 04/03 A3010 RMK SF1SC1SC5SC2 SF TR SC TR SLP212",
-   "recorded_at": "2026-10-31T17:56:52-07:00"
+   "recorded_at": "2026-10-31T22:52:45-07:00"
   }
  ]
 }
