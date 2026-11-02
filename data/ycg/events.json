@@ -783,6 +783,22 @@
    "text": "Cancelled",
    "prev": "delayed",
    "at": "2026-11-01T14:17:57-07:00"
+  },
+  {
+   "date": "2026-11-02",
+   "flight": "AC8376",
+   "status": "cancelled",
+   "text": "Cancelled",
+   "prev": null,
+   "at": "2026-11-02T14:04:20-07:00"
+  },
+  {
+   "date": "2026-11-02",
+   "flight": "AC8377",
+   "status": "cancelled",
+   "text": "Cancelled",
+   "prev": null,
+   "at": "2026-11-02T14:04:20-07:00"
   }
  ]
 }
