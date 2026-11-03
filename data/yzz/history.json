@@ -1545,6 +1545,29 @@
    "outcome": "delayed",
    "metar": "METAR CYCG 021800Z 00000KT 15SM BKN024 04/01 A3037 RMK SC7 SLP306",
    "recorded_at": "2026-11-02T23:37:03-07:00"
+  },
+  {
+   "date": "2026-11-03",
+   "flight": "8P451",
+   "from": "YVR",
+   "to": "YZZ",
+   "kind": "arrival",
+   "status": "arrived",
+   "status_text": "Arrived On time",
+   "sched_dep": "10:10",
+   "sched_arr": "11:24",
+   "dep_time": "10:06",
+   "arr_time": "11:17",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GPCR",
+   "equipment": "BEH",
+   "dep_delay_min": -4,
+   "arr_delay_min": -7,
+   "outcome": "on_time",
+   "metar": "METAR CYCG 031800Z 35006KT 15SM FEW023 SCT032 BKN210 04/01 A3023 RMK SC2SC1CI3 SLP259",
+   "recorded_at": "2026-11-03T11:49:12-07:00"
   }
  ]
 }
