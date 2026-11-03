@@ -1427,6 +1427,34 @@
    "recorded_at": "2026-10-30T22:26:37-07:00"
   },
   {
+   "date": "2026-10-31",
+   "flight": "8P451",
+   "from": "YVR",
+   "to": "YZZ",
+   "kind": "arrival",
+   "status": "unknown",
+   "sched_dep": "09:15",
+   "sched_arr": "10:31",
+   "outcome": "unknown",
+   "parser": "none",
+   "recorded_at": "2026-11-03T09:58:52-07:00",
+   "metar": "METAR CYCG 311800Z 34007KT 15SM FEW006 FEW016 BKN024 BKN033 04/03 A3010 RMK SF1SC1SC5SC2 SF TR SC TR SLP212"
+  },
+  {
+   "date": "2026-10-31",
+   "flight": "8P452",
+   "from": "YZZ",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "unknown",
+   "sched_dep": "10:55",
+   "sched_arr": "12:11",
+   "outcome": "unknown",
+   "parser": "none",
+   "recorded_at": "2026-11-03T09:58:52-07:00",
+   "metar": "METAR CYCG 311800Z 34007KT 15SM FEW006 FEW016 BKN024 BKN033 04/03 A3010 RMK SF1SC1SC5SC2 SF TR SC TR SLP212"
+  },
+  {
    "date": "2026-11-01",
    "flight": "8P451",
    "from": "YVR",

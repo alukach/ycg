@@ -3580,6 +3580,36 @@
     "ensemble"
    ],
    "at": "2026-11-02T21:04:26.546Z"
+  },
+  {
+   "date": "2026-11-03",
+   "flight": "AC8376",
+   "lead": 3,
+   "lead_h": 1.73,
+   "p": 0.0842,
+   "range": null,
+   "base": 0.2,
+   "sources": [
+    "METAR",
+    "TAF",
+    "model"
+   ],
+   "at": "2026-11-03T16:58:59.130Z"
+  },
+  {
+   "date": "2026-11-03",
+   "flight": "AC8377",
+   "lead": 3,
+   "lead_h": 2.27,
+   "p": 0.1025,
+   "range": null,
+   "base": 0.2,
+   "sources": [
+    "METAR",
+    "TAF",
+    "model"
+   ],
+   "at": "2026-11-03T16:58:59.130Z"
   }
  ]
 }
