@@ -1594,6 +1594,29 @@
    "outcome": "on_time",
    "metar": "METAR CYCG 031900Z 34004KT 260V360 15SM FEW023 SCT032 BKN210 06/01 A3022 RMK SC1SC2CI3 SLP251",
    "recorded_at": "2026-11-03T23:04:22-07:00"
+  },
+  {
+   "date": "2026-11-04",
+   "flight": "AC8376",
+   "from": "YVR",
+   "to": "YCG",
+   "kind": "arrival",
+   "status": "arrived",
+   "status_text": "Arrived On time",
+   "sched_dep": "10:35",
+   "sched_arr": "11:43",
+   "dep_time": "10:37",
+   "arr_time": "11:47",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GGNF",
+   "equipment": "DH4",
+   "dep_delay_min": 2,
+   "arr_delay_min": 4,
+   "outcome": "on_time",
+   "metar": "SPECI CYCG 041852Z 36005KT 340V050 15SM SCT024 SCT031 BKN220 05/00 A3016 RMK SC3SC1CI2 SLP230",
+   "recorded_at": "2026-11-04T12:04:24-07:00"
   }
  ]
 }
