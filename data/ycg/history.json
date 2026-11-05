@@ -1616,7 +1616,7 @@
    "arr_delay_min": 4,
    "outcome": "on_time",
    "metar": "SPECI CYCG 041852Z 36005KT 340V050 15SM SCT024 SCT031 BKN220 05/00 A3016 RMK SC3SC1CI2 SLP230",
-   "recorded_at": "2026-11-04T19:12:54-07:00"
+   "recorded_at": "2026-11-04T23:32:57-07:00"
   },
   {
    "date": "2026-11-04",
@@ -1639,7 +1639,7 @@
    "arr_delay_min": -3,
    "outcome": "on_time",
    "metar": "METAR CYCG 041900Z 36008KT 15SM SCT024 SCT031 BKN220 05/00 A3015 RMK SC3SC1CI2 SLP227",
-   "recorded_at": "2026-11-04T19:12:54-07:00"
+   "recorded_at": "2026-11-04T23:32:57-07:00"
   }
  ]
 }
