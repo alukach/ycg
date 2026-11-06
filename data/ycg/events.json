@@ -863,6 +863,22 @@
    "text": "En route",
    "prev": null,
    "at": "2026-11-06T11:40:40-07:00"
+  },
+  {
+   "date": "2026-11-06",
+   "flight": "AC8376",
+   "status": "diverted",
+   "text": "Diverted to YVR",
+   "prev": "en_route",
+   "at": "2026-11-06T16:30:07-07:00"
+  },
+  {
+   "date": "2026-11-06",
+   "flight": "AC8377",
+   "status": "cancelled",
+   "text": "Cancelled",
+   "prev": null,
+   "at": "2026-11-06T16:30:07-07:00"
   }
  ]
 }
