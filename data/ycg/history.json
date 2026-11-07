@@ -1709,7 +1709,7 @@
    "arr_delay_min": 57,
    "outcome": "diverted",
    "metar": "SPECI CYCG 061838Z VRB02KT 6SM BR FEW005 SCT018 OVC034 05/04 A3019 RMK SF2SC2SC4 XTNSV LO CLD DNWND SLP239",
-   "recorded_at": "2026-11-06T16:30:07-07:00"
+   "recorded_at": "2026-11-06T18:45:57-07:00"
   },
   {
    "date": "2026-11-06",
@@ -1732,7 +1732,7 @@
    "arr_delay_min": -8,
    "outcome": "cancelled",
    "metar": "SPECI CYCG 061913Z 00000KT 6SM -RA BR FEW005 SCT015 OVC034 05/05 A3018 RMK SF2SC2SC4 XTNSV LO CLD DNWND SLP235",
-   "recorded_at": "2026-11-06T16:30:07-07:00"
+   "recorded_at": "2026-11-06T18:45:57-07:00"
   }
  ]
 }
