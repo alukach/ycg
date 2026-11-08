@@ -1755,7 +1755,7 @@
    "arr_delay_min": -23,
    "outcome": "on_time",
    "metar": "METAR CYCG 071900Z 00000KT 15SM SCT049 BKN140 OVC210 08/05 A3017 RMK SC4AC2CI2 SLP228",
-   "recorded_at": "2026-11-07T13:51:04-07:00"
+   "recorded_at": "2026-11-07T17:04:38-07:00"
   },
   {
    "date": "2026-11-07",
@@ -1778,7 +1778,7 @@
    "arr_delay_min": -13,
    "outcome": "on_time",
    "metar": "METAR CYCG 071900Z 00000KT 15SM SCT049 BKN140 OVC210 08/05 A3017 RMK SC4AC2CI2 SLP228",
-   "recorded_at": "2026-11-07T13:51:04-07:00"
+   "recorded_at": "2026-11-07T17:04:38-07:00"
   }
  ]
 }
