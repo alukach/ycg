@@ -1801,7 +1801,7 @@
    "arr_delay_min": -23,
    "outcome": "on_time",
    "metar": "METAR CYCG 081900Z 19005KT 130V210 15SM SCT061 BKN110 10/05 A3000 RMK SC4AC3 SLP169",
-   "recorded_at": "2026-11-08T18:03:36-07:00"
+   "recorded_at": "2026-11-08T18:36:32-07:00"
   },
   {
    "date": "2026-11-08",
@@ -1824,7 +1824,7 @@
    "arr_delay_min": -6,
    "outcome": "on_time",
    "metar": "METAR CYCG 081900Z 19005KT 130V210 15SM SCT061 BKN110 10/05 A3000 RMK SC4AC3 SLP169",
-   "recorded_at": "2026-11-08T18:03:36-07:00"
+   "recorded_at": "2026-11-08T18:36:32-07:00"
   }
  ]
 }
