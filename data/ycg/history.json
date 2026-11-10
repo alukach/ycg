@@ -1847,7 +1847,7 @@
    "arr_delay_min": -9,
    "outcome": "on_time",
    "metar": "METAR CYCG 091900Z 00000KT 15SM FEW003 FEW044 OVC052 04/02 A3014 RMK SF1SC2SC6 SF TR PCPN DIST W SLP224",
-   "recorded_at": "2026-11-09T14:44:29-07:00"
+   "recorded_at": "2026-11-09T20:48:58-07:00"
   },
   {
    "date": "2026-11-09",
@@ -1870,7 +1870,7 @@
    "arr_delay_min": -8,
    "outcome": "on_time",
    "metar": "METAR CYCG 091900Z 00000KT 15SM FEW003 FEW044 OVC052 04/02 A3014 RMK SF1SC2SC6 SF TR PCPN DIST W SLP224",
-   "recorded_at": "2026-11-09T14:44:29-07:00"
+   "recorded_at": "2026-11-09T20:48:58-07:00"
   }
  ]
 }
