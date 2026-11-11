@@ -1917,6 +1917,29 @@
    "outcome": "cancelled",
    "metar": "SPECI CYCG 101920Z 28003KT 180V290 3SM -RA SCT004 BKN034 BKN046 OVC060 07/06 A3019 RMK CF3SC3SC1SC1 SLP240",
    "recorded_at": "2026-11-10T22:59:07-07:00"
+  },
+  {
+   "date": "2026-11-11",
+   "flight": "AC8376",
+   "from": "YVR",
+   "to": "YCG",
+   "kind": "arrival",
+   "status": "arrived",
+   "status_text": "Arrived On time",
+   "sched_dep": "10:35",
+   "sched_arr": "11:43",
+   "dep_time": "10:26",
+   "arr_time": "11:40",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GIJZ",
+   "equipment": "DH4",
+   "dep_delay_min": -9,
+   "arr_delay_min": -3,
+   "outcome": "on_time",
+   "metar": "METAR CYCG 111800Z 15003KT 140V210 12SM FEW003 FEW012 SCT045 BKN190 BKN230 09/08 A3019 RMK SF1SC1SC2AS2CI2 SC TR SLP235",
+   "recorded_at": "2026-11-11T12:00:01-07:00"
   }
  ]
 }
