@@ -1889,7 +1889,7 @@
    "arr_delay_min": 0,
    "outcome": "cancelled",
    "metar": "METAR CYCG 101800Z 00000KT 5SM -RA SCT003 BKN030 OVC052 06/06 A3019 RMK CF3SC2SC3 CIG RAG VIS SW-NW 2 1/2 SLP238",
-   "recorded_at": "2026-11-10T18:49:39-07:00"
+   "recorded_at": "2026-11-10T22:59:07-07:00"
   },
   {
    "date": "2026-11-10",
@@ -1912,7 +1912,7 @@
    "arr_delay_min": 0,
    "outcome": "cancelled",
    "metar": "METAR CYCG 101900Z 11002KT 5SM -RA SCT005 SCT011 BKN035 OVC052 07/06 A3020 RMK CF3SF1SC3SC2 SF TR VIS S-NW 2 CIG RAG SLP243",
-   "recorded_at": "2026-11-10T18:49:39-07:00"
+   "recorded_at": "2026-11-10T22:59:07-07:00"
   }
  ]
 }
