@@ -1984,8 +1984,8 @@
    "dep_delay_min": 0,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "metar": "METAR CYCG 121700Z 35003KT 230V040 15SM FEW015 BKN020 08/06 A2999 RMK CF1SC7 CF TR SLP165",
-   "recorded_at": "2026-11-12T10:30:45-07:00"
+   "metar": "METAR CYCG 121900Z VRB02KT 15SM SCT022 BKN210 10/07 A2995 RMK SC4CS3 SLP150",
+   "recorded_at": "2026-11-12T12:19:02-07:00"
   },
   {
    "date": "2026-11-12",
@@ -2007,8 +2007,8 @@
    "dep_delay_min": null,
    "arr_delay_min": 0,
    "outcome": "cancelled",
-   "recorded_at": "2026-11-12T10:30:45-07:00",
-   "metar": null
+   "metar": "METAR CYCG 121900Z VRB02KT 15SM SCT022 BKN210 10/07 A2995 RMK SC4CS3 SLP150",
+   "recorded_at": "2026-11-12T12:19:02-07:00"
   }
  ]
 }
