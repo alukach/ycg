@@ -767,6 +767,14 @@
    "text": "Arrived at 12:16",
    "prev": "delayed",
    "at": "2026-11-12T12:19:02-07:00"
+  },
+  {
+   "date": "2026-11-12",
+   "flight": "8P452",
+   "status": "arrived",
+   "text": "Arrived at 13:54",
+   "prev": null,
+   "at": "2026-11-12T17:35:40-07:00"
   }
  ]
 }
