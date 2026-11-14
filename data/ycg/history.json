@@ -2031,7 +2031,7 @@
    "arr_delay_min": -12,
    "outcome": "on_time",
    "metar": "METAR CYCG 131900Z 36005KT 300V050 15SM FEW015 SCT022 BKN220 BKN240 09/05 A2958 RMK SC1SC3CI3CI1 SC TR CI TR SLP027",
-   "recorded_at": "2026-11-13T19:12:29-07:00"
+   "recorded_at": "2026-11-13T23:08:08-07:00"
   },
   {
    "date": "2026-11-13",
@@ -2054,7 +2054,7 @@
    "arr_delay_min": -20,
    "outcome": "on_time",
    "metar": "METAR CYCG 131900Z 36005KT 300V050 15SM FEW015 SCT022 BKN220 BKN240 09/05 A2958 RMK SC1SC3CI3CI1 SC TR CI TR SLP027",
-   "recorded_at": "2026-11-13T19:12:29-07:00"
+   "recorded_at": "2026-11-13T23:08:08-07:00"
   }
  ]
 }
