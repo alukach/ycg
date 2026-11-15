@@ -2122,8 +2122,31 @@
    "dep_delay_min": 0,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "metar": "METAR CYCG 151800Z VRB02KT 7SM -RA FEW002 SCT012 BKN037 OVC075 07/07 A2989 RMK ST2SF1SC3AC2 VIS W-NW 1 SLP135",
-   "recorded_at": "2026-11-15T11:11:57-07:00"
+   "metar": "METAR CYCG 151900Z 14003KT 5SM -RA BR FEW004 BKN039 OVC054 OVC071 08/07 A2989 RMK ST2SC4SC2AC1 AC TR VIS LWR NW+S XTNSV LO CLD SE-NW SLP135",
+   "recorded_at": "2026-11-15T15:46:33-07:00"
+  },
+  {
+   "date": "2026-11-15",
+   "flight": "AC8377",
+   "from": "YCG",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "cancelled",
+   "status_text": "Cancelled",
+   "sched_dep": "12:15",
+   "sched_arr": "13:29",
+   "dep_time": null,
+   "arr_time": "13:29",
+   "dep_is_actual": false,
+   "arr_is_actual": false,
+   "parser": "flightstats-json",
+   "tail": "C-GJZH",
+   "equipment": "DH4",
+   "dep_delay_min": null,
+   "arr_delay_min": 0,
+   "outcome": "cancelled",
+   "metar": "METAR CYCG 151900Z 14003KT 5SM -RA BR FEW004 BKN039 OVC054 OVC071 08/07 A2989 RMK ST2SC4SC2AC1 AC TR VIS LWR NW+S XTNSV LO CLD SE-NW SLP135",
+   "recorded_at": "2026-11-15T15:46:33-07:00"
   }
  ]
 }

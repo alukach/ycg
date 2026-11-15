@@ -1031,6 +1031,14 @@
    "text": "Cancelled",
    "prev": null,
    "at": "2026-11-15T11:11:57-07:00"
+  },
+  {
+   "date": "2026-11-15",
+   "flight": "AC8377",
+   "status": "cancelled",
+   "text": "Cancelled",
+   "prev": null,
+   "at": "2026-11-15T15:46:33-07:00"
   }
  ]
 }
