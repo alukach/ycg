@@ -4766,6 +4766,36 @@
    "base": 0.25,
    "sources": [],
    "at": "2026-11-14T21:38:39.372Z"
+  },
+  {
+   "date": "2026-11-15",
+   "flight": "AC8376",
+   "lead": 3,
+   "lead_h": 2.43,
+   "p": 0.2178,
+   "range": null,
+   "base": 0.2444,
+   "sources": [
+    "METAR",
+    "TAF",
+    "model"
+   ],
+   "at": "2026-11-15T16:17:23.677Z"
+  },
+  {
+   "date": "2026-11-15",
+   "flight": "AC8377",
+   "lead": 3,
+   "lead_h": 2.96,
+   "p": 0.2335,
+   "range": null,
+   "base": 0.2444,
+   "sources": [
+    "METAR",
+    "TAF",
+    "model"
+   ],
+   "at": "2026-11-15T16:17:23.677Z"
   }
  ]
 }

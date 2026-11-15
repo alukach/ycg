@@ -2098,6 +2098,29 @@
    "outcome": "cancelled",
    "metar": "METAR CYCG 141900Z 15005KT 8SM FEW005 FEW024 BKN032 BKN045 BKN072 07/06 A2977 RMK SC1SC1SC3SC2AC1 AC TR SLP093",
    "recorded_at": "2026-11-14T23:16:02-07:00"
+  },
+  {
+   "date": "2026-11-15",
+   "flight": "8P452",
+   "from": "YZZ",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "cancelled",
+   "status_text": "Cancelled",
+   "sched_dep": "10:50",
+   "sched_arr": "12:13",
+   "dep_time": "10:50",
+   "arr_time": "12:13",
+   "dep_is_actual": false,
+   "arr_is_actual": false,
+   "parser": "flightstats-json",
+   "tail": "C-FPCX",
+   "equipment": "BEH",
+   "dep_delay_min": 0,
+   "arr_delay_min": 0,
+   "outcome": "cancelled",
+   "metar": "METAR CYCG 151600Z 34002KT 4SM BR BCFG BKN043 06/06 A2988 RMK FG4SC4 VIS VRB 2-6 SLP132",
+   "recorded_at": "2026-11-15T09:16:46-07:00"
   }
  ]
 }
