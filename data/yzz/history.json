@@ -2074,7 +2074,7 @@
    "arr_delay_min": -2,
    "outcome": "diverted",
    "metar": "METAR CYCG 141800Z 15006KT 8SM -RA FEW004 FEW024 BKN036 OVC079 07/06 A2975 RMK SF2SC1SC5AC1 SC TR XTNSV LO CLD DNWND VIS LWR S SLP087",
-   "recorded_at": "2026-11-14T18:18:25-07:00"
+   "recorded_at": "2026-11-14T18:43:57-07:00"
   },
   {
    "date": "2026-11-14",
@@ -2097,7 +2097,7 @@
    "arr_delay_min": 0,
    "outcome": "cancelled",
    "metar": "METAR CYCG 141900Z 15005KT 8SM FEW005 FEW024 BKN032 BKN045 BKN072 07/06 A2977 RMK SC1SC1SC3SC2AC1 AC TR SLP093",
-   "recorded_at": "2026-11-14T18:18:25-07:00"
+   "recorded_at": "2026-11-14T18:43:57-07:00"
   }
  ]
 }
