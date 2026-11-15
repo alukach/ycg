@@ -2101,6 +2101,29 @@
   },
   {
    "date": "2026-11-15",
+   "flight": "8P451",
+   "from": "YVR",
+   "to": "YZZ",
+   "kind": "arrival",
+   "status": "cancelled",
+   "status_text": "Cancelled",
+   "sched_dep": "09:10",
+   "sched_arr": "10:24",
+   "dep_time": "09:10",
+   "arr_time": "10:24",
+   "dep_is_actual": false,
+   "arr_is_actual": false,
+   "parser": "flightstats-json",
+   "tail": "C-FPCX",
+   "equipment": "BEH",
+   "dep_delay_min": 0,
+   "arr_delay_min": 0,
+   "outcome": "cancelled",
+   "metar": "METAR CYCG 151700Z VRB02KT 8SM -RA SCT002 SCT020 BKN047 BKN054 BKN075 07/07 A2989 RMK ST3SC1SC3SC1AC1 SC TR AC TR XTNSV LO CLD S-NW VIS S 3 SLP135",
+   "recorded_at": "2026-11-15T11:11:57-07:00"
+  },
+  {
+   "date": "2026-11-15",
    "flight": "8P452",
    "from": "YZZ",
    "to": "YVR",
@@ -2119,8 +2142,8 @@
    "dep_delay_min": 0,
    "arr_delay_min": 0,
    "outcome": "cancelled",
-   "metar": "METAR CYCG 151600Z 34002KT 4SM BR BCFG BKN043 06/06 A2988 RMK FG4SC4 VIS VRB 2-6 SLP132",
-   "recorded_at": "2026-11-15T09:16:46-07:00"
+   "metar": "METAR CYCG 151800Z VRB02KT 7SM -RA FEW002 SCT012 BKN037 OVC075 07/07 A2989 RMK ST2SF1SC3AC2 VIS W-NW 1 SLP135",
+   "recorded_at": "2026-11-15T11:11:57-07:00"
   }
  ]
 }
