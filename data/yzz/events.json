@@ -863,6 +863,14 @@
    "text": "Cancelled",
    "prev": null,
    "at": "2026-11-16T12:30:32-07:00"
+  },
+  {
+   "date": "2026-11-17",
+   "flight": "8P451",
+   "status": "delayed",
+   "text": "Delayed 65 min (dep 11:15)",
+   "prev": null,
+   "at": "2026-11-17T11:28:21-07:00"
   }
  ]
 }
