@@ -1071,6 +1071,14 @@
    "text": "Delayed 90 min (dep 13:45)",
    "prev": null,
    "at": "2026-11-17T11:28:21-07:00"
+  },
+  {
+   "date": "2026-11-17",
+   "flight": "AC8376",
+   "status": "arrived",
+   "text": "Arrived at 13:02",
+   "prev": "delayed",
+   "at": "2026-11-17T13:13:41-07:00"
   }
  ]
 }
