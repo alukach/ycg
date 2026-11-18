@@ -2190,6 +2190,29 @@
    "outcome": "cancelled",
    "metar": "METAR CYCG 161800Z 13002KT 7SM FEW007 SCT017 SCT022 BKN090 BKN220 07/06 A3005 RMK ST2SC2SC1AC2CI1 SC TR CI TR CVCTV CLD EMBD LO CLD ALDS SLP188",
    "recorded_at": "2026-11-16T21:25:27-07:00"
+  },
+  {
+   "date": "2026-11-17",
+   "flight": "8P452",
+   "from": "YZZ",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "arrived",
+   "status_text": "Arrived Delayed by 2h 49m",
+   "sched_dep": "11:50",
+   "sched_arr": "13:13",
+   "dep_time": "11:50",
+   "arr_time": "16:02",
+   "dep_is_actual": false,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-FMCN",
+   "equipment": "BEH",
+   "dep_delay_min": 0,
+   "arr_delay_min": 169,
+   "outcome": "delayed",
+   "metar": "METAR CYCG 171900Z 01006KT 320V040 15SM FEW032 BKN038 BKN220 06/01 A2992 RMK SC2SC4CS1 SLP147",
+   "recorded_at": "2026-11-17T19:25:47-07:00"
   }
  ]
 }

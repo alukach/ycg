@@ -1079,6 +1079,14 @@
    "text": "Arrived at 13:02",
    "prev": "delayed",
    "at": "2026-11-17T13:13:41-07:00"
+  },
+  {
+   "date": "2026-11-17",
+   "flight": "AC8377",
+   "status": "arrived",
+   "text": "Arrived at 14:47",
+   "prev": "delayed",
+   "at": "2026-11-17T19:25:47-07:00"
   }
  ]
 }
