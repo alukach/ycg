@@ -2282,6 +2282,29 @@
    "outcome": "delayed",
    "metar": "METAR CYCG 181800Z 36006KT 340V050 15SM FEW018 FEW040 FEW170 SCT250 05/M01 A3006 RMK SC1SC1AC1CI1 AC TR SLP198",
    "recorded_at": "2026-11-18T20:09:32-07:00"
+  },
+  {
+   "date": "2026-11-19",
+   "flight": "8P451",
+   "from": "YVR",
+   "to": "YZZ",
+   "kind": "arrival",
+   "status": "arrived",
+   "status_text": "Arrived Delayed by 39m",
+   "sched_dep": "10:10",
+   "sched_arr": "11:24",
+   "dep_time": "10:50",
+   "arr_time": "12:03",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GSWV",
+   "equipment": "BEH",
+   "dep_delay_min": 40,
+   "arr_delay_min": 39,
+   "outcome": "delayed",
+   "metar": "METAR CYCG 191800Z 03011KT 15SM FEW023 SCT027 BKN120 BKN220 03/M01 A2998 RMK SC1SC3AC3CS1 SC TR SLP168",
+   "recorded_at": "2026-11-19T12:44:48-07:00"
   }
  ]
 }
