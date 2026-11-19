@@ -2258,7 +2258,7 @@
    "arr_delay_min": 35,
    "outcome": "delayed",
    "metar": "METAR CYCG 181700Z 01005KT 15SM FEW020 BKN051 03/00 A3007 RMK SF1SC7 SF TR SLP202",
-   "recorded_at": "2026-11-18T18:30:15-07:00"
+   "recorded_at": "2026-11-18T20:09:32-07:00"
   },
   {
    "date": "2026-11-18",
@@ -2281,7 +2281,7 @@
    "arr_delay_min": 33,
    "outcome": "delayed",
    "metar": "METAR CYCG 181800Z 36006KT 340V050 15SM FEW018 FEW040 FEW170 SCT250 05/M01 A3006 RMK SC1SC1AC1CI1 AC TR SLP198",
-   "recorded_at": "2026-11-18T18:30:15-07:00"
+   "recorded_at": "2026-11-18T20:09:32-07:00"
   }
  ]
 }
