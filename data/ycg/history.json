@@ -2307,7 +2307,7 @@
    "arr_delay_min": -8,
    "outcome": "on_time",
    "metar": "METAR CYCG 191900Z 03011G16KT 350V060 15SM FEW025 BKN110 OVC210 03/M01 A2997 RMK SC2AC3CS3 SLP165",
-   "recorded_at": "2026-11-19T18:26:58-07:00"
+   "recorded_at": "2026-11-19T19:58:07-07:00"
   },
   {
    "date": "2026-11-19",
@@ -2330,7 +2330,7 @@
    "arr_delay_min": -19,
    "outcome": "on_time",
    "metar": "METAR CYCG 191900Z 03011G16KT 350V060 15SM FEW025 BKN110 OVC210 03/M01 A2997 RMK SC2AC3CS3 SLP165",
-   "recorded_at": "2026-11-19T18:26:58-07:00"
+   "recorded_at": "2026-11-19T19:58:07-07:00"
   }
  ]
 }
