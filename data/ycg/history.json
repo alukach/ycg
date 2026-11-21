@@ -2353,7 +2353,7 @@
    "arr_delay_min": -7,
    "outcome": "on_time",
    "metar": "METAR CYCG 201900Z 17004KT 15SM FEW029 FEW036 SCT100 OVC190 02/M01 A2995 RMK SC1SC1AC2AS4 HZ SLP161",
-   "recorded_at": "2026-11-20T17:53:13-07:00"
+   "recorded_at": "2026-11-20T20:05:44-07:00"
   },
   {
    "date": "2026-11-20",
@@ -2376,7 +2376,7 @@
    "arr_delay_min": -3,
    "outcome": "on_time",
    "metar": "METAR CYCG 201900Z 17004KT 15SM FEW029 FEW036 SCT100 OVC190 02/M01 A2995 RMK SC1SC1AC2AS4 HZ SLP161",
-   "recorded_at": "2026-11-20T17:53:13-07:00"
+   "recorded_at": "2026-11-20T20:05:44-07:00"
   }
  ]
 }
