@@ -2350,7 +2350,7 @@
    "arr_delay_min": 3,
    "outcome": "on_time",
    "metar": "METAR CYCG 201700Z VRB02KT 15SM FEW028 SCT110 BKN150 BKN190 00/M01 A2995 RMK SC2AC1AS1AC2 SLP162",
-   "recorded_at": "2026-11-20T12:25:47-07:00"
+   "recorded_at": "2026-11-20T17:53:13-07:00"
   },
   {
    "date": "2026-11-20",
@@ -2359,21 +2359,21 @@
    "to": "YVR",
    "kind": "departure",
    "status": "arrived",
-   "status_text": "Arrived On time",
+   "status_text": "Arrived Delayed by 16m",
    "sched_dep": "10:50",
    "sched_arr": "12:13",
    "dep_time": "11:06",
-   "arr_time": "12:24",
+   "arr_time": "12:29",
    "dep_is_actual": true,
    "arr_is_actual": true,
    "parser": "flightstats-json",
    "tail": "C-FWZK",
    "equipment": "BEH",
    "dep_delay_min": 16,
-   "arr_delay_min": 11,
-   "outcome": "on_time",
-   "recorded_at": "2026-11-20T12:25:47-07:00",
-   "metar": null
+   "arr_delay_min": 16,
+   "outcome": "delayed",
+   "metar": "METAR CYCG 201800Z 17004KT 15SM FEW029 SCT039 BKN190 BKN240 01/M00 A2995 RMK SC2SC1AC4CI1 SLP161",
+   "recorded_at": "2026-11-20T17:53:13-07:00"
   }
  ]
 }
