@@ -951,6 +951,14 @@
    "text": "Arrived at 12:24",
    "prev": null,
    "at": "2026-11-20T12:25:47-07:00"
+  },
+  {
+   "date": "2026-11-21",
+   "flight": "8P451",
+   "status": "delayed",
+   "text": "Delayed 45 min (dep 10:30)",
+   "prev": null,
+   "at": "2026-11-21T09:44:03-07:00"
   }
  ]
 }
