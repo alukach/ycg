@@ -2423,6 +2423,29 @@
    "outcome": "delayed",
    "metar": "METAR CYCG 211900Z 22003KT 110V240 15SM FEW037 FEW130 M01/M01 A3009 RMK SC1AC1 HZ S SLP212",
    "recorded_at": "2026-11-21T23:34:16-07:00"
+  },
+  {
+   "date": "2026-11-22",
+   "flight": "AC8376",
+   "from": "YVR",
+   "to": "YCG",
+   "kind": "arrival",
+   "status": "cancelled",
+   "status_text": "Cancelled",
+   "sched_dep": "10:35",
+   "sched_arr": "11:43",
+   "dep_time": "10:35",
+   "arr_time": null,
+   "dep_is_actual": false,
+   "arr_is_actual": false,
+   "parser": "flightstats-json",
+   "tail": "C-GIJZ",
+   "equipment": "DH4",
+   "dep_delay_min": 0,
+   "arr_delay_min": null,
+   "outcome": "cancelled",
+   "recorded_at": "2026-11-22T10:04:01-07:00",
+   "metar": null
   }
  ]
 }

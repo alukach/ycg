@@ -1223,6 +1223,14 @@
    "text": "Arrived at 13:58",
    "prev": "delayed",
    "at": "2026-11-21T16:31:21-07:00"
+  },
+  {
+   "date": "2026-11-22",
+   "flight": "AC8376",
+   "status": "cancelled",
+   "text": "Cancelled",
+   "prev": null,
+   "at": "2026-11-22T10:04:01-07:00"
   }
  ]
 }
