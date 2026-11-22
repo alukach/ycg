@@ -2444,8 +2444,31 @@
    "dep_delay_min": 0,
    "arr_delay_min": null,
    "outcome": "cancelled",
-   "recorded_at": "2026-11-22T10:04:01-07:00",
-   "metar": null
+   "metar": "METAR CYCG 221800Z 01005KT 12SM VCSH FEW028 FEW062 OVC100 02/M04 A3009 RMK SC1SC1AS7 SC TR PCPN NW SLP210",
+   "recorded_at": "2026-11-22T11:50:05-07:00"
+  },
+  {
+   "date": "2026-11-22",
+   "flight": "AC8377",
+   "from": "YCG",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "cancelled",
+   "status_text": "Cancelled",
+   "sched_dep": "12:15",
+   "sched_arr": "13:29",
+   "dep_time": null,
+   "arr_time": "13:29",
+   "dep_is_actual": false,
+   "arr_is_actual": false,
+   "parser": "flightstats-json",
+   "tail": "C-GIJZ",
+   "equipment": "DH4",
+   "dep_delay_min": null,
+   "arr_delay_min": 0,
+   "outcome": "cancelled",
+   "metar": "METAR CYCG 221800Z 01005KT 12SM VCSH FEW028 FEW062 OVC100 02/M04 A3009 RMK SC1SC1AS7 SC TR PCPN NW SLP210",
+   "recorded_at": "2026-11-22T11:50:05-07:00"
   }
  ]
 }
