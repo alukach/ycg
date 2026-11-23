@@ -2445,7 +2445,7 @@
    "arr_delay_min": null,
    "outcome": "cancelled",
    "metar": "METAR CYCG 221900Z 36005KT 310V020 8SM -SN FEW028 BKN048 OVC100 02/M04 A3009 RMK SC1SC5AS3 SC TR VIS LWR NW PCPN VRY LGT SLP211",
-   "recorded_at": "2026-11-22T16:56:19-07:00"
+   "recorded_at": "2026-11-22T19:28:42-07:00"
   },
   {
    "date": "2026-11-22",
@@ -2468,7 +2468,7 @@
    "arr_delay_min": 0,
    "outcome": "cancelled",
    "metar": "METAR CYCG 221900Z 36005KT 310V020 8SM -SN FEW028 BKN048 OVC100 02/M04 A3009 RMK SC1SC5AS3 SC TR VIS LWR NW PCPN VRY LGT SLP211",
-   "recorded_at": "2026-11-22T16:56:19-07:00"
+   "recorded_at": "2026-11-22T19:28:42-07:00"
   }
  ]
 }
