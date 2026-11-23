@@ -1239,6 +1239,22 @@
    "text": "Cancelled",
    "prev": null,
    "at": "2026-11-22T11:50:05-07:00"
+  },
+  {
+   "date": "2026-11-23",
+   "flight": "AC8376",
+   "status": "arrived",
+   "text": "Arrived at 11:36",
+   "prev": null,
+   "at": "2026-11-23T14:14:40-07:00"
+  },
+  {
+   "date": "2026-11-23",
+   "flight": "AC8377",
+   "status": "arrived",
+   "text": "Arrived at 13:37",
+   "prev": null,
+   "at": "2026-11-23T14:14:40-07:00"
   }
  ]
 }
