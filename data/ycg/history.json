@@ -2583,7 +2583,30 @@
    "arr_delay_min": -22,
    "outcome": "on_time",
    "metar": "METAR CYCG 251900Z 00000KT 15SM FEW005 FEW015 BKN046 BKN081 04/03 A3021 RMK ST2SC1SC4AC1 SC TR LO CLD DNWND AND IN VLYS SLP250",
-   "recorded_at": "2026-11-25T12:09:06-07:00"
+   "recorded_at": "2026-11-25T13:50:43-07:00"
+  },
+  {
+   "date": "2026-11-25",
+   "flight": "AC8377",
+   "from": "YCG",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "arrived",
+   "status_text": "Arrived On time",
+   "sched_dep": "12:15",
+   "sched_arr": "13:29",
+   "dep_time": "12:17",
+   "arr_time": "13:23",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GJZH",
+   "equipment": "DH4",
+   "dep_delay_min": 2,
+   "arr_delay_min": -6,
+   "outcome": "on_time",
+   "metar": "METAR CYCG 251900Z 00000KT 15SM FEW005 FEW015 BKN046 BKN081 04/03 A3021 RMK ST2SC1SC4AC1 SC TR LO CLD DNWND AND IN VLYS SLP250",
+   "recorded_at": "2026-11-25T13:50:43-07:00"
   }
  ]
 }
