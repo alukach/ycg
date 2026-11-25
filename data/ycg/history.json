@@ -2561,6 +2561,29 @@
    "outcome": "cancelled",
    "metar": "METAR CYCG 241900Z VRB02KT 7SM FEW004 SCT020 SCT029 BKN034 OVC041 01/01 A3024 RMK ST2SC1SC1SC2SC2 LO CLD S-NE SLP262",
    "recorded_at": "2026-11-24T21:50:50-07:00"
+  },
+  {
+   "date": "2026-11-25",
+   "flight": "AC8376",
+   "from": "YVR",
+   "to": "YCG",
+   "kind": "arrival",
+   "status": "arrived",
+   "status_text": "Arrived On time",
+   "sched_dep": "10:35",
+   "sched_arr": "11:43",
+   "dep_time": "10:18",
+   "arr_time": "11:21",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-GJZH",
+   "equipment": "DH4",
+   "dep_delay_min": -17,
+   "arr_delay_min": -22,
+   "outcome": "on_time",
+   "metar": "METAR CYCG 251900Z 00000KT 15SM FEW005 FEW015 BKN046 BKN081 04/03 A3021 RMK ST2SC1SC4AC1 SC TR LO CLD DNWND AND IN VLYS SLP250",
+   "recorded_at": "2026-11-25T12:09:06-07:00"
   }
  ]
 }
