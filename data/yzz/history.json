@@ -2580,7 +2580,30 @@
    "arr_delay_min": 183,
    "outcome": "delayed",
    "metar": "METAR CYCG 251700Z 14003KT 110V170 15SM SCT003 BKN050 BKN094 03/03 A3019 RMK SF3SC3AC1 SLP241",
-   "recorded_at": "2026-11-25T13:50:43-07:00"
+   "recorded_at": "2026-11-25T20:17:19-07:00"
+  },
+  {
+   "date": "2026-11-25",
+   "flight": "8P452",
+   "from": "YZZ",
+   "to": "YVR",
+   "kind": "departure",
+   "status": "arrived",
+   "status_text": "Arrived Delayed by 3h 20m",
+   "sched_dep": "10:50",
+   "sched_arr": "12:13",
+   "dep_time": "14:02",
+   "arr_time": "15:33",
+   "dep_is_actual": true,
+   "arr_is_actual": true,
+   "parser": "flightstats-json",
+   "tail": "C-FPCX",
+   "equipment": "BEH",
+   "dep_delay_min": 192,
+   "arr_delay_min": 200,
+   "outcome": "delayed",
+   "metar": "METAR CYCG 251800Z VRB02KT 15SM FEW004 FEW015 BKN055 BKN081 BKN100 04/03 A3021 RMK ST2SF1SC3AC2AC1 SF TR AC TR LO CLD DNWND SLP248",
+   "recorded_at": "2026-11-25T20:17:19-07:00"
   }
  ]
 }
