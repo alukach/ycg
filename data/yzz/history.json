@@ -2580,7 +2580,7 @@
    "arr_delay_min": 183,
    "outcome": "delayed",
    "metar": "METAR CYCG 251700Z 14003KT 110V170 15SM SCT003 BKN050 BKN094 03/03 A3019 RMK SF3SC3AC1 SLP241",
-   "recorded_at": "2026-11-25T20:17:19-07:00"
+   "recorded_at": "2026-11-25T21:04:00-07:00"
   },
   {
    "date": "2026-11-25",
@@ -2603,7 +2603,7 @@
    "arr_delay_min": 200,
    "outcome": "delayed",
    "metar": "METAR CYCG 251800Z VRB02KT 15SM FEW004 FEW015 BKN055 BKN081 BKN100 04/03 A3021 RMK ST2SF1SC3AC2AC1 SF TR AC TR LO CLD DNWND SLP248",
-   "recorded_at": "2026-11-25T20:17:19-07:00"
+   "recorded_at": "2026-11-25T21:04:00-07:00"
   }
  ]
 }
