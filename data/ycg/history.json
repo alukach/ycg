@@ -2629,7 +2629,7 @@
    "arr_delay_min": null,
    "outcome": "cancelled",
    "metar": "SPECI CYCG 261847Z 00000KT 15SM FEW004 FEW014 OVC027 05/04 A3000 RMK SF1SC1SC6 SLP173",
-   "recorded_at": "2026-11-26T13:42:11-07:00"
+   "recorded_at": "2026-11-26T20:16:36-07:00"
   },
   {
    "date": "2026-11-26",
@@ -2652,7 +2652,7 @@
    "arr_delay_min": 0,
    "outcome": "cancelled",
    "metar": "METAR CYCG 261900Z VRB02KT 15SM FEW004 FEW014 OVC027 05/04 A2999 RMK SF1ST1SC6 SLP171",
-   "recorded_at": "2026-11-26T13:42:11-07:00"
+   "recorded_at": "2026-11-26T20:16:36-07:00"
   }
  ]
 }
